@@ -1,0 +1,619 @@
+{
+  "category": "containers",
+  "section": "6",
+  "vectors": [
+    {
+      "id": "V-40",
+      "desc": "array trailing-zero elision, slice root view",
+      "tags": [
+        "WF-14"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d1675b5d696e743634d865696e74363408840222249004",
+      "ir": {
+        "root": "v1",
+        "nodes": [
+          {
+            "node": "a1",
+            "kind": "array",
+            "len": 4,
+            "elements": [
+              {
+                "ref": "e1"
+              },
+              {
+                "ref": "e2"
+              }
+            ]
+          },
+          {
+            "node": "e1",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "e2",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "v1",
+            "kind": "view",
+            "backing": {
+              "ref": "a1"
+            },
+            "off": 0,
+            "len": 4,
+            "extent": 4
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC SLICE D1 \"[]int64\" + elem DESC INT (WF-18)",
+        "array L=4 inline 84, E=2 (element[1]=2 nonzero, zeros elided), elems zz(1)=2 -> 22, zz(2)=4 -> 24 (WF-14, WF-5)",
+        "view form 0 over backing id 4: 90 04 (WF-15; ids: D1 0, name 1, D-INT 2, name 3, array 4)"
+      ]
+    },
+    {
+      "id": "V-41",
+      "desc": "negative zero is never elision fodder",
+      "tags": [
+        "WF-14",
+        "WF-8"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d1695b5d666c6f61743634da67666c6f61743634088202413ff00000000000004180000000000000009004",
+      "ir": {
+        "root": "v1",
+        "nodes": [
+          {
+            "node": "a1",
+            "kind": "array",
+            "len": 2,
+            "elements": [
+              {
+                "ref": "e1"
+              },
+              {
+                "ref": "e2"
+              }
+            ]
+          },
+          {
+            "node": "e1",
+            "kind": "float",
+            "bits": "3ff0000000000000"
+          },
+          {
+            "node": "e2",
+            "kind": "float",
+            "bits": "8000000000000000"
+          },
+          {
+            "node": "v1",
+            "kind": "view",
+            "backing": {
+              "ref": "a1"
+            },
+            "off": 0,
+            "len": 2,
+            "extent": 2
+          }
+        ]
+      },
+      "deriv": [
+        "[]float64 {1.0, -0.0}: elision predicate is bit-level, Float64bits(-0.0)=0x8000...!=0 -> dense (WF-14)",
+        "array 82 02, elems 41 3FF0..0 and 41 8000..0, view 90 04"
+      ]
+    },
+    {
+      "id": "V-42",
+      "desc": "two views over one backing: form 2 and form 1",
+      "tags": [
+        "WF-15",
+        "WF-13"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d5692a7665632e70616972d0687665632e70616972026158d1675b5d696e743634d865696e743634086159c5b0840422242628920b000204910b0202",
+      "ir": {
+        "root": {
+          "ref": "n1"
+        },
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "struct",
+            "type": "vec.pair",
+            "fields": [
+              {
+                "name": "X",
+                "value": {
+                  "ref": "v1"
+                }
+              },
+              {
+                "name": "Y",
+                "value": {
+                  "ref": "v2"
+                }
+              }
+            ]
+          },
+          {
+            "node": "a1",
+            "kind": "array",
+            "len": 4,
+            "elements": [
+              {
+                "ref": "e1"
+              },
+              {
+                "ref": "e2"
+              },
+              {
+                "ref": "e3"
+              },
+              {
+                "ref": "e4"
+              }
+            ]
+          },
+          {
+            "node": "e1",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "e2",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "e3",
+            "kind": "int",
+            "value": "3"
+          },
+          {
+            "node": "e4",
+            "kind": "int",
+            "value": "4"
+          },
+          {
+            "node": "v1",
+            "kind": "view",
+            "backing": {
+              "ref": "a1"
+            },
+            "off": 0,
+            "len": 2,
+            "extent": 4
+          },
+          {
+            "node": "v2",
+            "kind": "view",
+            "backing": {
+              "ref": "a1"
+            },
+            "off": 2,
+            "len": 2,
+            "extent": 2
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC POINTER D5 \"*vec.pair\" -> STRUCT D0 \"vec.pair\", fields X,Y []int64, Y type-ref REF C5 (WF-18, WF-13 repeat)",
+        "backing 84 04 22 24 26 28 (L=4 full); X = form 2 (extent 4 > len 2): 92 0B 00 02 04; Y = form 1 (off=2, extent=len): 91 0B 02 02 (WF-15)",
+        "backing id 11: DESCs/names/fields take ids 0-10, struct target 10 is referenced never, backing 11 (WF-13 DFS)"
+      ]
+    },
+    {
+      "id": "V-43",
+      "desc": "single view form 2 with reserved extent",
+      "tags": [
+        "WF-15"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d1675b5d696e743634d865696e7436340883032224269204000203",
+      "ir": {
+        "root": "v1",
+        "nodes": [
+          {
+            "node": "a1",
+            "kind": "array",
+            "len": 3,
+            "elements": [
+              {
+                "ref": "e1"
+              },
+              {
+                "ref": "e2"
+              },
+              {
+                "ref": "e3"
+              }
+            ]
+          },
+          {
+            "node": "e1",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "e2",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "e3",
+            "kind": "int",
+            "value": "3"
+          },
+          {
+            "node": "v1",
+            "kind": "view",
+            "backing": {
+              "ref": "a1"
+            },
+            "off": 0,
+            "len": 2,
+            "extent": 3
+          }
+        ]
+      },
+      "deriv": [
+        "slice b[0:2:3]: backing L=3 (max off+extent), view form 2 92 04 00 02 03 (WF-15 minimality: extent>len forces form 2)"
+      ]
+    },
+    {
+      "id": "V-44",
+      "desc": "view geometry violation: off+len beyond L",
+      "tags": [
+        "WF-15",
+        "WF-22"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d1675b5d696e743634d865696e74363408830222249204000506",
+      "class": "bad_view"
+    },
+    {
+      "id": "V-45",
+      "desc": "single-pair map record",
+      "tags": [
+        "WF-16"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e74363408a1616122",
+      "ir": {
+        "root": "m1",
+        "nodes": [
+          {
+            "node": "m1",
+            "kind": "map",
+            "pairs": [
+              {
+                "key": {
+                  "ref": "k1"
+                },
+                "value": {
+                  "ref": "e1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "k1",
+            "kind": "string",
+            "value": "a"
+          },
+          {
+            "node": "e1",
+            "kind": "int",
+            "value": "1"
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC MAP D3 \"map[string]int64\" + key DESC STRING + elem DESC INT (WF-18 kind 3)",
+        "MAP count 1 = A1; pair key \"a\" literal 61 61, value zz(1)=2 -> 22 (WF-16)"
+      ]
+    },
+    {
+      "id": "V-46",
+      "desc": "struct value root in descriptor field order",
+      "tags": [
+        "WF-17"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d0697665632e706f696e74026158d865696e743634086159c3b02224",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "struct",
+            "type": "vec.point",
+            "fields": [
+              {
+                "name": "X",
+                "value": {
+                  "ref": "e1"
+                }
+              },
+              {
+                "name": "Y",
+                "value": {
+                  "ref": "e2"
+                }
+              }
+            ]
+          },
+          {
+            "node": "e1",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "e2",
+            "kind": "int",
+            "value": "2"
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC STRUCT D0 \"vec.point\", ARG field count 02, field X type-ref DESC INT literal, field Y type-ref REF C3 (id 3; WF-18)",
+        "STRUCT token B0, field values in descriptor order: 22, 24; no per-field tags (WF-17)"
+      ]
+    },
+    {
+      "id": "V-47",
+      "desc": "scalar descriptor kinds in one struct",
+      "tags": [
+        "WF-18",
+        "WF-17"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d0697665632e7363616c73066142d764626f6f6c6149d865696e743634086155d96675696e743634086146da67666c6f61743332046143db69636f6d706c65783634046153dc0c66737472696e67b011213f0000000100000000403fc00000503f80000040000000626869",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "struct",
+            "type": "vec.scals",
+            "fields": [
+              {
+                "name": "B",
+                "value": {
+                  "ref": "e1"
+                }
+              },
+              {
+                "name": "I",
+                "value": {
+                  "ref": "e2"
+                }
+              },
+              {
+                "name": "U",
+                "value": {
+                  "ref": "e3"
+                }
+              },
+              {
+                "name": "F",
+                "value": {
+                  "ref": "e4"
+                }
+              },
+              {
+                "name": "C",
+                "value": {
+                  "ref": "e5"
+                }
+              },
+              {
+                "name": "S",
+                "value": {
+                  "ref": "e6"
+                }
+              }
+            ]
+          },
+          {
+            "node": "e1",
+            "kind": "bool",
+            "value": true
+          },
+          {
+            "node": "e2",
+            "kind": "int",
+            "value": "-1"
+          },
+          {
+            "node": "e3",
+            "kind": "uint",
+            "value": "4294967296"
+          },
+          {
+            "node": "e4",
+            "kind": "float",
+            "bits": "3fc00000"
+          },
+          {
+            "node": "e5",
+            "kind": "complex",
+            "real": "3f800000",
+            "imag": "40000000"
+          },
+          {
+            "node": "e6",
+            "kind": "string",
+            "value": "hi"
+          }
+        ]
+      },
+      "deriv": [
+        "DESC STRUCT 6 fields; type-refs cover kinds BOOL D7, INT D8 width 08, UINT D9 width 08, FLOAT DA width 04, COMPLEX DB width 04, STRING DC 0C (WF-18 kind table)",
+        "values: 11 true; 21 zz(-1); 3F 0100000000000000 u64 UINT 2^32; 40 3FC00000 f32 1.5; 50 3F800000 40000000 c64 1+2i; 62 6869 \"hi\""
+      ]
+    },
+    {
+      "id": "V-48",
+      "desc": "reserved descriptor kind 16",
+      "tags": [
+        "WF-18",
+        "WF-21"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000dc10617820",
+      "class": "malformed_op"
+    },
+    {
+      "id": "V-49",
+      "desc": "descriptor kind argument in non-minimal u16 form",
+      "tags": [
+        "WF-18",
+        "WF-4"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000dd000c6178",
+      "class": "malformed_op"
+    },
+    {
+      "id": "V-50",
+      "desc": "fixed array descriptor and bare array record",
+      "tags": [
+        "WF-18",
+        "WF-14"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d2685b325d696e74363402d865696e7436340882022224",
+      "ir": {
+        "root": "a1",
+        "nodes": [
+          {
+            "node": "a1",
+            "kind": "array",
+            "len": 2,
+            "elements": [
+              {
+                "ref": "e1"
+              },
+              {
+                "ref": "e2"
+              }
+            ]
+          },
+          {
+            "node": "e1",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "e2",
+            "kind": "int",
+            "value": "2"
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC ARRAY D2 \"[2]int64\", body ARG N=02 + elem type-ref DESC INT (WF-18 kind 2)",
+        "value = bare array record 82 02 22 24, no view: a fixed array is not a slice (WF-14)"
+      ]
+    },
+    {
+      "id": "V-51",
+      "desc": "named type descriptor wraps its base",
+      "tags": [
+        "WF-18"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d4687665632e74656d70da67666c6f6174363408413ff0000000000000",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "float",
+            "type": "vec.temp",
+            "bits": "3ff0000000000000"
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC NAMED D4 \"vec.temp\", body type-ref DESC FLOAT width 08 (WF-18 kind 4)",
+        "value is the base-class token 41 3FF0000000000000 (WF-8)"
+      ]
+    },
+    {
+      "id": "V-52",
+      "desc": "evolution pair source: extra field present in stream",
+      "tags": [
+        "WF-23",
+        "WF-17"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d5692a7665632e65766f32d0687665632e65766f32026141d865696e743634086142dc0c66737472696e67b02c0e6178",
+      "ir": {
+        "root": {
+          "ref": "n1"
+        },
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "struct",
+            "type": "vec.evo2",
+            "fields": [
+              {
+                "name": "A",
+                "value": {
+                  "ref": "e1"
+                }
+              },
+              {
+                "name": "B",
+                "value": {
+                  "ref": "e2"
+                }
+              }
+            ]
+          },
+          {
+            "node": "e1",
+            "kind": "int",
+            "value": "7"
+          },
+          {
+            "node": "e2",
+            "kind": "string",
+            "value": "x"
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC POINTER -> STRUCT vec.evo2 {A int64; B string}",
+        "B0 2C 0E (zz(7)=14, u8) 61 78 (\"x\") (WF-17)",
+        "reader contract: v2->v1 target skips B, v1->v2 zero-fills B (WF-23)"
+      ]
+    },
+    {
+      "id": "V-53",
+      "desc": "evolution kind drift: field B float64 against string target",
+      "tags": [
+        "WF-23"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d5692a7665632e65766f32d0687665632e65766f32026141d865696e743634086142da67666c6f6174363408b02c0e413ff0000000000000"
+    }
+  ]
+}

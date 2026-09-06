@@ -1,0 +1,251 @@
+{
+  "category": "nil-empty",
+  "section": "6.8-6.11",
+  "vectors": [
+    {
+      "id": "V-87",
+      "desc": "nil pointer token",
+      "tags": [
+        "WF-12",
+        "GO-4"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d5662a696e743634d865696e7436340800",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "nil",
+            "sort": "pointer"
+          }
+        ]
+      },
+      "deriv": [
+        "nil token class 0x0, selector 0 = nil pointer (WF-12, GO-4 table)"
+      ]
+    },
+    {
+      "id": "V-88",
+      "desc": "nil slice token",
+      "tags": [
+        "WF-12",
+        "GO-4"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d1675b5d696e743634d865696e7436340801",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "nil",
+            "sort": "slice"
+          }
+        ]
+      },
+      "deriv": [
+        "nil selector 1 = nil slice; a nil slice is not a view (WF-12, WF-15)"
+      ]
+    },
+    {
+      "id": "V-89",
+      "desc": "nil map token",
+      "tags": [
+        "WF-12",
+        "GO-4"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e7436340802",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "nil",
+            "sort": "map"
+          }
+        ]
+      },
+      "deriv": [
+        "nil selector 2 = nil map; never interns (WF-12, WF-16)"
+      ]
+    },
+    {
+      "id": "V-90",
+      "desc": "nil interface token",
+      "tags": [
+        "WF-12",
+        "GO-4"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d66c0c696e74657266616365207b7d03",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "nil",
+            "sort": "interface"
+          }
+        ]
+      },
+      "deriv": [
+        "nil selector 3 = nil interface (WF-12, GO-4)"
+      ]
+    },
+    {
+      "id": "V-91",
+      "desc": "empty non-nil slice: zero-length backing plus form-0 view",
+      "tags": [
+        "WF-15",
+        "GO-4"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d1675b5d696e743634d865696e7436340880009004",
+      "ir": {
+        "root": "v1",
+        "nodes": [
+          {
+            "node": "a1",
+            "kind": "array",
+            "len": 0,
+            "elements": []
+          },
+          {
+            "node": "v1",
+            "kind": "view",
+            "backing": {
+              "ref": "a1"
+            },
+            "off": 0,
+            "len": 0,
+            "extent": 0
+          }
+        ]
+      },
+      "deriv": [
+        "empty non-nil slice is a VIEW with len 0 (WF-12/GO-4): backing array 80 00 (L=0,E=0) + view form 0 (off=0,len=extent=L) 90 04 (WF-15)"
+      ]
+    },
+    {
+      "id": "V-92",
+      "desc": "empty non-nil map: count-0 record",
+      "tags": [
+        "WF-16",
+        "GO-4"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e74363408a0",
+      "ir": {
+        "root": "m1",
+        "nodes": [
+          {
+            "node": "m1",
+            "kind": "map",
+            "pairs": [],
+            "type": "map[string]int64"
+          }
+        ]
+      },
+      "deriv": [
+        "empty non-nil map is a record like any other: A0, count 0 (WF-16, GO-4)"
+      ]
+    },
+    {
+      "id": "V-93",
+      "desc": "typed nil inside an interface is not the nil interface",
+      "tags": [
+        "KO-4",
+        "GO-4"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d5662a696e743634d865696e7436340800",
+      "ir": {
+        "root": "i1",
+        "nodes": [
+          {
+            "node": "i1",
+            "kind": "iface",
+            "type": "*int64",
+            "value": {
+              "ref": "np"
+            }
+          },
+          {
+            "node": "np",
+            "kind": "nil",
+            "sort": "pointer"
+          }
+        ]
+      },
+      "deriv": [
+        "any((*int64)(nil)): interface carrying (DESC *int64, nil pointer body 00) - bytes differ from the nil-interface token 03 (KO-4, GO-4 typed-nil distinctness)"
+      ]
+    },
+    {
+      "id": "V-94",
+      "desc": "BIGINT nil: coincidence byte of the nil pointer",
+      "tags": [
+        "GO-4",
+        "WF-18"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000dc0f676269672e496e7400",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "bigint",
+            "value": null
+          }
+        ]
+      },
+      "deriv": [
+        "nil *big.Int: BIGINT value body nil selector 0 - byte-identical to the inline zero it coincides with (GO-4 coincidence, WF-18 kind 15, WF-3)"
+      ]
+    },
+    {
+      "id": "V-95",
+      "desc": "BIGINT zero: the other reading of the coincidence byte",
+      "tags": [
+        "GO-4",
+        "WF-18"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000dc0f676269672e496e7400",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "bigint",
+            "value": "0"
+          }
+        ]
+      },
+      "deriv": [
+        "big.Int(0): value body zz(0)=0 inline - same byte as V-94, different projection shape; either re-encodes to the same byte (GO-4)"
+      ]
+    },
+    {
+      "id": "V-96",
+      "desc": "reserved nil selector 4",
+      "tags": [
+        "WF-12"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d66c0c696e74657266616365207b7d04"
+    }
+  ]
+}

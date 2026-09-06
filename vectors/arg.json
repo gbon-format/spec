@@ -1,0 +1,254 @@
+{
+  "category": "arg",
+  "section": "5",
+  "vectors": [
+    {
+      "id": "V-9",
+      "desc": "string length 5 rides the inline argument form",
+      "tags": [
+        "WF-4"
+      ],
+      "verdict": "ok",
+      "bytes": "67626f6e0000dc0c66737472696e67656161616161",
+      "direction": "both",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "string",
+            "value": "aaaaa"
+          }
+        ]
+      },
+      "deriv": [
+        "header (WF-2)",
+        "root DESC STRING kind 12 = DC 0C, name \"string\" len 6 = 66 737472696e67 (WF-18)",
+        "STRING len 5 <= 11: inline selector 0x60|5 = 65; payload 5 bytes (WF-4, WF-10)"
+      ]
+    },
+    {
+      "id": "V-10",
+      "desc": "string length 11: the inline ceiling",
+      "tags": [
+        "WF-4"
+      ],
+      "verdict": "ok",
+      "bytes": "67626f6e0000dc0c66737472696e676b6161616161616161616161",
+      "direction": "both",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "string",
+            "value": "aaaaaaaaaaa"
+          }
+        ]
+      },
+      "deriv": [
+        "STRING len 11: last inline value, 0x60|11 = 6b (WF-4 boundary 11 -> inline)"
+      ]
+    },
+    {
+      "id": "V-11",
+      "desc": "string length 12: first u8-form length",
+      "tags": [
+        "WF-4"
+      ],
+      "verdict": "ok",
+      "bytes": "67626f6e0000dc0c66737472696e676c0c616161616161616161616161",
+      "direction": "both",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "string",
+            "value": "aaaaaaaaaaaa"
+          }
+        ]
+      },
+      "deriv": [
+        "STRING len 12 > 11: u8 form 0x6C with payload 0C, then 12 bytes (WF-4 boundary 12 -> u8)"
+      ]
+    },
+    {
+      "id": "V-12",
+      "desc": "string length 255: the u8 ceiling",
+      "tags": [
+        "WF-4"
+      ],
+      "verdict": "ok",
+      "bytes": "67626f6e0000dc0c66737472696e676cff616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161",
+      "direction": "both",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "string",
+            "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ]
+      },
+      "deriv": [
+        "STRING len 255 = u8 max: 6C FF (WF-4 boundary 255 -> u8)"
+      ]
+    },
+    {
+      "id": "V-13",
+      "desc": "string length 256 crosses into u16",
+      "tags": [
+        "WF-4"
+      ],
+      "verdict": "ok",
+      "bytes": "67626f6e0000dc0c66737472696e676d010061616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161",
+      "direction": "both",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "string",
+            "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ]
+      },
+      "deriv": [
+        "STRING len 256: u16 form 0x6D, big-endian 01 00 (WF-4 boundary 256 -> u16)"
+      ]
+    },
+    {
+      "id": "V-14",
+      "desc": "UINT 65536 rides the u32 form",
+      "tags": [
+        "WF-4",
+        "WF-6"
+      ],
+      "verdict": "ok",
+      "bytes": "67626f6e0000d96675696e743634083e00010000",
+      "direction": "both",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "uint",
+            "value": "65536"
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC UINT kind 9 = D9, name \"uint64\" len 6, width 08 (WF-18)",
+        "UINT 65536 = 0x00010000: u32 form 0x3E, big-endian 00 01 00 00 (WF-4 boundary 65536 -> u32; WF-6)"
+      ]
+    },
+    {
+      "id": "V-15",
+      "desc": "UINT 2^32 rides the u64 form",
+      "tags": [
+        "WF-4",
+        "WF-6"
+      ],
+      "verdict": "ok",
+      "bytes": "67626f6e0000d96675696e743634083f0000000100000000",
+      "direction": "both",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "uint",
+            "value": "4294967296"
+          }
+        ]
+      },
+      "deriv": [
+        "UINT 2^32: u64 form 0x3F, 01 00 00 00 00 00 00 00 (WF-4 boundary 2^32 -> u64)",
+        "UINT 2^32 = 0x0000000100000000: u64 form 0x3F, big-endian 00 00 00 01 00 00 00 00 (WF-4 boundary 2^32 -> u64)"
+      ]
+    },
+    {
+      "id": "V-16",
+      "desc": "UINT 2^64-1: the u64 ceiling",
+      "tags": [
+        "WF-6"
+      ],
+      "verdict": "ok",
+      "bytes": "67626f6e0000d96675696e743634083fffffffffffffffff",
+      "direction": "both",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "uint",
+            "value": "18446744073709551615"
+          }
+        ]
+      },
+      "deriv": [
+        "UINT 2^64-1 = u64 max payload FF x8 (WF-6: UINT tops out at 2^64-1)"
+      ]
+    },
+    {
+      "id": "V-17",
+      "desc": "BIGINT 2^64 rides the ext argument",
+      "tags": [
+        "WF-4",
+        "WF-18",
+        "WF-5"
+      ],
+      "verdict": "ok",
+      "bytes": "67626f6e0000dc0f676269672e496e741009020000000000000000",
+      "direction": "both",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "bigint",
+            "value": "18446744073709551616"
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC BIGINT kind 15 = DC 0F, reserved name \"big.Int\" len 7 (WF-18)",
+        "value body bare argument: zz(2^64)=2^65=0x02_0000000000000000 needs 9 bytes -> ext 10, n=9 inline, payload 02 + 8 zero bytes (WF-4 ext n>=9, WF-5)"
+      ]
+    },
+    {
+      "id": "V-18",
+      "desc": "BIGINT zero: inline zero of the value body",
+      "tags": [
+        "WF-18"
+      ],
+      "verdict": "ok",
+      "bytes": "67626f6e0000dc0f676269672e496e7400",
+      "direction": "both",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "bigint",
+            "value": "0"
+          }
+        ]
+      },
+      "deriv": [
+        "BIGINT value body zz(0)=0, inline selector 00 (WF-18 kind 15: one bare argument)"
+      ]
+    },
+    {
+      "id": "V-19",
+      "desc": "ext argument selector in a bare non-BIGINT position",
+      "tags": [
+        "WF-4"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000dc0d665b5d62797465701009010000000000000000"
+    }
+  ]
+}

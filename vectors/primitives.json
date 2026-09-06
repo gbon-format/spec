@@ -1,0 +1,445 @@
+{
+  "category": "primitives",
+  "section": "6",
+  "vectors": [
+    {
+      "id": "V-20",
+      "desc": "INT zero: inline selector zero",
+      "tags": [
+        "WF-5"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d865696e7436340820",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "int",
+            "value": "0"
+          }
+        ]
+      },
+      "deriv": [
+        "INT 0: zz(0)=0, inline 0x20|0 = 20 (WF-5)"
+      ]
+    },
+    {
+      "id": "V-21",
+      "desc": "INT MinInt64: full zigzag image in u64",
+      "tags": [
+        "WF-5"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d865696e743634082fffffffffffffffff",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "int",
+            "value": "-9223372036854775808"
+          }
+        ]
+      },
+      "deriv": [
+        "INT MinInt64: zz = 0xFFFFFFFFFFFFFFFF (WF-5); u64 form 0x2F + FF x8 (WF-4)"
+      ]
+    },
+    {
+      "id": "V-22",
+      "desc": "INT MaxInt64: zigzag image 2^64-2",
+      "tags": [
+        "WF-5"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d865696e743634082ffffffffffffffffe",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "int",
+            "value": "9223372036854775807"
+          }
+        ]
+      },
+      "deriv": [
+        "INT 2^63-1: zz = 2*(2^63-1) = 0xFFFFFFFFFFFFFFFE; 2F FE-terminated u64 (WF-5, WF-4)"
+      ]
+    },
+    {
+      "id": "V-23",
+      "desc": "BOOL true",
+      "tags": [
+        "WF-7"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d764626f6f6c11",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "bool",
+            "value": true
+          }
+        ]
+      },
+      "deriv": [
+        "BOOL class 0x1, selector 1 = true -> 11 (WF-7, WF-19)"
+      ]
+    },
+    {
+      "id": "V-24",
+      "desc": "BOOL reserved selector 2",
+      "tags": [
+        "WF-7"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d764626f6f6c12",
+      "class": "malformed_op"
+    },
+    {
+      "id": "V-25",
+      "desc": "f64 NaN payload survives bitwise",
+      "tags": [
+        "WF-8",
+        "WF-1"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000da67666c6f6174363408417ff800000000000a",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "float",
+            "bits": "7ff800000000000a"
+          }
+        ]
+      },
+      "deriv": [
+        "FLOAT form 1 = 0x41 + 8 raw IEEE bits, quiet NaN with payload 0x0A (WF-8: NaN payloads preserved bit-for-bit)"
+      ]
+    },
+    {
+      "id": "V-26",
+      "desc": "f64 positive infinity",
+      "tags": [
+        "WF-8"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000da67666c6f6174363408417ff0000000000000",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "float",
+            "bits": "7ff0000000000000"
+          }
+        ]
+      },
+      "deriv": [
+        "+Inf raw bits 7FF0000000000000, form 1 (WF-8)"
+      ]
+    },
+    {
+      "id": "V-27",
+      "desc": "f32 subnormal survives bitwise",
+      "tags": [
+        "WF-8",
+        "WF-1"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000da67666c6f61743332044000000001",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "float",
+            "bits": "00000001"
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC FLOAT width 4; form 0 = 0x40 + 4 raw bits; subnormal 0x00000001 (WF-8: subnormals preserved)"
+      ]
+    },
+    {
+      "id": "V-28",
+      "desc": "f32 negative zero survives bitwise",
+      "tags": [
+        "WF-8"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000da67666c6f61743332044080000000",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "float",
+            "bits": "80000000"
+          }
+        ]
+      },
+      "deriv": [
+        "-0.0 raw bits 0x80000000, form 0 (WF-8: +/-0 preserved)"
+      ]
+    },
+    {
+      "id": "V-29",
+      "desc": "decimal128 form 2 (width 16): valid stream, projection degrades",
+      "tags": [
+        "WF-8",
+        "WF-21"
+      ],
+      "verdict": "ok",
+      "direction": "decode",
+      "bytes": "67626f6e0000da67666c6f617436340c104222001c00000000000000000000000159",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "float",
+            "bits": "22001c00000000000000000000000159"
+          }
+        ]
+      },
+      "deriv": [
+        "DESC FLOAT width 16: kind DA + name + width u8 form 0C 10 (16 > 11, minimal u8; WF-8 fixed pair width-16/form-2, WF-18)",
+        "FLOAT form 2 = 0x42 + 16 raw decimal128 bits (WF-8, WF-21)"
+      ]
+    },
+    {
+      "id": "V-30",
+      "desc": "FLOAT form 3 unknown",
+      "tags": [
+        "WF-8",
+        "WF-19"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000da67666c6f6174363408430000000000000000"
+    },
+    {
+      "id": "V-31",
+      "desc": "c128 NaN components legal outside key positions",
+      "tags": [
+        "WF-9"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000db6a636f6d706c657831323808517ff80000000000107ff8000000000020",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "complex",
+            "real": "7ff8000000000010",
+            "imag": "7ff8000000000020"
+          }
+        ]
+      },
+      "deriv": [
+        "COMPLEX form 1 = 0x51; raw bits of real then imaginary, each per WF-8 (WF-9)"
+      ]
+    },
+    {
+      "id": "V-32",
+      "desc": "c64 1+2i by raw component bits",
+      "tags": [
+        "WF-9"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000db69636f6d706c6578363404503f80000040000000",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "complex",
+            "real": "3f800000",
+            "imag": "40000000"
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC COMPLEX kind 11 = DB, name \"complex64\" len 9 = 69, width 04 (WF-18)"
+      ]
+    },
+    {
+      "id": "V-33",
+      "desc": "COMPLEX form 2 unknown",
+      "tags": [
+        "WF-9",
+        "WF-19"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000db6a636f6d706c657831323808520000000000000000"
+    },
+    {
+      "id": "V-34",
+      "desc": "non-UTF-8 string bytes are legal content",
+      "tags": [
+        "WF-10",
+        "WF-1"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000dc0c66737472696e6762fffe",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "string",
+            "bytes": "fffe"
+          }
+        ]
+      },
+      "deriv": [
+        "STRING len 2 inline 62 + raw bytes FF FE; no UTF-8 validity gate (WF-10)"
+      ]
+    },
+    {
+      "id": "V-35",
+      "desc": "empty string",
+      "tags": [
+        "WF-10"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000dc0c66737472696e6760",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "string",
+            "value": ""
+          }
+        ]
+      },
+      "deriv": [
+        "STRING len 0 inline 60, empty payload (WF-10, WF-4)"
+      ]
+    },
+    {
+      "id": "V-36",
+      "desc": "blob with trailing-zero elision",
+      "tags": [
+        "WF-11"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000dc0d665b5d627974657402aabb9002",
+      "ir": {
+        "root": "v1",
+        "nodes": [
+          {
+            "node": "b1",
+            "kind": "blob",
+            "len": 4,
+            "bytes": "aabb"
+          },
+          {
+            "node": "v1",
+            "kind": "view",
+            "backing": {
+              "ref": "b1"
+            },
+            "off": 0,
+            "len": 4,
+            "extent": 4
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC BLOB kind 13 = DC 0D, name \"[]byte\" (WF-18)",
+        "blob record: L=4 inline 0x74, E=2 (byte[1]=BB nonzero, minimal), bytes AA BB; implicit zero tail [2,4) (WF-11)",
+        "slice root = view form 0 over backing id 2: 90 02 (WF-15; ids: DESC 0, name 1, blob 2)"
+      ]
+    },
+    {
+      "id": "V-37",
+      "desc": "all-zero blob: empty dense prefix",
+      "tags": [
+        "WF-11"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000dc0d665b5d6279746575009002",
+      "ir": {
+        "root": "v1",
+        "nodes": [
+          {
+            "node": "b1",
+            "kind": "blob",
+            "len": 5,
+            "bytes": ""
+          },
+          {
+            "node": "v1",
+            "kind": "view",
+            "backing": {
+              "ref": "b1"
+            },
+            "off": 0,
+            "len": 5,
+            "extent": 5
+          }
+        ]
+      },
+      "deriv": [
+        "blob L=5, E=0 (no nonzero byte), zero payload; view 90 02 (WF-11 elision)"
+      ]
+    },
+    {
+      "id": "V-38",
+      "desc": "UINT above MaxInt64 has no INT form",
+      "tags": [
+        "WF-6"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d96675696e743634083f8000000000000000",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "uint",
+            "value": "9223372036854775808"
+          }
+        ]
+      },
+      "deriv": [
+        "UINT 2^63: zigzag image needs 65 bits, UINT class carries it directly; 3F + 8000000000000000 (WF-6)"
+      ]
+    },
+    {
+      "id": "V-39",
+      "desc": "INT value overflows the int8 target range",
+      "tags": [
+        "WF-5"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d864696e7438012d018f",
+      "class": "overflow_value"
+    }
+  ]
+}

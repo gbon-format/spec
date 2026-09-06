@@ -1,0 +1,103 @@
+{
+  "category": "budget",
+  "section": "9.1",
+  "vectors": [
+    {
+      "id": "V-79",
+      "desc": "crafted blob L=2^50 fails by budget, never by allocation: the backing length is charged against the byte/slice budget before the allocation",
+      "tags": [
+        "WF-22",
+        "S91-bytes",
+        "S91-slicelen"
+      ],
+      "verdict": "budget",
+      "bytes": "67626f6e0000dc0d665b5d627974657f0004000000000000009002",
+      "class": "budget_bytes"
+    },
+    {
+      "id": "V-80",
+      "desc": "oversized advertised ext length in the BIGINT body: booked by its advertised length before allocation",
+      "tags": [
+        "WF-22",
+        "S91-bytes",
+        "WF-4"
+      ],
+      "verdict": "budget",
+      "bytes": "67626f6e0000dc0f676269672e496e74100f0004000000000000",
+      "class": "budget_bytes"
+    },
+    {
+      "id": "V-81",
+      "desc": "giant declared map pair count: 2^30 charged before any pair is read",
+      "tags": [
+        "WF-22",
+        "S91-nodes"
+      ],
+      "verdict": "budget",
+      "bytes": "67626f6e0000d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e74363408ae40000000",
+      "class": "budget_nodes"
+    },
+    {
+      "id": "V-82",
+      "desc": "depth budget exceeded: six nested single-element arrays under a lowered depth budget",
+      "tags": [
+        "WF-22",
+        "S91-depth"
+      ],
+      "verdict": "budget",
+      "bytes": "67626f6e0000d16c0e5b5d696e74657266616365207b7dd66c0c696e74657266616365207b7d8101c08101c08101c08101c08101c08101d865696e7436340822900990089007900690059004",
+      "class": "budget_depth",
+      "limits": {
+        "max_depth": 4
+      }
+    },
+    {
+      "id": "V-83",
+      "desc": "node budget exceeded under lowered limits: three-element slice with a two-node budget",
+      "tags": [
+        "WF-22",
+        "S91-nodes"
+      ],
+      "verdict": "budget",
+      "bytes": "67626f6e0000d1675b5d696e743634d865696e7436340883032224269004",
+      "class": "budget_nodes",
+      "limits": {
+        "max_nodes": 2
+      }
+    },
+    {
+      "id": "V-84",
+      "desc": "budgeted decode of the V-56 cycle+sharing graph under a three-node budget",
+      "tags": [
+        "WF-22",
+        "S91-nodes"
+      ],
+      "verdict": "budget",
+      "bytes": "67626f6e0000d5692a7665632e72696e67d0687665632e72696e6703644e657874c06156d865696e743634086150d5662a696e743634c6b0b0cb242c1222cc0d",
+      "class": "budget_nodes",
+      "limits": {
+        "max_nodes": 3
+      }
+    },
+    {
+      "id": "V-85",
+      "desc": "map pair budget border: 2^20+1 declared pairs against the default MaxMapPairs",
+      "tags": [
+        "S91-mappairs"
+      ],
+      "verdict": "budget",
+      "bytes": "67626f6e0000d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e74363408ae00100001",
+      "class": "budget_nodes"
+    },
+    {
+      "id": "V-86",
+      "desc": "degenerate NAMED cycle: wrapper chain onto itself",
+      "tags": [
+        "WF-22",
+        "S91-namedcycle"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d4687665632e74656d70c0413ff0000000000000"
+    }
+  ]
+}

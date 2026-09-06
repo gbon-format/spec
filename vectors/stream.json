@@ -1,0 +1,133 @@
+{
+  "category": "stream",
+  "section": "4",
+  "vectors": [
+    {
+      "id": "V-1",
+      "desc": "canonical header, root INT descriptor and value",
+      "tags": [
+        "WF-2",
+        "WF-5",
+        "WF-1"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d865696e7436340821",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "int",
+            "value": "-1"
+          }
+        ]
+      },
+      "deriv": [
+        "header: magic 67 62 6F 6E, major 00, minor 00 (WF-2)",
+        "root DESC: INT kind 8 inline D8; name \"int64\" STRING len 5 = 65 696e743634; body width ARG inline 08 (WF-18)",
+        "INT -1: zz(-1)=1, inline selector 0x20|1 = 21 (WF-5, WF-4)"
+      ]
+    },
+    {
+      "id": "V-2",
+      "desc": "wrong stream magic rejected",
+      "tags": [
+        "WF-2"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6f0000d865696e7436340821",
+      "class": "bad_magic"
+    },
+    {
+      "id": "V-3",
+      "desc": "unknown major version rejected",
+      "tags": [
+        "WF-2",
+        "WF-21"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0200d865696e7436340821",
+      "class": "malformed_op"
+    },
+    {
+      "id": "V-4",
+      "desc": "unknown higher minor read normally (additive-only)",
+      "tags": [
+        "WF-2",
+        "WF-21"
+      ],
+      "verdict": "ok",
+      "direction": "decode",
+      "bytes": "67626f6e0002d865696e7436340821",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "int",
+            "value": "-1"
+          }
+        ]
+      },
+      "deriv": [
+        "header: minor 02 > decoder knowledge; decoders read normally (WF-2)",
+        "body identical to V-1"
+      ]
+    },
+    {
+      "id": "V-5",
+      "desc": "next additive minor stream reads normally",
+      "tags": [
+        "WF-2",
+        "WF-21"
+      ],
+      "verdict": "ok",
+      "direction": "decode",
+      "bytes": "67626f6e0001d865696e7436340821",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "int",
+            "value": "-1"
+          }
+        ]
+      },
+      "deriv": [
+        "header: minor byte 01, one ahead of the current minor; decoders read normally (WF-2, WF-21)",
+        "body identical to V-1"
+      ]
+    },
+    {
+      "id": "V-6",
+      "desc": "truncated string body is a format error, no partial values",
+      "tags": [
+        "WF-3"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000dc0c66737472696e676461",
+      "class": "truncated"
+    },
+    {
+      "id": "V-7",
+      "desc": "unknown experimental ESC subclass in element position",
+      "tags": [
+        "WF-19",
+        "WF-21"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d16c0e5b5d696e74657266616365207b7dd66c0c696e74657266616365207b7d8101e0059004"
+    },
+    {
+      "id": "V-8",
+      "desc": "unknown private ESC subclass in element position",
+      "tags": [
+        "WF-19"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d16c0e5b5d696e74657266616365207b7dd66c0c696e74657266616365207b7d8101f0019004"
+    }
+  ]
+}

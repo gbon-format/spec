@@ -1,0 +1,252 @@
+{
+  "category": "topology",
+  "section": "7",
+  "vectors": [
+    {
+      "id": "V-54",
+      "desc": "interned string repeat becomes REF",
+      "tags": [
+        "WF-13",
+        "WF-10"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d1685b5d737472696e67dc0c66737472696e6782026178c59004",
+      "ir": {
+        "root": "v1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "string",
+            "value": "x"
+          },
+          {
+            "node": "a1",
+            "kind": "array",
+            "len": 2,
+            "elements": [
+              {
+                "ref": "s1"
+              },
+              {
+                "ref": "s1"
+              }
+            ]
+          },
+          {
+            "node": "v1",
+            "kind": "view",
+            "backing": {
+              "ref": "a1"
+            },
+            "off": 0,
+            "len": 2,
+            "extent": 2
+          }
+        ]
+      },
+      "deriv": [
+        "[]string {\"x\",\"x\"}: first encounter STRING literal 61 78 (id 5), repeat = REF C5 (WF-13 single id space, WF-10)",
+        "backing 82 02 + view 90 04 (backing id 4)"
+      ]
+    },
+    {
+      "id": "V-55",
+      "desc": "pointer sharing: one target, two REF edges",
+      "tags": [
+        "WF-13"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d56a2a7665632e7368617265d0697665632e736861726502625031d5662a696e743634d865696e74363408625032c5b02acb",
+      "ir": {
+        "root": {
+          "ref": "n1"
+        },
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "struct",
+            "type": "vec.share",
+            "fields": [
+              {
+                "name": "P1",
+                "value": {
+                  "ref": "n2"
+                }
+              },
+              {
+                "name": "P2",
+                "value": {
+                  "ref": "n2"
+                }
+              }
+            ]
+          },
+          {
+            "node": "n2",
+            "kind": "int",
+            "value": "5"
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC POINTER -> STRUCT vec.share {P1,P2 *int64}",
+        "field P1: pointer-target record INT 2A (zz(5)=10) registers id 11; field P2: REF CB -> same target (WF-13 registration before children, sharing never duplicated)"
+      ]
+    },
+    {
+      "id": "V-56",
+      "desc": "graph with cycles and sharing in one value",
+      "tags": [
+        "WF-13",
+        "WF-1"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d5692a7665632e72696e67d0687665632e72696e6703644e657874c06156d865696e743634086150d5662a696e743634c6b0b0cb242c1222cc0d",
+      "ir": {
+        "root": {
+          "ref": "n1"
+        },
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "struct",
+            "type": "vec.ring",
+            "fields": [
+              {
+                "name": "Next",
+                "value": {
+                  "ref": "n2"
+                }
+              },
+              {
+                "name": "V",
+                "value": {
+                  "ref": "e1"
+                }
+              },
+              {
+                "name": "P",
+                "value": {
+                  "ref": "n3"
+                }
+              }
+            ]
+          },
+          {
+            "node": "n2",
+            "kind": "struct",
+            "type": "vec.ring",
+            "fields": [
+              {
+                "name": "Next",
+                "value": {
+                  "ref": "n1"
+                }
+              },
+              {
+                "name": "V",
+                "value": {
+                  "ref": "e2"
+                }
+              },
+              {
+                "name": "P",
+                "value": {
+                  "ref": "n3"
+                }
+              }
+            ]
+          },
+          {
+            "node": "e1",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "e2",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "n3",
+            "kind": "int",
+            "value": "9"
+          }
+        ]
+      },
+      "deriv": [
+        "DESC POINTER -> STRUCT vec.ring {Next *ring; V int64; P *int64}; Next type-ref = REF C0 to the pointer descriptor itself (recursive type closes through REF, WF-13/WF-18); P type-ref D5 \"*int64\" with pointee REF C6",
+        "value: n1 (id 11) B0, Next -> n2 (id 12) B0 [Next CB -> n1] [V 24] [P target 2C 12 (zz(9)=18) id 13], then n1 [V 22] [P CC 0D shared: id 13 > 11 rides the u8 form (WF-4)]"
+      ]
+    },
+    {
+      "id": "V-57",
+      "desc": "self-referential map: record-then-fill",
+      "tags": [
+        "WF-13",
+        "WF-16"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d36c176d61705b737472696e675d696e74657266616365207b7ddc0c66737472696e67d66c0c696e74657266616365207b7da16473656c66c0c6",
+      "ir": {
+        "root": "m1",
+        "nodes": [
+          {
+            "node": "k1",
+            "kind": "string",
+            "value": "self"
+          },
+          {
+            "node": "m1",
+            "kind": "map",
+            "pairs": [
+              {
+                "key": {
+                  "ref": "k1"
+                },
+                "value": {
+                  "ref": "i1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "i1",
+            "kind": "iface",
+            "type": "map[string]interface {}",
+            "value": {
+              "ref": "m1"
+            }
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC MAP \"map[string]interface {}\" + STRING + INTERFACE (WF-18)",
+        "map object registers its id at header emission (A1, id 6) before pairs; pair value = interface [type-tag REF C0 to the map descriptor] [REF C6 to the map object] -> cycle closes inside the pair (WF-13, WF-16 record-then-fill)"
+      ]
+    },
+    {
+      "id": "V-58",
+      "desc": "REF to an unregistered id",
+      "tags": [
+        "WF-13"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e74363408a16161c9"
+    },
+    {
+      "id": "V-59",
+      "desc": "REF of the wrong sort: map position resolves to a string record",
+      "tags": [
+        "WF-13",
+        "WF-16"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d5672a7665632e646dd0667665632e646d036141d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e743634086142c56153c7b0a1616122cc0f6178"
+    }
+  ]
+}

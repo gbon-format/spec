@@ -1,0 +1,741 @@
+{
+  "category": "canonical",
+  "section": "8.1",
+  "vectors": [
+    {
+      "id": "V-60",
+      "desc": "non-minimal view form 2 with extent == len",
+      "tags": [
+        "WF-15",
+        "S81-view"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d1675b5d696e743634d865696e7436340883032224269204000202",
+      "class": "bad_view"
+    },
+    {
+      "id": "V-61",
+      "desc": "view form 1 carrying the form-0 geometry",
+      "tags": [
+        "WF-15",
+        "S81-view"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d1675b5d696e743634d865696e74363408830322242691040003",
+      "class": "bad_view"
+    },
+    {
+      "id": "V-62",
+      "desc": "non-minimal dense prefix: last dense element is zero",
+      "tags": [
+        "WF-14",
+        "S81-dense"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d1675b5d696e743634d865696e7436340884032224209004",
+      "class": "malformed_op"
+    },
+    {
+      "id": "V-63",
+      "desc": "non-minimal blob dense prefix: zero tail byte visible",
+      "tags": [
+        "WF-11",
+        "S81-dense"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000dc0d665b5d627974657403aabb009002",
+      "class": "malformed_op"
+    },
+    {
+      "id": "V-64",
+      "desc": "SLICE of UINT-8 in a byte-slice position",
+      "tags": [
+        "WF-18",
+        "WF-20",
+        "S81-sliceu8"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d1665b5d62797465d96575696e7438018101359004"
+    },
+    {
+      "id": "V-65",
+      "desc": "nonzero ESC reserved nibble",
+      "tags": [
+        "WF-19",
+        "S81-esc"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d16c0e5b5d696e74657266616365207b7dd66c0c696e74657266616365207b7d8101e1009004"
+    },
+    {
+      "id": "V-66",
+      "desc": "non-minimal argument: u16 form for length 1",
+      "tags": [
+        "WF-4",
+        "S81-arg"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000dc0c66737472696e676d000178",
+      "class": "malformed_arg"
+    },
+    {
+      "id": "V-67",
+      "desc": "canonical map order: string keys sorted by skeleton",
+      "tags": [
+        "KO-1",
+        "KO-2",
+        "E3",
+        "WF-16",
+        "WF-20"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e74363408a3616124616222616326",
+      "ir": {
+        "root": "m1",
+        "nodes": [
+          {
+            "node": "m1",
+            "kind": "map",
+            "pairs": [
+              {
+                "key": {
+                  "ref": "a"
+                },
+                "value": {
+                  "ref": "va"
+                }
+              },
+              {
+                "key": {
+                  "ref": "b"
+                },
+                "value": {
+                  "ref": "vb"
+                }
+              },
+              {
+                "key": {
+                  "ref": "c"
+                },
+                "value": {
+                  "ref": "vc"
+                }
+              }
+            ]
+          },
+          {
+            "node": "b",
+            "kind": "string",
+            "value": "b"
+          },
+          {
+            "node": "a",
+            "kind": "string",
+            "value": "a"
+          },
+          {
+            "node": "c",
+            "kind": "string",
+            "value": "c"
+          },
+          {
+            "node": "va",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "vb",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "vc",
+            "kind": "int",
+            "value": "3"
+          }
+        ]
+      },
+      "deriv": [
+        "map{\"b\":1,\"a\":2,\"c\":3}: keys sorted bytewise over literal skeletons a<b<c regardless of insertion order (KO-1, E3)",
+        "A3; pairs (61 61, 24) (61 62, 22) (61 63, 26); values zz-encoded (WF-5)"
+      ]
+    },
+    {
+      "id": "V-68",
+      "desc": "canonical map order: integer keys by zigzag argument bytes",
+      "tags": [
+        "KO-6",
+        "WF-5",
+        "WF-20"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d36c106d61705b696e7436345d737472696e67d865696e74363408dc0c66737472696e67a5206162216164226165236161246163",
+      "ir": {
+        "root": "m1",
+        "nodes": [
+          {
+            "node": "m1",
+            "kind": "map",
+            "pairs": [
+              {
+                "key": {
+                  "ref": "k0"
+                },
+                "value": {
+                  "ref": "s0"
+                }
+              },
+              {
+                "key": {
+                  "ref": "km1"
+                },
+                "value": {
+                  "ref": "s1"
+                }
+              },
+              {
+                "key": {
+                  "ref": "k1"
+                },
+                "value": {
+                  "ref": "s2"
+                }
+              },
+              {
+                "key": {
+                  "ref": "km2"
+                },
+                "value": {
+                  "ref": "s3"
+                }
+              },
+              {
+                "key": {
+                  "ref": "k2"
+                },
+                "value": {
+                  "ref": "s4"
+                }
+              }
+            ]
+          },
+          {
+            "node": "k0",
+            "kind": "int",
+            "value": "0"
+          },
+          {
+            "node": "km1",
+            "kind": "int",
+            "value": "-1"
+          },
+          {
+            "node": "k1",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "km2",
+            "kind": "int",
+            "value": "-2"
+          },
+          {
+            "node": "k2",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "s0",
+            "kind": "string",
+            "value": "b"
+          },
+          {
+            "node": "s1",
+            "kind": "string",
+            "value": "d"
+          },
+          {
+            "node": "s2",
+            "kind": "string",
+            "value": "e"
+          },
+          {
+            "node": "s3",
+            "kind": "string",
+            "value": "a"
+          },
+          {
+            "node": "s4",
+            "kind": "string",
+            "value": "c"
+          }
+        ]
+      },
+      "deriv": [
+        "map[int64]string {-2:\"a\",0:\"b\",2:\"c\",-1:\"d\",1:\"e\"}: key order = bytewise over minimal zigzag arguments 0,1,2,3,4 -> keys 0,-1,1,-2,2 (KO-6, KO-1)",
+        "A5 then pairs (20,6162)(21,6164)(22,6165)(23,6161)(24,6163)"
+      ]
+    },
+    {
+      "id": "V-69",
+      "desc": "float key: stored sign of minus zero round-trips",
+      "tags": [
+        "KO-3",
+        "E4"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d36c126d61705b666c6f617436345d737472696e67da67666c6f6174363408dc0c66737472696e67a1418000000000000000636e6567",
+      "ir": {
+        "root": "m1",
+        "nodes": [
+          {
+            "node": "m1",
+            "kind": "map",
+            "pairs": [
+              {
+                "key": {
+                  "ref": "k1"
+                },
+                "value": {
+                  "ref": "s1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "k1",
+            "kind": "float",
+            "bits": "8000000000000000"
+          },
+          {
+            "node": "s1",
+            "kind": "string",
+            "value": "neg"
+          }
+        ]
+      },
+      "deriv": [
+        "map[float64]string {-0.0: \"neg\"}: raw bits BE 41 8000000000000000, not normalized (KO-3, E4: stored sign observable)"
+      ]
+    },
+    {
+      "id": "V-70",
+      "desc": "complex key: raw component bits pair",
+      "tags": [
+        "KO-6",
+        "WF-9"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d36c146d61705b636f6d706c657836345d737472696e67db69636f6d706c6578363404dc0c66737472696e67a1503f800000400000006161",
+      "ir": {
+        "root": "m1",
+        "nodes": [
+          {
+            "node": "m1",
+            "kind": "map",
+            "pairs": [
+              {
+                "key": {
+                  "ref": "k1"
+                },
+                "value": {
+                  "ref": "s1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "k1",
+            "kind": "complex",
+            "real": "3f800000",
+            "imag": "40000000"
+          },
+          {
+            "node": "s1",
+            "kind": "string",
+            "value": "a"
+          }
+        ]
+      },
+      "deriv": [
+        "map[complex64]string {1+2i: \"a\"}: skeleton = pair of raw component bits (KO-6 complex rule)"
+      ]
+    },
+    {
+      "id": "V-71",
+      "desc": "interface keys: type tag distinguishes int64(1) from int32(1)",
+      "tags": [
+        "KO-4",
+        "KO-2"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d36c166d61705b696e74657266616365207b7d5d696e743634d66c0c696e74657266616365207b7dd865696e74363408a2d865696e743332042224c42222",
+      "ir": {
+        "root": "m1",
+        "nodes": [
+          {
+            "node": "i32",
+            "kind": "iface",
+            "type": "int32",
+            "value": {
+              "ref": "k1"
+            }
+          },
+          {
+            "node": "i64",
+            "kind": "iface",
+            "type": "int64",
+            "value": {
+              "ref": "k2"
+            }
+          },
+          {
+            "node": "m1",
+            "kind": "map",
+            "pairs": [
+              {
+                "key": {
+                  "ref": "i32"
+                },
+                "value": {
+                  "ref": "v2"
+                }
+              },
+              {
+                "key": {
+                  "ref": "i64"
+                },
+                "value": {
+                  "ref": "v1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "k1",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "k2",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "v2",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "v1",
+            "kind": "int",
+            "value": "1"
+          }
+        ]
+      },
+      "deriv": [
+        "map[any]int64 {int64(1):1, int32(1):2}: key = (type tag, value) (KO-4)",
+        "skeleton order: int32 key skeleton vs int64 key skeleton compare as literal descriptors; names diverge at byte 4 (0x33 < 0x36) -> int32 pair first (KO-1)",
+        "wire: key1 = DESC int32 literal D8..04 + 22; key2 = REF C4 to the already-interned int64 descriptor + 22; 2 slots preserved (KO-2)"
+      ]
+    },
+    {
+      "id": "V-72",
+      "desc": "nil-interface and typed-nil occupy distinct key slots",
+      "tags": [
+        "KO-4",
+        "GO-4"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d36c166d61705b696e74657266616365207b7d5d696e743634d66c0c696e74657266616365207b7dd865696e74363408a20324d5662a696e743634c40022",
+      "ir": {
+        "root": "m1",
+        "nodes": [
+          {
+            "node": "tn",
+            "kind": "iface",
+            "type": "*int64",
+            "value": {
+              "ref": "np"
+            }
+          },
+          {
+            "node": "np",
+            "kind": "nil",
+            "sort": "pointer"
+          },
+          {
+            "node": "m1",
+            "kind": "map",
+            "pairs": [
+              {
+                "key": {
+                  "ref": "ni"
+                },
+                "value": {
+                  "ref": "v2"
+                }
+              },
+              {
+                "key": {
+                  "ref": "tn"
+                },
+                "value": {
+                  "ref": "v1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "ni",
+            "kind": "nil",
+            "sort": "interface"
+          },
+          {
+            "node": "v2",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "v1",
+            "kind": "int",
+            "value": "1"
+          }
+        ]
+      },
+      "deriv": [
+        "map[any]int64 {(*int64)(nil):1, nil:2}: nil-interface token 03 vs typed-nil (DESC *int64 + nil pointer body 00) (KO-4, GO-4)",
+        "skeleton order 03 < D5...: nil-interface pair first"
+      ]
+    },
+    {
+      "id": "V-73",
+      "desc": "pointer keys with equal skeletons ordered by value bytes",
+      "tags": [
+        "KO-2b",
+        "E5"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d36c116d61705b2a696e7436345d737472696e67d5662a696e743634d865696e74363408dc0c66737472696e67a22c0e61612c0e6162",
+      "ir": {
+        "root": "m1",
+        "nodes": [
+          {
+            "node": "p1",
+            "kind": "int",
+            "value": "7"
+          },
+          {
+            "node": "p2",
+            "kind": "int",
+            "value": "7"
+          },
+          {
+            "node": "m1",
+            "kind": "map",
+            "pairs": [
+              {
+                "key": {
+                  "ref": "p2"
+                },
+                "value": {
+                  "ref": "sa"
+                }
+              },
+              {
+                "key": {
+                  "ref": "p1"
+                },
+                "value": {
+                  "ref": "sb"
+                }
+              }
+            ],
+            "type": "map[*int64]string"
+          },
+          {
+            "node": "sa",
+            "kind": "string",
+            "value": "a"
+          },
+          {
+            "node": "sb",
+            "kind": "string",
+            "value": "b"
+          }
+        ]
+      },
+      "deriv": [
+        "map[*int64]string {p1:\"b\", p2:\"a\"}, *p1==*p2==7: distinct slots, byte-equal key skeletons -> order by canonical value bytes \"a\"<\"b\" (KO-2b, KO-2)",
+        "wire: two distinct pointer-target records 2C 0E each (distinct pointers = distinct records), values 6161/6162"
+      ]
+    },
+    {
+      "id": "V-74",
+      "desc": "full tie: KO-2a discriminator territory, decode-only",
+      "tags": [
+        "KO-2a",
+        "E5"
+      ],
+      "verdict": "ok",
+      "direction": "decode",
+      "bytes": "67626f6e0000d36c116d61705b2a696e7436345d737472696e67d5662a696e743634d865696e74363408dc0c66737472696e67a22c0e61782c0e6178",
+      "ir": {
+        "root": "m1",
+        "nodes": [
+          {
+            "node": "p1",
+            "kind": "int",
+            "value": "7"
+          },
+          {
+            "node": "p2",
+            "kind": "int",
+            "value": "7"
+          },
+          {
+            "node": "m1",
+            "kind": "map",
+            "pairs": [
+              {
+                "key": {
+                  "ref": "p1"
+                },
+                "value": {
+                  "ref": "sx"
+                }
+              },
+              {
+                "key": {
+                  "ref": "p2"
+                },
+                "value": {
+                  "ref": "sy"
+                }
+              }
+            ],
+            "type": "map[*int64]string"
+          },
+          {
+            "node": "sx",
+            "kind": "string",
+            "value": "x"
+          },
+          {
+            "node": "sy",
+            "kind": "string",
+            "value": "x"
+          }
+        ]
+      },
+      "deriv": [
+        "keys AND values byte-equal, distinct identity slots: legal, order fixed by the implementation-defined identity discriminator that never enters bytes (E5, KO-2a)",
+        "decode asserts slot count 2 and association pointer->\"x\" for both; re-encode order is discriminator-dependent -> direction decode"
+      ]
+    },
+    {
+      "id": "V-75",
+      "desc": "cyclic pointer key: skeleton never dereferences",
+      "tags": [
+        "KO-5",
+        "E2"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d36c136d61705b2a7665632e6e6f64655d696e743634d5692a7665632e6e6f6465d0687665632e6e6f646502644e657874c26156d865696e74363408c8a1b0cb222a",
+      "ir": {
+        "root": "m1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "struct",
+            "type": "vec.node",
+            "fields": [
+              {
+                "name": "Next",
+                "value": {
+                  "ref": "n1"
+                }
+              },
+              {
+                "name": "V",
+                "value": {
+                  "ref": "e1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "e1",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "m1",
+            "kind": "map",
+            "pairs": [
+              {
+                "key": {
+                  "ref": "n1"
+                },
+                "value": {
+                  "ref": "v5"
+                }
+              }
+            ],
+            "type": "map[*vec.node]int64"
+          },
+          {
+            "node": "v5",
+            "kind": "int",
+            "value": "5"
+          }
+        ]
+      },
+      "deriv": [
+        "DESC chain: D3 map[*vec.node]int64 (0), name (1), D5 *vec.node (2), name (3), D0 vec.node (4), name (5), field Next (6) type-ref REF C2 -> the D5 pointer descriptor itself, field V (7), D_INT64 (8), name (9); map value type-ref C8",
+        "key = pointer-target struct record (id 11: the map object itself registers id 10 at header emission): B0 [Next CB -> itself] 22; value 2A (zz(5)=10)"
+      ]
+    },
+    {
+      "id": "V-76",
+      "desc": "duplicate string key slots rejected",
+      "tags": [
+        "KO-8",
+        "WF-16"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e74363408a2616122616124",
+      "class": "duplicate_key"
+    },
+    {
+      "id": "V-77",
+      "desc": "NaN in key position is outside the key domain",
+      "tags": [
+        "E1",
+        "KO-3"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d36c116d61705b666c6f617436345d696e743634da67666c6f6174363408d865696e74363408a1417ff800000000000022",
+      "class": "malformed_op"
+    },
+    {
+      "id": "V-78",
+      "desc": "plus-zero and minus-zero cannot coexist as keys",
+      "tags": [
+        "E4",
+        "KO-8"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0000d36c116d61705b666c6f617436345d696e743634da67666c6f6174363408d865696e74363408a24180000000000000002241000000000000000024",
+      "class": "malformed_op"
+    }
+  ]
+}

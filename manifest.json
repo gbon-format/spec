@@ -1,0 +1,832 @@
+{
+  "corpus": "GBON conformance vectors",
+  "version": 1,
+  "categories": [
+    {
+      "file": "vectors/stream.json",
+      "section": "4",
+      "covers": [
+        "WF-1",
+        "WF-2",
+        "WF-3",
+        "WF-21",
+        "WF-23"
+      ]
+    },
+    {
+      "file": "vectors/arg.json",
+      "section": "5",
+      "covers": [
+        "WF-4"
+      ]
+    },
+    {
+      "file": "vectors/primitives.json",
+      "section": "6",
+      "covers": [
+        "WF-5",
+        "WF-6",
+        "WF-7",
+        "WF-8",
+        "WF-9",
+        "WF-10",
+        "WF-11",
+        "WF-12"
+      ]
+    },
+    {
+      "file": "vectors/containers.json",
+      "section": "6",
+      "covers": [
+        "WF-14",
+        "WF-15",
+        "WF-16",
+        "WF-17",
+        "WF-18"
+      ]
+    },
+    {
+      "file": "vectors/topology.json",
+      "section": "7",
+      "covers": [
+        "WF-13"
+      ]
+    },
+    {
+      "file": "vectors/canonical.json",
+      "section": "8.1",
+      "covers": [
+        "WF-20"
+      ]
+    },
+    {
+      "file": "vectors/budget.json",
+      "section": "9.1",
+      "covers": [
+        "WF-22"
+      ]
+    },
+    {
+      "file": "vectors/nil-empty.json",
+      "section": "6.8-6.11",
+      "covers": [
+        "WF-12",
+        "WF-15",
+        "WF-16"
+      ]
+    }
+  ],
+  "vectors": [
+    {
+      "id": "V-1",
+      "category": "stream",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-2",
+      "category": "stream",
+      "verdict": "format"
+    },
+    {
+      "id": "V-3",
+      "category": "stream",
+      "verdict": "format"
+    },
+    {
+      "id": "V-4",
+      "category": "stream",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-5",
+      "category": "stream",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-6",
+      "category": "stream",
+      "verdict": "format"
+    },
+    {
+      "id": "V-7",
+      "category": "stream",
+      "verdict": "format"
+    },
+    {
+      "id": "V-8",
+      "category": "stream",
+      "verdict": "format"
+    },
+    {
+      "id": "V-9",
+      "category": "arg",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-10",
+      "category": "arg",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-11",
+      "category": "arg",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-12",
+      "category": "arg",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-13",
+      "category": "arg",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-14",
+      "category": "arg",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-15",
+      "category": "arg",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-16",
+      "category": "arg",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-17",
+      "category": "arg",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-18",
+      "category": "arg",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-19",
+      "category": "arg",
+      "verdict": "format"
+    },
+    {
+      "id": "V-20",
+      "category": "primitives",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-21",
+      "category": "primitives",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-22",
+      "category": "primitives",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-23",
+      "category": "primitives",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-24",
+      "category": "primitives",
+      "verdict": "format"
+    },
+    {
+      "id": "V-25",
+      "category": "primitives",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-26",
+      "category": "primitives",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-27",
+      "category": "primitives",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-28",
+      "category": "primitives",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-29",
+      "category": "primitives",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-30",
+      "category": "primitives",
+      "verdict": "format"
+    },
+    {
+      "id": "V-31",
+      "category": "primitives",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-32",
+      "category": "primitives",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-33",
+      "category": "primitives",
+      "verdict": "format"
+    },
+    {
+      "id": "V-34",
+      "category": "primitives",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-35",
+      "category": "primitives",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-36",
+      "category": "primitives",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-37",
+      "category": "primitives",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-38",
+      "category": "primitives",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-39",
+      "category": "primitives",
+      "verdict": "format"
+    },
+    {
+      "id": "V-40",
+      "category": "containers",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-41",
+      "category": "containers",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-42",
+      "category": "containers",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-43",
+      "category": "containers",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-44",
+      "category": "containers",
+      "verdict": "format"
+    },
+    {
+      "id": "V-45",
+      "category": "containers",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-46",
+      "category": "containers",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-47",
+      "category": "containers",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-48",
+      "category": "containers",
+      "verdict": "format"
+    },
+    {
+      "id": "V-49",
+      "category": "containers",
+      "verdict": "format"
+    },
+    {
+      "id": "V-50",
+      "category": "containers",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-51",
+      "category": "containers",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-52",
+      "category": "containers",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-53",
+      "category": "containers",
+      "verdict": "format"
+    },
+    {
+      "id": "V-54",
+      "category": "topology",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-55",
+      "category": "topology",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-56",
+      "category": "topology",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-57",
+      "category": "topology",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-58",
+      "category": "topology",
+      "verdict": "format"
+    },
+    {
+      "id": "V-59",
+      "category": "topology",
+      "verdict": "format"
+    },
+    {
+      "id": "V-60",
+      "category": "canonical",
+      "verdict": "format"
+    },
+    {
+      "id": "V-61",
+      "category": "canonical",
+      "verdict": "format"
+    },
+    {
+      "id": "V-62",
+      "category": "canonical",
+      "verdict": "format"
+    },
+    {
+      "id": "V-63",
+      "category": "canonical",
+      "verdict": "format"
+    },
+    {
+      "id": "V-64",
+      "category": "canonical",
+      "verdict": "format"
+    },
+    {
+      "id": "V-65",
+      "category": "canonical",
+      "verdict": "format"
+    },
+    {
+      "id": "V-66",
+      "category": "canonical",
+      "verdict": "format"
+    },
+    {
+      "id": "V-67",
+      "category": "canonical",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-68",
+      "category": "canonical",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-69",
+      "category": "canonical",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-70",
+      "category": "canonical",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-71",
+      "category": "canonical",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-72",
+      "category": "canonical",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-73",
+      "category": "canonical",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-74",
+      "category": "canonical",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-75",
+      "category": "canonical",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-76",
+      "category": "canonical",
+      "verdict": "format"
+    },
+    {
+      "id": "V-77",
+      "category": "canonical",
+      "verdict": "format"
+    },
+    {
+      "id": "V-78",
+      "category": "canonical",
+      "verdict": "format"
+    },
+    {
+      "id": "V-79",
+      "category": "budget",
+      "verdict": "budget"
+    },
+    {
+      "id": "V-80",
+      "category": "budget",
+      "verdict": "budget"
+    },
+    {
+      "id": "V-81",
+      "category": "budget",
+      "verdict": "budget"
+    },
+    {
+      "id": "V-82",
+      "category": "budget",
+      "verdict": "budget"
+    },
+    {
+      "id": "V-83",
+      "category": "budget",
+      "verdict": "budget"
+    },
+    {
+      "id": "V-84",
+      "category": "budget",
+      "verdict": "budget"
+    },
+    {
+      "id": "V-85",
+      "category": "budget",
+      "verdict": "budget"
+    },
+    {
+      "id": "V-86",
+      "category": "budget",
+      "verdict": "format"
+    },
+    {
+      "id": "V-87",
+      "category": "nil-empty",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-88",
+      "category": "nil-empty",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-89",
+      "category": "nil-empty",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-90",
+      "category": "nil-empty",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-91",
+      "category": "nil-empty",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-92",
+      "category": "nil-empty",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-93",
+      "category": "nil-empty",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-94",
+      "category": "nil-empty",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-95",
+      "category": "nil-empty",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-96",
+      "category": "nil-empty",
+      "verdict": "format"
+    }
+  ],
+  "coverage": {
+    "covered": {
+      "E1": [
+        "V-77"
+      ],
+      "E2": [
+        "V-75"
+      ],
+      "E3": [
+        "V-67"
+      ],
+      "E4": [
+        "V-69",
+        "V-78"
+      ],
+      "E5": [
+        "V-73",
+        "V-74"
+      ],
+      "KO-1": [
+        "V-67"
+      ],
+      "KO-2": [
+        "V-67",
+        "V-71"
+      ],
+      "KO-2a": [
+        "V-74"
+      ],
+      "KO-2b": [
+        "V-73"
+      ],
+      "KO-3": [
+        "V-69",
+        "V-77"
+      ],
+      "KO-4": [
+        "V-71",
+        "V-72",
+        "V-93"
+      ],
+      "KO-5": [
+        "V-75"
+      ],
+      "KO-6": [
+        "V-68",
+        "V-70"
+      ],
+      "KO-8": [
+        "V-76",
+        "V-78"
+      ],
+      "S81-arg": [
+        "V-66"
+      ],
+      "S81-dense": [
+        "V-62",
+        "V-63"
+      ],
+      "S81-esc": [
+        "V-65"
+      ],
+      "S81-sliceu8": [
+        "V-64"
+      ],
+      "S81-view": [
+        "V-60",
+        "V-61"
+      ],
+      "S91-bytes": [
+        "V-79",
+        "V-80"
+      ],
+      "S91-depth": [
+        "V-82"
+      ],
+      "S91-mappairs": [
+        "V-85"
+      ],
+      "S91-namedcycle": [
+        "V-86"
+      ],
+      "S91-nodes": [
+        "V-81",
+        "V-83",
+        "V-84"
+      ],
+      "S91-slicelen": [
+        "V-79"
+      ],
+      "WF-1": [
+        "V-1",
+        "V-25",
+        "V-27",
+        "V-34",
+        "V-56"
+      ],
+      "WF-10": [
+        "V-34",
+        "V-35",
+        "V-54"
+      ],
+      "WF-11": [
+        "V-36",
+        "V-37",
+        "V-63"
+      ],
+      "WF-12": [
+        "V-87",
+        "V-88",
+        "V-89",
+        "V-90",
+        "V-96"
+      ],
+      "WF-13": [
+        "V-42",
+        "V-54",
+        "V-55",
+        "V-56",
+        "V-57",
+        "V-58",
+        "V-59"
+      ],
+      "WF-14": [
+        "V-40",
+        "V-41",
+        "V-50",
+        "V-62"
+      ],
+      "WF-15": [
+        "V-42",
+        "V-43",
+        "V-44",
+        "V-60",
+        "V-61",
+        "V-91"
+      ],
+      "WF-16": [
+        "V-45",
+        "V-57",
+        "V-59",
+        "V-67",
+        "V-76",
+        "V-92"
+      ],
+      "WF-17": [
+        "V-46",
+        "V-47",
+        "V-52"
+      ],
+      "WF-18": [
+        "V-17",
+        "V-18",
+        "V-47",
+        "V-48",
+        "V-49",
+        "V-50",
+        "V-51",
+        "V-64",
+        "V-94",
+        "V-95"
+      ],
+      "WF-19": [
+        "V-7",
+        "V-8",
+        "V-30",
+        "V-33",
+        "V-65"
+      ],
+      "WF-2": [
+        "V-1",
+        "V-2",
+        "V-3",
+        "V-4",
+        "V-5"
+      ],
+      "WF-20": [
+        "V-64",
+        "V-67",
+        "V-68"
+      ],
+      "WF-21": [
+        "V-3",
+        "V-4",
+        "V-5",
+        "V-7",
+        "V-29",
+        "V-48"
+      ],
+      "WF-22": [
+        "V-44",
+        "V-79",
+        "V-80",
+        "V-81",
+        "V-82",
+        "V-83",
+        "V-84",
+        "V-86"
+      ],
+      "WF-23": [
+        "V-52",
+        "V-53"
+      ],
+      "WF-3": [
+        "V-6"
+      ],
+      "WF-4": [
+        "V-9",
+        "V-10",
+        "V-11",
+        "V-12",
+        "V-13",
+        "V-14",
+        "V-15",
+        "V-17",
+        "V-19",
+        "V-49",
+        "V-66",
+        "V-80"
+      ],
+      "WF-5": [
+        "V-1",
+        "V-17",
+        "V-20",
+        "V-21",
+        "V-22",
+        "V-39",
+        "V-68"
+      ],
+      "WF-6": [
+        "V-14",
+        "V-15",
+        "V-16",
+        "V-38"
+      ],
+      "WF-7": [
+        "V-23",
+        "V-24"
+      ],
+      "WF-8": [
+        "V-25",
+        "V-26",
+        "V-27",
+        "V-28",
+        "V-29",
+        "V-30",
+        "V-41"
+      ],
+      "WF-9": [
+        "V-31",
+        "V-32",
+        "V-33",
+        "V-70"
+      ]
+    },
+    "exempt": [
+      {
+        "id": "WF-24",
+        "reason": "editorial section identity and reference mechanics; wire-invisible, no byte surface to conformance-test"
+      },
+      {
+        "id": "KO-7",
+        "reason": "chan and live-resource categories have no byte representation in any position; the rejection has no stream to craft"
+      }
+    ],
+    "notes": [
+      "coverage classes S81-* are the five non-canonical decode-reject families enumerated by clause 8.1; S91-* are the budget families and named rules of clause 9.1 (truncated covered via WF-3 vectors)",
+      "kind 14 CODER records: the body is defined by the coder registered for the type name (WF-18); no body is derivable from this specification, so the kind has no positive vector - the reserved-kind and minimality negatives of WF-18 are covered (V-48, V-49)",
+      "the unknown-minor stream class is covered decode-only (V-4, V-5); the kind-14 big-integer channel shares the kind-14 exemption"
+    ]
+  }
+}
