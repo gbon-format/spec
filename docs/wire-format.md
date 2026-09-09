@@ -645,16 +645,23 @@ Rules:
   forbidden, with one carve-out for backing records (the join rule below).
   A REF to an unregistered id is a format error.
 - **Pointer-to-interface positions.** A value position holding a pointer
-  to an interface encodes the pointer's own state through one leading
-  token of the body. A leading REF resolves by the sort of the named
+  to an interface — or a chain of two or more pointers ending at such a
+  position — encodes the pointer's own state through one leading token of
+  the body; the chain itself emits no tokens, so the rule is uniform for
+  any chain depth. A leading REF resolves by the sort of the named
   intern record: a descriptor record names the dynamic type of the
   pointee — the REF is the dynamic-type tag, and the tagged value body
   follows; an object record is the pointer target itself — a cycle or
   shared reference, and no value body follows. A REF naming a record of
   any other sort, or an object record that is not the target of this
   pointer, is a format error. A leading NIL token: selector 0 is the nil
-  pointer; selector 3 is a non-nil pointer whose pointee holds a nil
-  interface; any other selector is a format error (WF-12). On the first
+  pointer — the whole chain position decodes to the nil outer pointer,
+  whether the encoder meant the outer level or an inner level of the
+  chain (the two are wire-identical and normalize to the nil outer
+  value, which re-encodes to its own bytes); selector 3 is a chain
+  non-nil down to a pointee holding a nil interface, the intermediate
+  pointer levels being materialized and registered before their
+  children; any other selector is a format error (WF-12). On the first
   encounter of the dynamic type the tag is a DESC literal instead of a
   REF; resolution is the same.
 - **Backing join rule (guard).** A slice/blob position over memory already

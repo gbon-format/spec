@@ -94,16 +94,19 @@ what crosses is data.
 
 **Pointer-to-interface positions (from core WF-13).**
 
-A pointer-to-interface position resolves its leading token by the sort
-of the named record: a REF to a descriptor record is the dynamic-type
-tag with the tagged value body following; a REF to the pointer-target
-record is a cycle or shared reference with no value body following.
-Selector 0 of a leading nil token is the nil pointer, selector 3 is a
-non-nil pointer holding a nil interface in the pointee; a typed-nil
-pointee travels as the dynamic-type tag followed by selector 0 under
-the tag (WF-12). The distinctions survive the round-trip bit-exact: a
-self-referencing pointer-to-interface re-encodes to its own bytes, and
-the nil-interface pointee never merges with the typed-nil pointee.
+A pointer-to-interface position, or a chain of pointers ending at one,
+resolves its leading token by the sort of the named record: a REF to a
+descriptor record is the dynamic-type tag with the tagged value body
+following; a REF to the pointer-target record is a cycle or shared
+reference with no value body following. Selector 0 of a leading nil
+token is the nil pointer of the whole chain position — an outer-nil
+chain and a chain nil at an inner level emit one identical stream and
+normalize to the nil outer value; selector 3 is a chain non-nil down to
+a nil-interface pointee; a typed-nil pointee travels as the dynamic-type
+tag followed by selector 0 under the tag (WF-12). The distinctions
+survive the round-trip bit-exact at any chain depth: a self-referencing
+pointer-to-interface re-encodes to its own bytes, and the nil-interface
+pointee never merges with the typed-nil pointee.
 
 ### 1.4 Descriptor Names in Go
 
