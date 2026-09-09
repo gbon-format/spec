@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.3] - 2026-09-09
+
+### Changed
+
+- WF-13 (pointer-to-interface positions) generalized to pointer chains
+  of any depth: leading REF resolution by intern-record sort at every
+  chain level; nil-selector chain resolution with outer-nil
+  normalization. Go binding note (1.3) synced.
+
 ## [0.0.2] - 2026-09-09
 
 ### Added
