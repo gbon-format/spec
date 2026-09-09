@@ -92,6 +92,19 @@ method set. Function values are outside the encodable categories
 (GO-1), so no interface position carries behavior across the wire:
 what crosses is data.
 
+**Pointer-to-interface positions (from core WF-13).**
+
+A pointer-to-interface position resolves its leading token by the sort
+of the named record: a REF to a descriptor record is the dynamic-type
+tag with the tagged value body following; a REF to the pointer-target
+record is a cycle or shared reference with no value body following.
+Selector 0 of a leading nil token is the nil pointer, selector 3 is a
+non-nil pointer holding a nil interface in the pointee; a typed-nil
+pointee travels as the dynamic-type tag followed by selector 0 under
+the tag (WF-12). The distinctions survive the round-trip bit-exact: a
+self-referencing pointer-to-interface re-encodes to its own bytes, and
+the nil-interface pointee never merges with the typed-nil pointee.
+
 ### 1.4 Descriptor Names in Go
 
 The core's namespace-qualification rule (WF-18) projects onto Go as
@@ -333,8 +346,8 @@ family, and the fields of the structured error type (class, input
 offset, value path, got/want, cause). Four package-level sentinels
 carry the errors.Is attribution across the five families (the code and
 contract families share one); the environment family answers through
-its own sentinel with the original reader fault reachable as the cause
-(Unwrap). The concrete package-level sentinel variables are
+its own sentinel with the underlying read or write fault reachable as the
+cause (Unwrap). The concrete package-level sentinel variables are
 implementation identifiers and live outside this document
 (non-normative: see the gbon-go repository). The one-line rendering
 interpolates no untrusted input: decoded values, keys, and stream
@@ -374,6 +387,7 @@ faults are codec capability):
 | `coder_recursion` | code | unsupported | custom coder re-entered the codec |
 | `contract_mismatch` | contract | unsupported | decode target breaks the evolution contract |
 | `io_read` | env | io | underlying reader failed |
+| `io_write` | env | io | underlying writer failed |
 
 ### 3.2 Coder Error Contract
 
@@ -389,11 +403,12 @@ codec's job, not the coder's.
 
 For service boundaries that must answer HTTP or gRPC, every class maps
 onto a problem-details identity and a status. The mapping derives from
-the five families, with three exceptions where the family default
+the five families, with four exceptions where the family default
 misstates the consumer's lever: `unknown_name` and `contract_mismatch`
 are consumer-side setup problems (422 / FailedPrecondition — fix the
-registry or the target, do not retry the bytes), and `io_read` is an
-environment fault worth a retry under policy (503 / Unavailable). The
+registry or the target, do not retry the bytes), and `io_read` and
+`io_write` are environment faults worth a retry under policy
+(503 / Unavailable). The
 families themselves: data/format answers 400 / InvalidArgument, budget
 classes answer 413 Payload Too Large / ResourceExhausted, and code
 classes answer 500 / Internal. The ErrorInfo reason is the class ID
@@ -421,6 +436,7 @@ itself — machine-checkable shapes, no prose in the columns.
 | `coder_recursion` | 500 | Internal | `coder_recursion` |
 | `contract_mismatch` | 422 | FailedPrecondition | `contract_mismatch` |
 | `io_read` | 503 | Unavailable | `io_read` |
+| `io_write` | 503 | Unavailable | `io_write` |
 
 The table is the mapping contract and is kept in lockstep with the
 class inventory in both directions.

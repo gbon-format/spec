@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Core rule for pointer-to-interface value positions (WF-13): leading
+  REF/NIL resolution by intern-record sort, nil selectors, format errors.
+- Go binding: error class `io_write` in the class inventory (GO-5) and
+  the reader/writer-symmetric environment wording.
+- Go binding note on pointer-to-interface positions: nil selectors and
+  the bit-exact round-trip distinctions.
+
 ## [0.0.1] - 2026-09-06
 
 ### Added

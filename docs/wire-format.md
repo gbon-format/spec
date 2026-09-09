@@ -644,6 +644,19 @@ Rules:
   already-registered record; duplicating a record body in one stream is
   forbidden, with one carve-out for backing records (the join rule below).
   A REF to an unregistered id is a format error.
+- **Pointer-to-interface positions.** A value position holding a pointer
+  to an interface encodes the pointer's own state through one leading
+  token of the body. A leading REF resolves by the sort of the named
+  intern record: a descriptor record names the dynamic type of the
+  pointee — the REF is the dynamic-type tag, and the tagged value body
+  follows; an object record is the pointer target itself — a cycle or
+  shared reference, and no value body follows. A REF naming a record of
+  any other sort, or an object record that is not the target of this
+  pointer, is a format error. A leading NIL token: selector 0 is the nil
+  pointer; selector 3 is a non-nil pointer whose pointee holds a nil
+  interface; any other selector is a format error (WF-12). On the first
+  encounter of the dynamic type the tag is a DESC literal instead of a
+  REF; resolution is the same.
 - **Backing join rule (guard).** A slice/blob position over memory already
   closed by a backing record joins that record — and emits a view over it —
   exactly when: (a) its whole extent-window [ptr, ptr+extent·es) lies
