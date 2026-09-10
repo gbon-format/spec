@@ -644,26 +644,47 @@ Rules:
   already-registered record; duplicating a record body in one stream is
   forbidden, with one carve-out for backing records (the join rule below).
   A REF to an unregistered id is a format error.
-- **Pointer-to-interface positions.** A value position holding a pointer
-  to an interface — or a chain of two or more pointers ending at such a
-  position — encodes the pointer's own state through one leading token of
-  the body; the chain itself emits no tokens, so the rule is uniform for
-  any chain depth. A leading REF resolves by the sort of the named
-  intern record: a descriptor record names the dynamic type of the
-  pointee — the REF is the dynamic-type tag, and the tagged value body
-  follows; an object record is the pointer target itself — a cycle or
-  shared reference, and no value body follows. A REF naming a record of
-  any other sort, or an object record that is not the target of this
-  pointer, is a format error. A leading NIL token: selector 0 is the nil
-  pointer — the whole chain position decodes to the nil outer pointer,
-  whether the encoder meant the outer level or an inner level of the
-  chain (the two are wire-identical and normalize to the nil outer
-  value, which re-encodes to its own bytes); selector 3 is a chain
-  non-nil down to a pointee holding a nil interface, the intermediate
-  pointer levels being materialized and registered before their
-  children; any other selector is a format error (WF-12). On the first
-  encounter of the dynamic type the tag is a DESC literal instead of a
-  REF; resolution is the same.
+- **Reference positions (type on the cell).** A value position holding
+  a pointer — to an interface, to a concrete value, or to a map object
+  — encodes the pointer's own state through one leading token of the
+  body. A leading NIL token: selector 0 is the nil pointer; selector 3
+  is a non-nil pointer whose pointee holds a nil interface; any other
+  selector is a format error (WF-12). A leading REF is a type-erased
+  handle: the argument names one intern record, and the record itself
+  carries the type — its sort, and for object records the descriptor
+  under which the cell was opened. Descriptor and object records share
+  the one id space of this section; that sharing lets a single token
+  serve both roles. Resolution is by the sort of the named record,
+  uniform across every position and depth: a descriptor record makes
+  the REF the dynamic-type tag of the pointee, with the tagged value
+  body following — the first encounter of the dynamic type writes the
+  DESC literal, and resolution is the same; an object record makes the
+  REF an identity edge to that cell — a cycle or a shared reference,
+  no value body following. Reference positions nest: the body of a
+  tagged pointee opens by the same rule, so chains of any depth
+  resolve level by level, and a cycle closes by a REF naming an
+  enclosing record from any depth and any entry point — a root, an
+  interface slot, a field, an element, or a map value. A map object is
+  an addressable cell in the same space: a pointer to a map opens the
+  map's record, and an identity edge naming a map cell closes a cycle
+  through that map. A REF naming a record of any other sort is a
+  format error.
+- **Cell compatibility and re-encode fidelity.** The consuming position
+  fixes the type contract; the named cell fixes the type. A resolution
+  the cell's sort or type cannot serve is a format error at the cell,
+  never a silent coercion to a neighboring type. Reference levels
+  between the position and its named cell materialize as the stream
+  reserved them, one cell per reserved id; levels without an id of
+  their own carry none. Identity interning is by address: l-values
+  equal in address are one record. A subvalue at the start of its
+  container's storage therefore shares the container's record — the
+  record serves a position either as that position's own target or
+  through its leading subvalue, and the consuming position fixes only
+  the reference grain of the materialized handle. Conformance requires
+  the round trip: a decoder reconstructs the encoded record-and-edge
+  graph exactly — structure, types, identity — so that encoding the
+  decoded value reproduces the stream byte for byte; a resolution that
+  cannot re-encode identically is a format error, not a decode result.
 - **Backing join rule (guard).** A slice/blob position over memory already
   closed by a backing record joins that record — and emits a view over it —
   exactly when: (a) its whole extent-window [ptr, ptr+extent·es) lies

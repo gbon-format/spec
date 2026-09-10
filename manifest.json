@@ -556,6 +556,21 @@
       "id": "V-96",
       "category": "nil-empty",
       "verdict": "format"
+    },
+    {
+      "id": "V-97",
+      "category": "topology",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-98",
+      "category": "topology",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-99",
+      "category": "topology",
+      "verdict": "ok"
     }
   ],
   "coverage": {
@@ -670,7 +685,10 @@
         "V-88",
         "V-89",
         "V-90",
-        "V-96"
+        "V-96",
+        "V-97",
+        "V-98",
+        "V-99"
       ],
       "WF-13": [
         "V-42",
@@ -679,7 +697,8 @@
         "V-56",
         "V-57",
         "V-58",
-        "V-59"
+        "V-59",
+        "V-97"
       ],
       "WF-14": [
         "V-40",
@@ -718,7 +737,8 @@
         "V-51",
         "V-64",
         "V-94",
-        "V-95"
+        "V-95",
+        "V-99"
       ],
       "WF-19": [
         "V-7",

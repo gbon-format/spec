@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- WF-13 reference semantics: references are type-erased handles, the
+  type lives on the interned cell, and descriptor and object records
+  resolve through the one intern space — chains of any depth, cycles
+  through map cells, offset-zero address aliasing, cell-level
+  reference compatibility, and the byte-identical re-encode
+  requirement.
+- Go binding: decode-target semantics for reference graphs (pointer
+  chains over an interface point as legal roots, typed-nil chain
+  roots) and the unnamed chain derivation note on a registry miss.
+
+### Added
+
+- Conformance corpus: topology vectors V-97..V-99 (reference chains
+  over interface points: self-referential chain, nil-interface
+  pointee, typed-nil pointee) bring the corpus to 99 vectors.
+
 ## [0.0.3] - 2026-09-09
 
 ### Changed

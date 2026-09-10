@@ -92,21 +92,31 @@ method set. Function values are outside the encodable categories
 (GO-1), so no interface position carries behavior across the wire:
 what crosses is data.
 
-**Pointer-to-interface positions (from core WF-13).**
+**Decode targets and reference positions (from core WF-13).**
 
-A pointer-to-interface position, or a chain of pointers ending at one,
-resolves its leading token by the sort of the named record: a REF to a
-descriptor record is the dynamic-type tag with the tagged value body
-following; a REF to the pointer-target record is a cycle or shared
-reference with no value body following. Selector 0 of a leading nil
-token is the nil pointer of the whole chain position — an outer-nil
-chain and a chain nil at an inner level emit one identical stream and
-normalize to the nil outer value; selector 3 is a chain non-nil down to
-a nil-interface pointee; a typed-nil pointee travels as the dynamic-type
-tag followed by selector 0 under the tag (WF-12). The distinctions
-survive the round-trip bit-exact at any chain depth: a self-referencing
-pointer-to-interface re-encodes to its own bytes, and the nil-interface
-pointee never merges with the typed-nil pointee.
+A stream's reference graph decodes into any target type whose
+reference structure carries it. Pointer chains over an interface
+point (`*any`, `**any`, …) are legal roots and legal slots at every
+depth: references are type-erased handles, the types live on the
+interned cells, and the decoder materializes one pointer level per
+reserved id — a chain of any depth, and a cycle closing through any
+slot, round-trips with exact slot types, pointer identity, and
+byte-identical re-encoding. A nil pointer-chain root decodes as the
+typed nil of the chain; a named or out-of-family root rejects with
+`unknown_name` — the registry contract, not a format rule. The
+distinctions survive the round-trip bit-exact: a self-referencing
+chain re-encodes to its own bytes, and a nil-interface pointee never
+merges with a typed-nil pointee.
+
+**Unnamed chain derivation (registry miss).**
+
+Unnamed pointer chains to an interface point (`*interface {}`,
+`**interface {}`, …), with one slice or `map[string]` level over the
+chain, derive from their descriptor name on a registry miss: the
+canonical structural name alone fixes the type, so the stateless
+`Unmarshal` decodes them without any registration. Explicit
+`Register` bindings take precedence; every other shape — named types
+above all — keeps its `unknown_name` rejection.
 
 ### 1.4 Descriptor Names in Go
 

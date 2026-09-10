@@ -247,6 +247,113 @@
       ],
       "verdict": "format",
       "bytes": "67626f6e0000d5672a7665632e646dd0667665632e646d036141d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e743634086142c56153c7b0a1616122cc0f6178"
+    },
+    {
+      "id": "V-97",
+      "desc": "self-referential pointer chain over an interface point: the chain cell is its own pointee",
+      "tags": [
+        "WF-12",
+        "WF-13"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dc0c4",
+      "ir": {
+        "root": {
+          "ref": "i1"
+        },
+        "nodes": [
+          {
+            "node": "i1",
+            "kind": "iface",
+            "type": "*interface {}",
+            "value": {
+              "ref": "i1"
+            }
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC *interface {} (id 0) + DESC interface {} (id 2); pointer cell id 4 reserved ahead of the pointee DESC (0-based DFS, registration before children)",
+        "slot payload: REF C0 dynamic-type tag (desc id 0); cycle REF C4 (cell id 4) - a type-erased identity edge closes the ring inside the slot, the type living on the cell (WF-13)"
+      ]
+    },
+    {
+      "id": "V-98",
+      "desc": "pointer chain over an interface point with a nil-interface pointee",
+      "tags": [
+        "WF-12"
+      ],
+      "verdict": "ok",
+      "direction": "decode",
+      "bytes": "67626f6e0000d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7d03",
+      "ir": {
+        "root": {
+          "ref": "i1"
+        },
+        "nodes": [
+          {
+            "node": "i1",
+            "kind": "iface",
+            "type": "*interface {}",
+            "value": {
+              "ref": "n1"
+            }
+          },
+          {
+            "node": "n1",
+            "kind": "nil"
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC *interface {} (id 0) + DESC interface {} (id 2); pointer cell id 4 reserved",
+        "pointee nil interface -> NIL selector 3 (WF-12); the root slot materializes its own *any level over the stream token, so the decode projection sits one level deeper - decode-only direction"
+      ]
+    },
+    {
+      "id": "V-99",
+      "desc": "pointer chain over an interface point with a typed-nil (*any)(nil) pointee",
+      "tags": [
+        "WF-12",
+        "WF-18"
+      ],
+      "verdict": "ok",
+      "direction": "decode",
+      "bytes": "67626f6e0000d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dc000",
+      "ir": {
+        "root": {
+          "ref": "i1"
+        },
+        "nodes": [
+          {
+            "node": "i1",
+            "kind": "iface",
+            "type": "*interface {}",
+            "value": {
+              "ref": "i2"
+            }
+          },
+          {
+            "node": "i2",
+            "kind": "iface",
+            "type": "interface {}",
+            "value": {
+              "ref": "n1"
+            }
+          },
+          {
+            "node": "n1",
+            "kind": "nil",
+            "sort": "pointer",
+            "type": "*interface {}"
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC *interface {} (id 0) + DESC interface {} (id 2); pointer cell id 4 reserved",
+        "REF C0 dynamic-type tag; typed nil -> NIL selector 0 under the tag: the inner slot holds the (*any)(nil) payload and the root slot adds its own *any level (KO-4 typed-nil distinct from nil interface) - decode-only direction"
+      ]
     }
   ]
 }
