@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.0.4] - 2026-09-11
 
 ### Changed
 
@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Go binding: decode-target semantics for reference graphs (pointer
   chains over an interface point as legal roots, typed-nil chain
   roots) and the unnamed chain derivation note on a registry miss.
+- Go binding error classes: sixth (binding-local) family
+  `internal_panic` -> `ErrInternal` — the never-panic tripwire for
+  foreign panics recovered at the decode boundary (companion of
+  gbon-go v0.0.4); the core wire-format families are unchanged.
 
 ### Added
 
