@@ -571,6 +571,36 @@
       "id": "V-99",
       "category": "topology",
       "verdict": "ok"
+    },
+    {
+      "id": "V-100",
+      "category": "topology",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-101",
+      "category": "topology",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-102",
+      "category": "topology",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-103",
+      "category": "topology",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-104",
+      "category": "topology",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-105",
+      "category": "topology",
+      "verdict": "ok"
     }
   ],
   "coverage": {
@@ -698,7 +728,13 @@
         "V-57",
         "V-58",
         "V-59",
-        "V-97"
+        "V-97",
+        "V-100",
+        "V-101",
+        "V-102",
+        "V-103",
+        "V-104",
+        "V-105"
       ],
       "WF-14": [
         "V-40",
@@ -738,7 +774,13 @@
         "V-64",
         "V-94",
         "V-95",
-        "V-99"
+        "V-99",
+        "V-100",
+        "V-101",
+        "V-102",
+        "V-103",
+        "V-104",
+        "V-105"
       ],
       "WF-19": [
         "V-7",

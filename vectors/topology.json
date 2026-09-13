@@ -354,6 +354,305 @@
         "root DESC *interface {} (id 0) + DESC interface {} (id 2); pointer cell id 4 reserved",
         "REF C0 dynamic-type tag; typed nil -> NIL selector 0 under the tag: the inner slot holds the (*any)(nil) payload and the root slot adds its own *any level (KO-4 typed-nil distinct from nil interface) - decode-only direction"
       ]
+    },
+    {
+      "id": "V-100",
+      "desc": "named self-ring with a slot root: the whole-value REF names the slot cell at the container's leading field",
+      "tags": [
+        "WF-13",
+        "WF-18"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd5682a6d61696e2e5331d0676d61696e2e533101624631c2c4",
+      "ir": {
+        "root": {
+          "ref": "b1"
+        },
+        "nodes": [
+          {
+            "node": "b1",
+            "kind": "iface",
+            "type": "*main.S1",
+            "value": {
+              "ref": "n1"
+            }
+          },
+          {
+            "node": "n1",
+            "kind": "struct",
+            "type": "main.S1",
+            "fields": [
+              {
+                "name": "F1",
+                "value": {
+                  "ref": "b1"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC *interface {} (id 0) + DESC interface {} (id 2); slot cell id 4 reserved before the content tag DESC *main.S1 (id 5, first occurrence as a literal)",
+        "cycle REF C4 (cell id 4) from the *main.S1 position: the record materializes at the container grain, the slot being the leading field's storage - the record serves the position through its leading subvalue (WF-13)"
+      ]
+    },
+    {
+      "id": "V-101",
+      "desc": "named self-ring with a double-pointer slot root: the closing REF names the slot cell one grain in",
+      "tags": [
+        "WF-13",
+        "WF-18"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d56c0e2a2a696e74657266616365207b7dd56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd5682a6d61696e2e5331d0676d61696e2e533101624631c4c7",
+      "ir": {
+        "root": {
+          "ref": "p0"
+        },
+        "nodes": [
+          {
+            "node": "p0",
+            "kind": "iface",
+            "type": "**interface {}",
+            "value": {
+              "ref": "b1"
+            }
+          },
+          {
+            "node": "b1",
+            "kind": "iface",
+            "type": "*main.S1",
+            "value": {
+              "ref": "n1"
+            }
+          },
+          {
+            "node": "n1",
+            "kind": "struct",
+            "type": "main.S1",
+            "fields": [
+              {
+                "name": "F1",
+                "value": {
+                  "ref": "b1"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC **interface {} (id 0) + DESC *interface {} (id 2) + DESC interface {} (id 4); cells id 6 and id 7 reserved level by level before the content tag DESC *main.S1 (id 8)",
+        "inner REF C4 tags the *interface {} level; cycle REF C7 (slot cell id 7) from the *main.S1 position: same container-grain materialization one level deeper (WF-13)"
+      ]
+    },
+    {
+      "id": "V-102",
+      "desc": "named DAG over a slot root: the slot content is a struct pointer with a nil field, no cycle",
+      "tags": [
+        "WF-13",
+        "WF-18"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd5682a6d61696e2e5331d0676d61696e2e533101624631c2b003",
+      "ir": {
+        "root": {
+          "ref": "b1"
+        },
+        "nodes": [
+          {
+            "node": "b1",
+            "kind": "iface",
+            "type": "*main.S1",
+            "value": {
+              "ref": "n2"
+            }
+          },
+          {
+            "node": "n2",
+            "kind": "struct",
+            "type": "main.S1",
+            "fields": [
+              {
+                "name": "F1",
+                "value": {
+                  "ref": "nl1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "nl1",
+            "kind": "nil"
+          }
+        ]
+      },
+      "deriv": [
+        "slot cell id 4 reserved before the content tag DESC *main.S1 (id 5); the DAG node cell id 10 opens by a STRUCT token with a nil-interface field (selector 3)",
+        "no cycle: the slot and the node are distinct cells; the container-grain materialization stays unobservable on the wire"
+      ]
+    },
+    {
+      "id": "V-103",
+      "desc": "named self-ring rooted at the node: the cycle REF names the node cell directly",
+      "tags": [
+        "WF-13",
+        "WF-18"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d5682a6d61696e2e5331d0676d61696e2e533101624631d66c0c696e74657266616365207b7db0c0c7",
+      "ir": {
+        "root": {
+          "ref": "n1"
+        },
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "struct",
+            "type": "main.S1",
+            "fields": [
+              {
+                "name": "F1",
+                "value": {
+                  "ref": "b1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "b1",
+            "kind": "iface",
+            "type": "*main.S1",
+            "value": {
+              "ref": "n1"
+            }
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC *main.S1 (id 0) + DESC main.S1 (id 2) with the field type REF to the interface descriptor written later (id 5 after the node cell id 7 reservation)",
+        "cycle REF C7 (node cell id 7) from the F1 position: exact-branch resolution, the slot and the node are separate records (WF-13)"
+      ]
+    },
+    {
+      "id": "V-104",
+      "desc": "named ring entered through a slot storage outside the ring: slice-element and pointer-variable slot roots produce the identical stream",
+      "tags": [
+        "WF-13",
+        "WF-18"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd5682a6d61696e2e5331d0676d61696e2e533101624631c2b0c5ca",
+      "ir": {
+        "root": {
+          "ref": "b1"
+        },
+        "nodes": [
+          {
+            "node": "b1",
+            "kind": "iface",
+            "type": "*main.S1",
+            "value": {
+              "ref": "n2"
+            }
+          },
+          {
+            "node": "n2",
+            "kind": "struct",
+            "type": "main.S1",
+            "fields": [
+              {
+                "name": "F1",
+                "value": {
+                  "ref": "p3"
+                }
+              }
+            ]
+          },
+          {
+            "node": "p3",
+            "kind": "iface",
+            "type": "*main.S1",
+            "value": {
+              "ref": "n2"
+            }
+          }
+        ]
+      },
+      "deriv": [
+        "slot cell id 4 reserved before the content tag DESC *main.S1 (id 5); the node cell id 10 opens by a STRUCT token, its F1 payload tag REF C5 reusing the descriptor record",
+        "cycle REF CA (node cell id 10): the slot storage and the node are separate cells - the ring closes on the node itself while the slot only points into it (WF-13)"
+      ]
+    },
+    {
+      "id": "V-105",
+      "desc": "named two-ring entered through a field slot: the closing REF crosses back to the entry slot cell",
+      "tags": [
+        "WF-13",
+        "WF-18"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0000d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd5682a6d61696e2e5331d0676d61696e2e533101624631c2b0c5c4",
+      "ir": {
+        "root": {
+          "ref": "b1"
+        },
+        "nodes": [
+          {
+            "node": "b1",
+            "kind": "iface",
+            "type": "*main.S1",
+            "value": {
+              "ref": "n2"
+            }
+          },
+          {
+            "node": "n2",
+            "kind": "struct",
+            "type": "main.S1",
+            "fields": [
+              {
+                "name": "F1",
+                "value": {
+                  "ref": "p4"
+                }
+              }
+            ]
+          },
+          {
+            "node": "p4",
+            "kind": "iface",
+            "type": "*main.S1",
+            "value": {
+              "ref": "n1"
+            }
+          },
+          {
+            "node": "n1",
+            "kind": "struct",
+            "type": "main.S1",
+            "fields": [
+              {
+                "name": "F1",
+                "value": {
+                  "ref": "b1"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "deriv": [
+        "slot cell id 4 reserved before the content tag DESC *main.S1 (id 5); node cell id 10 completes the two-ring",
+        "closing REF C4 (slot cell id 4) from the second node's field position: the record materializes at the container grain and the ring crosses back through the entry slot (WF-13)"
+      ]
     }
   ]
 }

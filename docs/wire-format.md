@@ -685,6 +685,21 @@ Rules:
   graph exactly — structure, types, identity — so that encoding the
   decoded value reproduces the stream byte for byte; a resolution that
   cannot re-encode identically is a format error, not a decode result.
+- **Slot-rooted record reference (named × slot-root cell).** A whole-value
+  REF from a pointer position of grain `*T`, where `T` is a struct whose
+  leading field carries the interface grain, may name the slot cell at
+  the start of that record's storage: the encoder reserved one cell for
+  the l-value the leading field denotes, and by the address-interning
+  rule above that cell is the record's storage. The stream carries the
+  cell exactly as reserved — its id, its content tag, and the closing
+  REF are unchanged — and the materialized grain of the named record
+  follows its content tag: a decoder materializes the cell at the
+  container grain `*T`, the slot being the leading field's storage, so
+  the REF resolves in the exact branch and the record-and-edge graph
+  reconstructs with the slot identity intact. Rings entered through a
+  root, an interface slot, or a field of this shape decode uniformly;
+  a leading field whose type cannot serve the slot's grain leaves the
+  REF a format error at the cell.
 - **Backing join rule (guard).** A slice/blob position over memory already
   closed by a backing record joins that record — and emits a view over it —
   exactly when: (a) its whole extent-window [ptr, ptr+extent·es) lies

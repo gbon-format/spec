@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- WF-13 slot-rooted record reference (the named × slot-root cell): a
+  whole-value REF from a `*T` pointer position may name the slot cell
+  at the start of a named record's storage when `T` is a struct whose
+  leading field carries the interface grain — the normative
+  leading-subvalue rule of the cell model, stated for this cell. The
+  corpus gains six topology vectors (V-100..V-105: self-rings and
+  two-rings over slot roots, a slot-rooted DAG, node-rooted and
+  slot-side ring entries; manifest 99 -> 105, topology 9 -> 15).
+
 ## [0.0.4] - 2026-09-11
 
 ### Changed
