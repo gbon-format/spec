@@ -11,8 +11,8 @@
 set -u
 REPO="${GBON_SPEC_REPO:-$(cd "$(dirname "$0")/.." && pwd)}"
 cd "$REPO" || exit 2
-MD_FILES="docs/wire-format.md docs/foundations.md docs/bindings/go.md README.md docs/meta/spec-conventions.md docs/references.md"
-SCAN_FILES="docs/wire-format.md docs/foundations.md docs/bindings/go.md README.md CHANGELOG.md LICENSE scripts/gate.sh vectors/*.json manifest.json docs/meta/spec-conventions.md docs/references.md"
+MD_FILES="docs/wire-format.md docs/foundations.md docs/bindings/go.md README.md docs/meta/spec-conventions.md docs/references.md docs/meta/claims.md"
+SCAN_FILES="docs/wire-format.md docs/foundations.md docs/bindings/go.md README.md CHANGELOG.md LICENSE scripts/gate.sh vectors/*.json manifest.json docs/meta/spec-conventions.md docs/references.md docs/meta/claims.md"
 NR_FILES="$MD_FILES scripts/gate.sh"
 status=0
 
@@ -95,9 +95,22 @@ gate_a() { # anchor/TOC/structure integrity
   done
   e=$(grep -hoE '^- \*\*E[0-9] ' docs/wire-format.md | grep -oE 'E[0-9]' | sort -u)
   [ "$(printf '%s\n' "$e" | wc -l)" -eq 5 ] || red $g "E def count != 5"
+  # Claims-registry def sets: the CLM/H home is docs/meta/claims.md,
+  # the grain-axiom G home is docs/foundations.md. Additive pins; the
+  # four corpus pins above keep their values and lines.
+  local clm h gd
+  clm=$(grep -hoE '^### CLM-[0-9]+ ' docs/meta/claims.md | grep -oE 'CLM-[0-9]+' | sort -u)
+  [ "$(printf '%s\n' "$clm" | wc -l)" -eq 7 ] || red $g "CLM def count $(printf '%s\n' "$clm" | wc -l) != 7"
+  for i in $(seq 1 7); do printf '%s\n' "$clm" | grep -qx "CLM-$i" || red $g "CLM def CLM-$i missing"; done
+  h=$(grep -hoE '^### H-[0-9]+ ' docs/meta/claims.md | grep -oE 'H-[0-9]+' | sort -u)
+  [ "$(printf '%s\n' "$h" | wc -l)" -eq 1 ] || red $g "H def count $(printf '%s\n' "$h" | wc -l) != 1"
+  printf '%s\n' "$h" | grep -qx "H-1" || red $g "H def H-1 missing"
+  gd=$(grep -hoE '^- \*\*G-[0-9]+ ' docs/foundations.md | grep -oE 'G-[0-9]+' | sort -u)
+  [ "$(printf '%s\n' "$gd" | wc -l)" -eq 6 ] || red $g "G def count $(printf '%s\n' "$gd" | wc -l) != 6"
+  for i in $(seq 1 6); do printf '%s\n' "$gd" | grep -qx "G-$i" || red $g "G def G-$i missing"; done
   # Mentions resolve (fenced and tick spans stripped); SA is mention-only
   local toks
-  toks=$(strip_fenced $MD_FILES | strip_ticks | grep -oP '(?<![0-9A-Za-z-])((WF|GO|KO)-[0-9]+[ab]?|SA-[0-9]+|E[1-9])(?![0-9A-Fa-f])' || true)
+  toks=$(strip_fenced $MD_FILES | strip_ticks | grep -oP '(?<![0-9A-Za-z-])((WF|GO|KO)-[0-9]+[ab]?|SA-[0-9]+|E[1-9]|CLM-[0-9]+|H-[0-9]+|G-[0-9]+)(?![0-9A-Fa-f])' || true)
   local t ser num
   while IFS= read -r t; do
     [ -n "$t" ] || continue
@@ -108,6 +121,9 @@ gate_a() { # anchor/TOC/structure integrity
       KO) printf '%s\n' "$ko" | grep -qx "KO-$num" || red $g "mention $t without def" ;;
       E)  printf '%s\n' "$e" | grep -qx "E$num" || red $g "mention $t without def" ;;
       SA) [ "$num" -le 9 ] 2>/dev/null || red $g "mention $t outside known range" ;;
+      CLM) printf '%s\n' "$clm" | grep -qx "CLM-$num" || red $g "mention $t without def" ;;
+      H)   printf '%s\n' "$h" | grep -qx "H-$num" || red $g "mention $t without def" ;;
+      G)   printf '%s\n' "$gd" | grep -qx "G-$num" || red $g "mention $t without def" ;;
     esac
   done < <(printf '%s\n' "$toks")
   local sa_n; sa_n=$(printf '%s\n' "$toks" | grep -c '^SA-' || true)
@@ -126,6 +142,7 @@ gate_a() { # anchor/TOC/structure integrity
   toc_check docs/wire-format.md
   toc_check docs/foundations.md
   toc_check docs/bindings/go.md
+  toc_check docs/meta/claims.md
   # Intro claims equal the actual ID sets
   local claim exp
   claim=$(head -20 docs/bindings/go.md | grep -oE 'GO-1\.\.GO-[0-9]+' | head -1)
@@ -257,7 +274,7 @@ gate_f() { # conformance corpus integrity (jq required; LC_ALL pinned)
     fset="${fset}$(jq -r --arg c "$cat_name" '.vectors[] | "\(.id) \(.verdict) \($c)"' "$f")
 "
   done < <(jq -r '.categories[].file' manifest.json)
-  fset=$(printf '%s' "$fset" | sort)
+  fset=$(printf '%s' "$fset" | sed '/^$/d' | sort)
   [ "$mset" = "$fset" ] || { red $g "manifest/file vector inventory mismatch:"; diff <(printf '%s\n' "$mset") <(printf '%s\n' "$fset") | head -20 >&2; }
   # def sets for tag resolution (reuse gate_a machinery)
   local wf go ko e
@@ -326,6 +343,69 @@ gate_f() { # conformance corpus integrity (jq required; LC_ALL pinned)
   grep -q 'vectors/' README.md || red $g "README corpus pointer missing"
   if grep -qE 'vectors[^.]*( [0-9]+ |[0-9]+ vectors)' docs/wire-format.md README.md; then
     red $g "corpus pointer carries counters (single-source: manifest)"
+  fi
+}
+
+# Ledger self-check, laws L0-L4: block presence and shape (L0), row
+# resolution into the def set (L1), def resolution into rows (L2), the
+# uniqueness cell level+claim[/sub] (L3), and test-id resolution (L4:
+# F rows against manifest vector ids; I rows against the live test
+# functions of the gbon-go tree when a directory argument is given).
+# Every jq capture checks its exit: a parse error is a red, never a
+# silent pass. Arguments: [gbon-go-dir] [manifest] [claims-md].
+gate_lint() {
+  local g=l dir="${1:-}" mf="${2:-manifest.json}" cm="${3:-docs/meta/claims.md}"
+  local defs jdefs out tot
+  command -v jq >/dev/null 2>&1 || { red $g "jq not found on PATH"; return; }
+  [ -f "$mf" ] || { red $g "ledger manifest missing: $mf"; return; }
+  [ -f "$cm" ] || { red $g "claims registry missing: $cm"; return; }
+  defs=$(cd "$(dirname "$cm")" && grep -hoE '^### (CLM|H)-[0-9]+' "$(basename "$cm")" \
+    | grep -oE '(CLM|H)-[0-9]+' | sort -u)
+  [ -n "$defs" ] || { red $g "def set derivation empty over $cm"; return; }
+  jdefs=$(printf '%s\n' "$defs" | jq -Rsc 'split("\n") | map(select(length > 0))')
+  out=$(jq -r 'has("ledger")' "$mf" 2>&1) || red $g "L0: manifest unreadable"
+  [ "$out" = true ] || red $g "L0: no ledger block"
+  out=$(jq -r '(keys | sort) == ["categories","corpus","coverage","ledger","vectors","version"]' "$mf" 2>&1) \
+    || red $g "L0: top-key scan failed"
+  [ "$out" = true ] || red $g "L0: top-level key set off the frozen six"
+  tot=$(jq -r '.ledger | length' "$mf" 2>&1) || red $g "L0: ledger unscannable"
+  out=$(jq -r '[.ledger[] | (((keys | sort) == ["claim","instrument","level","sub","test"])
+    and (.level == "F" or .level == "I"))] | map(select(.)) | length' "$mf" 2>&1) \
+    || red $g "L0: row shape scan failed"
+  [ "$out" = "$tot" ] || red $g "L0: rows off the five-field schema or level vocabulary ($out/$tot)"
+  out=$(jq -r --argjson defs "$jdefs" \
+    '[.ledger[] | select(((.claim | type) == "string") and (.claim as $c | ($defs | index($c))) | not)] | length' "$mf" 2>&1) \
+    || red $g "L1: scan failed"
+  [ "$out" = 0 ] || red $g "L1: rows citing unknown claims: $out"
+  out=$(jq -r --argjson defs "$jdefs" '[$defs[]] - [.ledger[].claim] | join(",")' "$mf" 2>&1) \
+    || red $g "L2: scan failed"
+  [ -z "$out" ] || red $g "L2: claims without rows: $out"
+  out=$(jq -r '[.ledger | group_by(.level + "|" + .claim + (if (.sub // "") == "" then "" else "/" + .sub end))[]
+    | select(length > 1)] | length' "$mf" 2>&1) || red $g "L3: scan failed"
+  [ "$out" = 0 ] || red $g "L3: duplicated (level, claim cell) groups: $out"
+  out=$(jq -r '[.ledger[] | select(.level == "F") | .test] - [.vectors[].id] | join(",")' "$mf" 2>&1) \
+    || red $g "L4: scan failed"
+  [ -z "$out" ] || red $g "L4: F rows citing unknown vectors: $out"
+  if [ -n "$dir" ]; then
+    [ -d "$dir" ] || { red $g "L4: cross-repo dir missing: $dir"; return; }
+    if ! grep -rq --include='*.go' '^package ' "$dir" 2>/dev/null; then
+      # a directory without Go sources is not the consumer tree; the
+      # sibling checkout beside this repository is the gbon-go tree
+      # (working-tree scan: untracked carriers included, no index read)
+      if grep -rq --include='*.go' '^package ' "$REPO/../gbon-go" 2>/dev/null; then
+        dir="$REPO/../gbon-go"
+        note "lint cross-repo dir resolved to the sibling gbon-go tree"
+      else
+        red $g "L4: cross-repo dir holds no Go sources: $dir"
+        return
+      fi
+    fi
+    local tid
+    while IFS= read -r tid; do
+      [ -n "$tid" ] || continue
+      grep -rqE "^func ${tid}\(" "$dir" --include='*.go' 2>/dev/null \
+        || red $g "L4: I row without a live test func: $tid"
+    done < <(jq -r '.ledger[] | select(.level == "I") | .test' "$mf" 2>/dev/null)
   fi
 }
 
@@ -451,6 +531,72 @@ self_test() { # adversarial fixtures on scratch copies; repo untouched
   run2 nr1f1 green      "printf '\n%s\n' \"\$F1T\" >> docs/wire-format.md"
   run2 nr1ex3 green     "printf '\nGBON specification probe\n' >> docs/foundations.md"
   run2 nr1ex4 green     "printf '\nprobe %s added\n' \"\$NR1F\" >> CHANGELOG.md"
+  # Ledger-lint probes, end-to-end: each injection trips exactly the
+  # lint stage (no other gate reads the ledger block).
+  run2 lint-orphan red   "jq '.ledger += [{test:\"V-1\",level:\"F\",claim:\"CLM-9\",sub:\"\",instrument:\"probe\"}]' manifest.json > t && mv t manifest.json"
+  run2 lint-dup red      "jq '.ledger += [{test:\"V-2\",level:\"F\",claim:\"CLM-2\",sub:\"S3\",instrument:\"probe\"}]' manifest.json > t && mv t manifest.json"
+  run2 lint-orphantest red "jq '.ledger += [{test:\"V-999\",level:\"F\",claim:\"CLM-1\",sub:\"probe\",instrument:\"probe\"}]' manifest.json > t && mv t manifest.json"
+  run2 lint-parse red    "jq 'del(.ledger)' manifest.json > t && mv t manifest.json"
+  # Ledger-lint direct probes: per-law firing counted by law tag on
+  # scratch carriers; the repo tree untouched.
+  local GG="$REPO/../gbon-go" mf mf2 cm lc out lawc
+  [ -d "$GG" ] || GG=""
+  mf="$TMPD/lint-clean.json"
+  jq '.' manifest.json > "$mf"
+  out=$(gate_lint "" "$mf" "docs/meta/claims.md" 2>&1)
+  if [ -z "$out" ]; then pass=$((pass+1)); note "self-test lint-clean: green as expected"
+  else failn=$((failn+1)); red f "self-test lint-clean fired: $out"; fi
+  if [ -n "$GG" ]; then
+    out=$(gate_lint "$GG" "$mf" "docs/meta/claims.md" 2>&1)
+    if [ -z "$out" ]; then pass=$((pass+1)); note "self-test lint-itest-clean: green as expected"
+    else failn=$((failn+1)); red f "self-test lint-itest-clean fired: $out"; fi
+  fi
+  lint_expect() { # label expected-count pairs: law=count ...
+    local label="$1"; shift; local ok=1 pair law want
+    for pair in "$@"; do
+      law=${pair%%=*}; want=${pair##*=}
+      lawc=$(printf '%s\n' "$out" | grep -c "^RED l: ${law}:" || true)
+      [ "$lawc" = "$want" ] || { ok=0; break; }
+    done
+    if [ $ok -eq 1 ]; then pass=$((pass+1)); note "self-test $label: laws fired as expected"
+    else failn=$((failn+1)); red f "self-test $label: law tags off ($law=$lawc want $want)"
+    fi
+  }
+  mf2="$TMPD/lint-neg.json"
+  jq '.ledger += [{test:"V-1",level:"F",claim:"CLM-9",sub:"",instrument:"probe"},
+                  {test:"V-2",level:"F",claim:"CLM-2",sub:"S3",instrument:"probe"},
+                  {test:"V-999",level:"F",claim:"CLM-1",sub:"p1",instrument:"probe"},
+                  {test:"V-998",level:"F",claim:"CLM-1",sub:"p2",instrument:"probe"}]' manifest.json > "$mf2"
+  out=$(gate_lint "" "$mf2" "docs/meta/claims.md" 2>&1)
+  lint_expect lint-neg L0=0 L1=1 L2=0 L3=1 L4=1
+  mf2="$TMPD/lint-parse.json"
+  jq 'del(.ledger)' manifest.json > "$mf2"
+  out=$(gate_lint "" "$mf2" "docs/meta/claims.md" 2>&1)
+  lawc=$(printf '%s\n' "$out" | grep -c '^RED l: L0:' || true)
+  if [ "$lawc" -ge 1 ]; then pass=$((pass+1)); note "self-test lint-parse: L0 red as expected"
+  else failn=$((failn+1)); red f "self-test lint-parse: L0 did not fire"; fi
+  lawc=$(printf '%s\n' "$out" | grep -c 'scan failed\|unscannable' || true)
+  if [ "$lawc" -ge 1 ]; then pass=$((pass+1)); note "self-test lint-parse-rc: nonzero jq exit observed as red"
+  else failn=$((failn+1)); red f "self-test lint-parse-rc: parse exit not caught"; fi
+  mf2="$TMPD/lint-badrow.json"
+  jq '.ledger += [{test:"V-3",level:"F",instrument:"probe"}]' manifest.json > "$mf2"
+  out=$(gate_lint "" "$mf2" "docs/meta/claims.md" 2>&1)
+  lint_expect lint-badrow L0=1 L1=1
+  cm="$TMPD/lint-claims-extra.md"
+  cp docs/meta/claims.md "$cm"
+  printf '\n### CLM-8 Probe\n\nbody\n' >> "$cm"
+  out=$(gate_lint "" "$mf" "$cm" 2>&1)
+  lint_expect lint-unresolved L2=1
+  cm="$TMPD/lint-claims-minus.md"
+  sed '/^### CLM-4 /d' docs/meta/claims.md > "$cm"
+  out=$(gate_lint "" "$mf" "$cm" 2>&1)
+  lint_expect lint-defremoved L1=1 L2=0
+  if [ -n "$GG" ]; then
+    mf2="$TMPD/lint-itest.json"
+    jq '.ledger += [{test:"TestNope",level:"I",claim:"CLM-3",sub:"",instrument:"probe"}]' manifest.json > "$mf2"
+    out=$(gate_lint "$GG" "$mf2" "docs/meta/claims.md" 2>&1)
+    lint_expect lint-itest-nope L4=1
+  fi
   note "self-test summary: $pass passed, $failn failed"
   [ $failn -eq 0 ]
 }
@@ -461,8 +607,12 @@ case "${1:-}" in
     [ $# -ge 2 ] || { echo 'usage: gate.sh --sb-e <gbon-go-dir>' >&2; exit 2; }
     note "gate a"; gate_a; note "gate b"; gate_b; note "gate c"; gate_c
     note "gate d"; gate_d; note "gate e"; gate_e; note "gate sb-e"; sb_e "$2"; note "gate f"; gate_f ;;
+  --lint)
+    [ $# -ge 2 ] || { echo 'usage: gate.sh --lint <gbon-go-dir>' >&2; exit 2; }
+    note "gate l"; gate_lint "$2" ;;
   *) note "gate a"; gate_a; note "gate b"; gate_b; note "gate c"; gate_c
-     note "gate d"; gate_d; note "gate e"; gate_e; note "gate f"; gate_f ;;
+     note "gate d"; gate_d; note "gate e"; gate_e; note "gate f"; gate_f
+     note "gate l"; gate_lint ;;
 esac
 if [ $status -eq 0 ]; then echo "GATES ALL GREEN"; else echo "GATES RED"; fi
 exit $status

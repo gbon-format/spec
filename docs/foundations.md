@@ -31,7 +31,9 @@ normative model text is clauses 1 through 6.
 - [2. Definitions and Conventions](#2-definitions-and-conventions)
 - [3. Model Overview](#3-model-overview)
 - [4. Identity, Sharing, and Cycles](#4-identity-sharing-and-cycles)
+  - [4.1 Typed Views over One Identity (Grain)](#41-typed-views-over-one-identity-grain)
 - [5. Equality and Canonical Form](#5-equality-and-canonical-form)
+  - [5.1 The Value Equivalence ≡_GBON](#51-the-value-equivalence-gbon)
 - [6. Requirements on the Wire Layer](#6-requirements-on-the-wire-layer)
   - [6.1 Identity, Sharing, and Cycles Preservation](#61-identity-sharing-and-cycles-preservation)
   - [6.2 Observables Survive the Round Trip](#62-observables-survive-the-round-trip)
@@ -133,6 +135,42 @@ operational form on the wire is the intern space of the wire document
 The theory that legitimizes the layer — term graphs, rational trees,
 bounded traversal, hash-consing — is mapped in Annex A.
 
+One identity may be observed at distinct types: the typed views of the
+grain layer, whose model axioms are clause 4.1.
+
+### 4.1 Typed Views over One Identity (Grain)
+
+The identity layer admits typed views — the grain layer: a single
+identity observed at distinct types, each observation a view with its
+own structure. The layer is part of the model and carries six axioms:
+
+- **G-1 Single record.** Each identity carries one record, opened
+  once, at its canonical grain — the coarsest grain among the tracked
+  views the stream holds for that identity. Opening one identity at
+  two grains is forbidden.
+- **G-2 Spine compatibility.** The tracked views of one identity share
+  a common coarsest view: the well-definedness axiom of the grain
+  order. A value whose tracked views violate it is outside the
+  encodable domain — a classified reject, not an arbitrary choice.
+- **G-3 Order independence.** The canonical grain is a function of the
+  tracked-view set, never of traversal or encounter order.
+- **G-4 Uniform resolution.** A reference resolves by the sort, the
+  content tag, the grain tags, and the derivable descent of the named
+  record — the asking position never participates.
+- **G-5 Layout-normal normalization.** Distinct named views of
+  identical structure normalize to the layout-normal form for the
+  intern key, the record grain, and the record descriptor; position
+  descriptors keep their names.
+- **G-6 Contentless views.** A view with no observable content (a
+  zero-size target) tracks no record; its nil-ness is observable, its
+  identity is neither preserved nor observable.
+
+Descent from a record's canonical grain to a position's view is
+derivable, carries no bytes, and is fixed by the record's content tag
+and the view structure. The grain layer is a domain-level construct
+with operational rules on the wire (WF-13, the grain rules of the
+graph-encodings section); host vocabulary belongs to the bindings.
+
 ## 5. Equality and Canonical Form
 
 The model carries an equality and a canonical form:
@@ -158,6 +196,45 @@ The model carries an equality and a canonical form:
   Consequence: any claim of the shape "equal values imply equal bytes"
   carries the KO-2a qualification.
 
+### 5.1 The Value Equivalence ≡_GBON
+
+The equality of the domain is one relation, `≡_GBON`: two values are
+equivalent when an identity-structure-preserving isomorphism relates
+their graphs and their declared observables coincide. The relation is
+defined over seven dimensions of the domain:
+
+- **Value.** Node payloads are equal: same sorts, same scalar
+  contents, same byte sequences.
+- **Identity.** The isomorphism preserves the identity layer — which
+  nodes are distinct, which encounters refer to one identity.
+- **Structural.** Constructors match: arities, element structure,
+  descriptor shape.
+- **Sharing.** A value referenced from two positions of one graph is
+  referenced from the corresponding positions of the other; sharing is
+  neither silently duplicated nor silently split.
+- **Cycle equivalence.** Cyclic structures are equal as rational
+  trees: unwinding a cycle yields the same infinite regular unfolding.
+- **Map-key equality.** Map entries are governed by the map-key
+  axioms of this clause (E1–E5 of the wire document): keys equal
+  under those axioms denote one entry.
+- **Representation-level distinctions.** Observables with no
+  value-level mirror — ±0, NaN payloads, subnormals, non-UTF-8 byte
+  sequences, nil sorts — are part of the equivalence: distinct
+  representations are distinct values.
+
+The relation is decidable: every value of the domain has a decidable
+`≡_GBON` relation to every other value of the domain.
+
+`≡_GBON` is not arbitrary graph isomorphism: it preserves the identity
+layer and the declared representation observables, nothing weaker.
+The upper bound of canonicalization stated in this clause stands: the
+model claims traversal canonicality, qualified by the pointer-identity
+tie-break (KO-2a), not isomorphism canonicality — no claim of the
+shape "isomorphic graphs imply equal bytes" is made or implied. Where
+equality is decided operationally as a byte comparison, the decision
+runs through the canonical encoding contract of the wire document
+(WF-20).
+
 ## 6. Requirements on the Wire Layer
 
 The model standard dictates to the encoding layer; the operational
@@ -175,6 +252,28 @@ nil versus empty containers, slice windows with their observable
 extent, NaN payloads, ±0, subnormals, non-UTF-8 strings, shared
 identity — bitwise round-trip fidelity is a model requirement; no
 projection may weaken it silently.
+
+The declared observables carry the consolidated classification:
+
+| Observable | Classification | Basis |
+|---|---|---|
+| value contents | MUST preserve | observables survive the round trip (WF-1); the byte-bearing sorts |
+| identity and sharing | MUST preserve | the identity layer (clause 4; WF-13); core-invariant ladder row (6.5) |
+| cycle topology | MUST preserve | cycles close through references (clause 4; WF-13); core-invariant ladder row |
+| reference topology | MUST preserve | references resolve to their named records (WF-13) |
+| map-key semantics | MUST preserve | map-key axioms (E1–E5; WF-16) |
+| nil versus empty | MUST preserve | nil tokens are distinct from empty containers (WF-12) |
+| slice extent | MAY degrade with declared blame | annotations ladder row (6.5); extent agreement at the boundary (WF-15; WF-20 (i)); the stream carries the geometry bitwise |
+| NaN payloads | MUST preserve | raw IEEE bit patterns (WF-8) |
+| ±0 | MUST preserve | raw IEEE bit patterns (WF-8) |
+| subnormals | MUST preserve | raw IEEE bit patterns (WF-8) |
+| non-UTF-8 byte sequences | MUST preserve | strings are byte sequences without a Unicode gate (WF-10) |
+| exact numeric representations | MAY degrade with declared blame | unrepresentable ladder row (6.5): beyond-width integers are a loud error at a narrow host, never truncation; the core carries the exact representation (WF-6; WF-18) |
+| typed nils | MAY degrade with declared blame | annotations ladder row (6.5); the nil taxonomy belongs to the binding (WF-12) |
+
+No declared observable carries the third class: an artifact with no
+domain counterpart — a host memory address, a lock state — is not a
+declared observable of the round trip and carries no row.
 
 ### 6.3 Budgeted Decode
 

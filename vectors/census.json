@@ -1,0 +1,37 @@
+{
+  "category": "census",
+  "section": "8.1",
+  "declaration": {
+    "grammar": "canongrain.Graphs",
+    "census_size": 64,
+    "families": [
+      {
+        "name": "census-pair",
+        "map_seeds": 8,
+        "modes": [
+          "marshal",
+          "marshal-stable"
+        ],
+        "asserts": "byte equality across independently generated isomorphic pairs and map-iteration seeds"
+      },
+      {
+        "name": "aliased-backing",
+        "map_seeds": 16,
+        "modes": [
+          "marshal",
+          "marshal-stable"
+        ],
+        "asserts": "byte equality across seeds over map-carried multi-window backings with array-pointer views and append chains"
+      },
+      {
+        "name": "multi-grain-address",
+        "modes": [
+          "marshal",
+          "marshal-stable"
+        ],
+        "asserts": "interior descent and array-grain addresses encode independently of allocation order"
+      }
+    ]
+  },
+  "vectors": []
+}

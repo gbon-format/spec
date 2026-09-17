@@ -240,7 +240,7 @@ condition of 0.0, not an addition attributed to a minor.
   section 7.1: the coarsest-grain record with the derivable descent,
   grain tags on differing-grain openings with elision at grain equality
   for non-pointer grains and self-tags for pointer grains, layout-normal
-  grains for named conversions, and the zero-size pointee marker
+  grains for named conversions, and the zero-size target marker
   (selector 4, WF-12). A decoder that implements minor 1 reads streams
   of minors 0 and 1 alike: a 0.0 stream remains valid input.
 - Minor version changes are additive: new escape subclasses and new
@@ -407,8 +407,8 @@ with the same mechanics as any other slice (WF-15).
 Class 0x0 carries a nil-kind selector. The taxonomy of nil kinds — which
 nil sorts a projection distinguishes and which selector each occupies —
 is defined by the binding (GO-4 for the Go value model). Selector 4 is
-the zero-size pointee marker of section 7.1 — a non-nil pointer to a
-zero-size pointee, distinct from the nil pointer of selector 0;
+the zero-size target marker of section 7.1 — a non-nil pointer to a
+zero-size target, distinct from the nil pointer of selector 0;
 selectors 5..11 are reserved. nil is never confused with empty: an empty
 non-nil slice is a VIEW with len 0 (WF-15); an empty non-nil map is a
 MAP with count 0 (WF-16).
@@ -529,7 +529,7 @@ DESC-record := 0xD‖ARG(kind) ‖ name ‖ body(kind)
 | 2 | `D2` | ARRAY ([N]T) | ARG N; 1 × type-ref (elem) |
 | 3 | `D3` | MAP | 2 × type-ref (key, elem — in this order) |
 | 4 | `D4` | NAMED (defined type) | 1 × type-ref (base) |
-| 5 | `D5` | POINTER | 1 × type-ref (pointee) |
+| 5 | `D5` | POINTER | 1 × type-ref (target) |
 | 6 | `D6` | INTERFACE | empty (an opaque, interface-like wrapper; method sets are a binding concern and are not encodable) |
 | 7 | `D7` | BOOL | empty |
 | 8 | `D8` | INT | ARG width (1/2/4/8) |
@@ -669,7 +669,7 @@ Rules:
   a pointer — to an interface, to a concrete value, or to a map object
   — encodes the pointer's own state through one leading token of the
   body. A leading NIL token: selector 0 is the nil pointer; selector 3
-  is a non-nil pointer whose pointee holds a nil interface; any other
+  is a non-nil pointer whose target holds a nil interface; any other
   selector is a format error (WF-12). A leading REF is a type-erased
   handle: the argument names one intern record, and the record itself
   carries the type — its sort, and for object records the descriptor
@@ -677,12 +677,12 @@ Rules:
   the one id space of this section; that sharing lets a single token
   serve both roles. Resolution is by the sort of the named record,
   uniform across every position and depth: a descriptor record makes
-  the REF the dynamic-type tag of the pointee, with the tagged value
+  the REF the dynamic-type tag of the target, with the tagged value
   body following — the first encounter of the dynamic type writes the
   DESC literal, and resolution is the same; an object record makes the
   REF an identity edge to that cell — a cycle or a shared reference,
   no value body following. Reference positions nest: the body of a
-  tagged pointee opens by the same rule, so chains of any depth
+  tagged target opens by the same rule, so chains of any depth
   resolve level by level, and a cycle closes by a REF naming an
   enclosing record from any depth and any entry point — a root, an
   interface slot, a field, an element, or a map value. A map object is
@@ -696,7 +696,7 @@ Rules:
   never a silent coercion to a neighboring type. Reference levels
   between the position and its named cell materialize as the stream
   reserved them, one cell per reserved id; levels without an id of
-  their own carry none. Identity interning is by address: l-values
+  their own carry none. Identity interning is by address: values
   equal in address are one record. A subvalue reachable from the
   record's canonical grain by the derivable descent of this section
   therefore resolves through the record — the record serves a position
@@ -714,26 +714,26 @@ Rules:
   reference grains carries one record, opened at the canonical grain of
   the address: the coarsest grain among the tracked grains the stream
   holds for that address, fixed by an encoder pass over the value ahead
-  of emission. A tracked grain is the grain of a pointee l-value a
-  reference position of the stream denotes; zero-size pointee grains
+  of emission. A tracked grain is the grain of a tracked view a
+  reference position of the stream denotes; zero-size target grains
   track nothing (the zero-size rule below). Opening one address at two
   grains is forbidden: the record opens once, at the canonical grain,
   and every position of that address resolves through it.
 - **Layout-normal grain.** Where one address carries two or more
-  tracked grains that are distinct named types of identical underlying
-  layout, the canonical grain is the layout-normal form — the
-  underlying type: the intern key, the record's grain, and the record's
-  descriptor use the underlying type, and a position of a named grain
+  tracked grains that are distinct named views of identical
+  structure, the canonical grain is the layout-normal form: the
+  intern key, the record's grain, and the record's descriptor use
+  the layout-normal form, and a position of a named grain
   materializes through the legal value conversion of the projection.
   The scope of normalization is the intern key and the record's grain
   alone; the type descriptors of positions (WF-18) keep their names.
 - **Grain tags, elision, self-tags.** Where a pointer position is the
   opening — the first encounter — of a record whose canonical grain
-  differs from the position's static pointee type, the opening carries
+  differs from the position's static target type, the opening carries
   an explicit grain tag: a REF naming the canonical grain's type
   descriptor, or a first-encounter DESC literal of it, ahead of the
   record body. Where the canonical grain equals the position's static
-  pointee type and that grain is not itself a pointer type, the tag is
+  target type and that grain is not itself a pointer type, the tag is
   elided and the body follows directly: the grain is statically
   derivable at the position. Where the record's canonical grain is
   itself a pointer type, the opening carries the explicit tag at grain
@@ -745,12 +745,12 @@ Rules:
   body's sort and content tag, at grain equality by the position's
   static type, on a repeat by the named record's descriptor;
   resolution never depends on which position asks.
-- **Derivable descent.** Where a reference position of static pointee
+- **Derivable descent.** Where a reference position of static target
   grain Pg resolves against a record of canonical grain Cg with Pg
   distinct from Cg, Pg MUST be derivable from Cg by descent: following
-  struct fields at offset zero — every offset-zero field, with
+  struct leading fields — every leading field, with
   zero-size fields skipped — and array elements at index zero, each
-  step fixed by the reflect type of the pair plus the record's content
+  step fixed by the type of the pair plus the record's content
   tag. The descent carries no bytes, and a position whose grain is not
   derivable this way leaves the REF a format error at the cell.
 - **Interface-grain discrimination.** Where a pointer position of
@@ -786,13 +786,13 @@ Rules:
   encounters, mirroring pointer and map identity interning — mutations of
   already-encoded content between values are invisible, exactly as they
   are within one value.
-- **Zero-size pointee rule.** A pointee type of zero size tracks no
-  record. A non-nil pointer to a zero-size pointee encodes as the
+- **Zero-size target rule.** A target type of zero size tracks no
+  record. A non-nil pointer to a zero-size target encodes as the
   zero-size marker — the NIL-class token of selector 4 (WF-12) — with
   no REF and no address, and decodes into a fresh zero-size allocation
   whose nil-ness is preserved: the marker and the nil pointer of
   selector 0 stay byte-distinct. Reference identity of zero-size
-  pointees is neither preserved nor observable. Where a zero-size grain
+  targets is neither preserved nor observable. Where a zero-size grain
   and a non-zero-size tracked grain share an interior address, the
   tracked grain keeps the record — opened at its own grain, never at a
   struct grain of the unrelated container — and the zero-size alias
@@ -846,7 +846,7 @@ contract.
 - **E2 Skeleton.** The skeleton of a key is its literal, non-interning
   encoding: repeated pointers are collapsed to the nil marker — equality
   of reference-kind components is decided by the identity layer (KO-2),
-  never by dereferencing the pointee. Because skeletons never
+  never by dereferencing the target. Because skeletons never
   dereference, key encoding terminates on cyclic structures.
 - **E3 Total order.** Map keys are totally ordered by bytewise
   lexicographic comparison of their skeletons.
@@ -948,6 +948,33 @@ skeletons in distinct slots are legal and are ordered by KO-2b/KO-2a —
 that is the tie-break's raison d'être; on the skip path, byte-identical
 key token sequences for pointer-free key types are a reject (WF-16). A
 duplicate is always an attack or corruption.
+
+**Stable class.** The stable class is a decidable predicate over the
+value domain. A value is stable when no map anywhere in its graph
+applies the E5 tie-break — no two of its map pairs are byte-equal in
+skeleton and value bytes across distinct identity slots — and no map in
+its graph holds a zero float key (axiom E4: the stored sign of a zero
+float key is a projection concern, excluded from the
+cross-implementation claim). Pointer-carrying keys whose pair value
+bytes differ are inside the stable class: KO-2b orders such pairs
+deterministically by value bytes before any identity discriminator
+applies, so the E5 tie-break never fires for them. The class is not
+enlarged by any domain change: the KO-2a tie-break stays excluded from
+the class, and no discriminator is added to the value model to
+stabilize tied pairs. An application MAY restore membership by moving
+identity into value (a declared discriminator inside the key), without
+any format change.
+
+**Guard contract (stable mode).** Encoders offer a stable mode. WHEN
+invoked on a value outside the stable class, the encoder MUST reject
+the value with a deterministic classified error naming the path to the
+offender; the classification is a function of the offending rule alone
+(E5 tie-break applied, or a zero float key present), never of process
+state. The completeness of the guard is conditional on H-1: the
+declaration that exactly the two rules above exhaust the sources of
+process-dependence. The Go binding projects the class (a static
+conservative predicate over types, a dynamic exact predicate at encode
+time); the projection lives in the binding document, not here.
 
 ### 8.2 Portable Profile (Frame)
 

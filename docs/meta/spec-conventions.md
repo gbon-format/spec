@@ -63,7 +63,11 @@ Section identifiers — `WF-n` (transfer syntax), `E-n` (axioms), `KO-n`
 numbers. Define each identifier once in its home document; reference it
 elsewhere by identifier. Extend only; never renumber; never reuse a
 freed identifier. Corpus vector ids (`V-n` in `manifest.json`) follow
-the same law.
+the same law. The registry families `CLM-n` (format claims) and `H-n`
+(hypotheses) follow the same law with their home in
+`docs/meta/claims.md`; the grain-axiom family `G-n` follows it with
+its home in `docs/foundations.md` (model-level axioms), referenced
+elsewhere by identifier.
 
 ## SC-4. Normative language
 

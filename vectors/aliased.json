@@ -1,0 +1,556 @@
+{
+  "category": "aliased",
+  "section": "8.1",
+  "vectors": [
+    {
+      "id": "V-112",
+      "desc": "map-carried three-window aliased backing, two entries",
+      "tags": [
+        "WF-20",
+        "WF-13",
+        "WF-15"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0001d36c166d61705b737472696e675d7665632e616c6961736564dc0c66737472696e67d06b7665632e616c6961736564036141d1675b5d696e743634d865696e743634086142c76143c7a26161b08606222426282a2c0c920c0f000306920c0f020304910c0f04026162b086062c0e2c102c122c142c162c18920c11000306920c11020304910c110402",
+      "ir": {
+        "root": "m1",
+        "nodes": [
+          {
+            "node": "m1",
+            "kind": "map",
+            "type": "map[string]vec.aliased",
+            "pairs": [
+              {
+                "key": {
+                  "ref": "ka"
+                },
+                "value": {
+                  "ref": "s1"
+                }
+              },
+              {
+                "key": {
+                  "ref": "kb"
+                },
+                "value": {
+                  "ref": "s2"
+                }
+              }
+            ]
+          },
+          {
+            "node": "ka",
+            "kind": "string",
+            "value": "a"
+          },
+          {
+            "node": "kb",
+            "kind": "string",
+            "value": "b"
+          },
+          {
+            "node": "s1",
+            "kind": "struct",
+            "type": "vec.aliased",
+            "fields": [
+              {
+                "name": "A",
+                "value": {
+                  "ref": "v1a"
+                }
+              },
+              {
+                "name": "B",
+                "value": {
+                  "ref": "v1b"
+                }
+              },
+              {
+                "name": "C",
+                "value": {
+                  "ref": "v1c"
+                }
+              }
+            ]
+          },
+          {
+            "node": "a1",
+            "kind": "array",
+            "len": 6,
+            "elements": [
+              {
+                "ref": "e11"
+              },
+              {
+                "ref": "e12"
+              },
+              {
+                "ref": "e13"
+              },
+              {
+                "ref": "e14"
+              },
+              {
+                "ref": "e15"
+              },
+              {
+                "ref": "e16"
+              }
+            ]
+          },
+          {
+            "node": "e11",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "e12",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "e13",
+            "kind": "int",
+            "value": "3"
+          },
+          {
+            "node": "e14",
+            "kind": "int",
+            "value": "4"
+          },
+          {
+            "node": "e15",
+            "kind": "int",
+            "value": "5"
+          },
+          {
+            "node": "e16",
+            "kind": "int",
+            "value": "6"
+          },
+          {
+            "node": "v1a",
+            "kind": "view",
+            "backing": {
+              "ref": "a1"
+            },
+            "off": 0,
+            "len": 3,
+            "extent": 6
+          },
+          {
+            "node": "v1b",
+            "kind": "view",
+            "backing": {
+              "ref": "a1"
+            },
+            "off": 2,
+            "len": 3,
+            "extent": 4
+          },
+          {
+            "node": "v1c",
+            "kind": "view",
+            "backing": {
+              "ref": "a1"
+            },
+            "off": 4,
+            "len": 2,
+            "extent": 2
+          },
+          {
+            "node": "s2",
+            "kind": "struct",
+            "type": "vec.aliased",
+            "fields": [
+              {
+                "name": "A",
+                "value": {
+                  "ref": "v2a"
+                }
+              },
+              {
+                "name": "B",
+                "value": {
+                  "ref": "v2b"
+                }
+              },
+              {
+                "name": "C",
+                "value": {
+                  "ref": "v2c"
+                }
+              }
+            ]
+          },
+          {
+            "node": "a2",
+            "kind": "array",
+            "len": 6,
+            "elements": [
+              {
+                "ref": "e21"
+              },
+              {
+                "ref": "e22"
+              },
+              {
+                "ref": "e23"
+              },
+              {
+                "ref": "e24"
+              },
+              {
+                "ref": "e25"
+              },
+              {
+                "ref": "e26"
+              }
+            ]
+          },
+          {
+            "node": "e21",
+            "kind": "int",
+            "value": "7"
+          },
+          {
+            "node": "e22",
+            "kind": "int",
+            "value": "8"
+          },
+          {
+            "node": "e23",
+            "kind": "int",
+            "value": "9"
+          },
+          {
+            "node": "e24",
+            "kind": "int",
+            "value": "10"
+          },
+          {
+            "node": "e25",
+            "kind": "int",
+            "value": "11"
+          },
+          {
+            "node": "e26",
+            "kind": "int",
+            "value": "12"
+          },
+          {
+            "node": "v2a",
+            "kind": "view",
+            "backing": {
+              "ref": "a2"
+            },
+            "off": 0,
+            "len": 3,
+            "extent": 6
+          },
+          {
+            "node": "v2b",
+            "kind": "view",
+            "backing": {
+              "ref": "a2"
+            },
+            "off": 2,
+            "len": 3,
+            "extent": 4
+          },
+          {
+            "node": "v2c",
+            "kind": "view",
+            "backing": {
+              "ref": "a2"
+            },
+            "off": 4,
+            "len": 2,
+            "extent": 2
+          }
+        ]
+      },
+      "deriv": [
+        "map[string]vec.aliased {\"a\": windows over [1..6], \"b\": windows over [7..12]}: pair order by string skeletons a<b regardless of insertion order (KO-1, E3)",
+        "DESC chain: D3 map (id 0, name id 1), STRING kind (2, name 3), D0 vec.aliased (4, name 5), field A (6), D1 []int64 with elem D8 int64 width 8 (7-10), B and C as REF C7 (11, 12); map record id 13, keys \"a\" 14 / \"b\" 16 (WF-13 DFS, WF-18)",
+        "value structs are not pointer targets: B0 token with fields in descriptor order, no record id (WF-17, WF-13); each entry's backing opens at its first window A with L = max(off+extent) = 6 and dense prefix E = 6 (WF-14)",
+        "views: A form 2 {id,0,3,6}, B form 2 {id,2,3,4}, C form 1 {id,4,2} — minimal forms, extents carry the caps (WF-15); B and C join the record opened by A: extent windows inside [0,6), zero-tail condition void (WF-13 join guard)",
+        "ids above 11 take the u8 argument form: view ids 15/17 as 0C0F/0C11 (WF-4); values zigzag with minimal tokens, 6 and above the u8 form (WF-4, WF-5)"
+      ]
+    },
+    {
+      "id": "V-113",
+      "desc": "map-carried append-chain window over a fresh backing",
+      "tags": [
+        "WF-20",
+        "WF-13",
+        "WF-14"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0001d36c176d61705b737472696e675d7665632e617070656e646564dc0c66737472696e67d06c0c7665632e617070656e646564026150d1675b5d696e743634d865696e743634086151c7a1616bb081012c0c900c0e84032c0c2c122c14920c0f000304",
+      "ir": {
+        "root": "m1",
+        "nodes": [
+          {
+            "node": "m1",
+            "kind": "map",
+            "type": "map[string]vec.appended",
+            "pairs": [
+              {
+                "key": {
+                  "ref": "kk"
+                },
+                "value": {
+                  "ref": "s1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "kk",
+            "kind": "string",
+            "value": "k"
+          },
+          {
+            "node": "s1",
+            "kind": "struct",
+            "type": "vec.appended",
+            "fields": [
+              {
+                "name": "P",
+                "value": {
+                  "ref": "vp"
+                }
+              },
+              {
+                "name": "Q",
+                "value": {
+                  "ref": "vq"
+                }
+              }
+            ]
+          },
+          {
+            "node": "b1",
+            "kind": "array",
+            "len": 2,
+            "elements": [
+              {
+                "ref": "e5"
+              },
+              {
+                "ref": "e6"
+              }
+            ]
+          },
+          {
+            "node": "e5",
+            "kind": "int",
+            "value": "5"
+          },
+          {
+            "node": "e6",
+            "kind": "int",
+            "value": "6"
+          },
+          {
+            "node": "b2",
+            "kind": "array",
+            "len": 4,
+            "elements": [
+              {
+                "ref": "f6"
+              },
+              {
+                "ref": "f9"
+              },
+              {
+                "ref": "f10"
+              }
+            ]
+          },
+          {
+            "node": "f6",
+            "kind": "int",
+            "value": "6"
+          },
+          {
+            "node": "f9",
+            "kind": "int",
+            "value": "9"
+          },
+          {
+            "node": "f10",
+            "kind": "int",
+            "value": "10"
+          },
+          {
+            "node": "vp",
+            "kind": "view",
+            "backing": {
+              "ref": "b1"
+            },
+            "off": 1,
+            "len": 1,
+            "extent": 1
+          },
+          {
+            "node": "vq",
+            "kind": "view",
+            "backing": {
+              "ref": "b2"
+            },
+            "off": 0,
+            "len": 3,
+            "extent": 4
+          }
+        ]
+      },
+      "deriv": [
+        "map[string]vec.appended {\"k\": {P: b[1:2:2], Q: [b[1],9,10] of cap 4}}: the append chain reallocates, so Q is fresh memory and stays a separate record — identity interning is by address (WF-13)",
+        "P's window is the only tracked grain over b: the record opens at the tracked window [1,2) with L=1, and P is the form-0 compaction {id} (WF-13 canonical grain, WF-15 form 0)",
+        "Q's backing: L=4 with dense prefix E=3, the tail element implicit zero (WF-14); the view is form 2 {id,0,3,4} carrying len 3 under extent 4 (WF-15)",
+        "DESC ids: map 0/1, string kind 2/3, struct 4/5, P 6, slice 7/8, int 9/10, Q as REF C7 (11); map record 12, key 13, backings 14/15 (WF-13, WF-18); single string key, count 1 (WF-16)"
+      ]
+    },
+    {
+      "id": "V-114",
+      "desc": "map-carried array-grain window into a shared backing",
+      "tags": [
+        "WF-20",
+        "WF-13",
+        "WF-15"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0001d36c146d61705b737472696e675d7665632e677261696edc0c66737472696e67d0697665632e677261696e026157d1675b5d696e743634d865696e743634086150d5692a5b335d696e743634d2685b335d696e74363403c9a16167b086062c0e2c102c122c142c162c18920c1200040683032c122c142c16",
+      "ir": {
+        "root": "m1",
+        "nodes": [
+          {
+            "node": "m1",
+            "kind": "map",
+            "type": "map[string]vec.grain",
+            "pairs": [
+              {
+                "key": {
+                  "ref": "kg"
+                },
+                "value": {
+                  "ref": "s1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "kg",
+            "kind": "string",
+            "value": "g"
+          },
+          {
+            "node": "s1",
+            "kind": "struct",
+            "type": "vec.grain",
+            "fields": [
+              {
+                "name": "W",
+                "value": {
+                  "ref": "vw"
+                }
+              },
+              {
+                "name": "P",
+                "value": {
+                  "ref": "gp"
+                }
+              }
+            ]
+          },
+          {
+            "node": "a1",
+            "kind": "array",
+            "len": 6,
+            "elements": [
+              {
+                "ref": "g7"
+              },
+              {
+                "ref": "g8"
+              },
+              {
+                "ref": "g9"
+              },
+              {
+                "ref": "g10"
+              },
+              {
+                "ref": "g11"
+              },
+              {
+                "ref": "g12"
+              }
+            ]
+          },
+          {
+            "node": "g7",
+            "kind": "int",
+            "value": "7"
+          },
+          {
+            "node": "g8",
+            "kind": "int",
+            "value": "8"
+          },
+          {
+            "node": "g9",
+            "kind": "int",
+            "value": "9"
+          },
+          {
+            "node": "g10",
+            "kind": "int",
+            "value": "10"
+          },
+          {
+            "node": "g11",
+            "kind": "int",
+            "value": "11"
+          },
+          {
+            "node": "g12",
+            "kind": "int",
+            "value": "12"
+          },
+          {
+            "node": "vw",
+            "kind": "view",
+            "backing": {
+              "ref": "a1"
+            },
+            "off": 0,
+            "len": 4,
+            "extent": 6
+          },
+          {
+            "node": "gp",
+            "kind": "array",
+            "backing": {
+              "ref": "a1"
+            },
+            "off": 2,
+            "len": 3
+          }
+        ]
+      },
+      "deriv": [
+        "map[string]vec.grain {\"g\": {W: b[0:4], P: the array-grain window b[2:5]}}: W opens the shared record at [0,6) with extent 6 (WF-13, WF-15 form 2 {18,0,4,6})",
+        "P is a pointer position of static target grain [3]int64: the address b+2 carries its own tracked grain, so the record opens there as a fresh ARRAY record of the window elements, grain tag elided at grain equality with the non-pointer target (WF-13 canonical grain and grain tags, WF-14)",
+        "the array-grain record does not join the slice record: the join guard binds slice and blob positions, and the two grains hold distinct tracked addresses (WF-13)",
+        "descriptors: D5 *[3]int64 (12/13) with target D2 [3]int64 (14/15), the array body ARG 3 plus REF C9 to the int64 descriptor (WF-18); map record 16, key 17, shared backing 18, array-grain record 19 (WF-13)",
+        "round trip: the decoded P is a fresh array — aliasing with W's backing is projection memory, not a wire observable; re-encode reproduces the stream (WF-13 re-encode fidelity)"
+      ]
+    }
+  ]
+}

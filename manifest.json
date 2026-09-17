@@ -1,6 +1,6 @@
 {
   "corpus": "GBON conformance vectors",
-  "version": 1,
+  "version": 2,
   "categories": [
     {
       "file": "vectors/stream.json",
@@ -73,6 +73,22 @@
         "WF-12",
         "WF-15",
         "WF-16"
+      ]
+    },
+    {
+      "file": "vectors/aliased.json",
+      "section": "8.1",
+      "covers": [
+        "WF-20",
+        "WF-13",
+        "WF-15"
+      ]
+    },
+    {
+      "file": "vectors/census.json",
+      "section": "8.1",
+      "covers": [
+        "WF-20"
       ]
     }
   ],
@@ -631,6 +647,21 @@
       "id": "V-111",
       "category": "topology",
       "verdict": "ok"
+    },
+    {
+      "id": "V-112",
+      "category": "aliased",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-113",
+      "category": "aliased",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-114",
+      "category": "aliased",
+      "verdict": "ok"
     }
   ],
   "coverage": {
@@ -764,13 +795,17 @@
         "V-102",
         "V-103",
         "V-104",
-        "V-105"
+        "V-105",
+        "V-112",
+        "V-113",
+        "V-114"
       ],
       "WF-14": [
         "V-40",
         "V-41",
         "V-50",
-        "V-62"
+        "V-62",
+        "V-113"
       ],
       "WF-15": [
         "V-42",
@@ -778,7 +813,9 @@
         "V-44",
         "V-60",
         "V-61",
-        "V-91"
+        "V-91",
+        "V-112",
+        "V-114"
       ],
       "WF-16": [
         "V-45",
@@ -829,7 +866,10 @@
       "WF-20": [
         "V-64",
         "V-67",
-        "V-68"
+        "V-68",
+        "V-112",
+        "V-113",
+        "V-114"
       ],
       "WF-21": [
         "V-3",
@@ -920,5 +960,126 @@
       "kind 14 CODER records: the body is defined by the coder registered for the type name (WF-18); no body is derivable from this specification, so the kind has no positive vector - the reserved-kind and minimality negatives of WF-18 are covered (V-48, V-49)",
       "the unknown-minor stream class is covered decode-only (V-4, V-5); the kind-14 big-integer channel shares the kind-14 exemption"
     ]
-  }
+  },
+  "ledger": [
+    {
+      "test": "V-42",
+      "level": "F",
+      "claim": "CLM-1",
+      "sub": "",
+      "instrument": "corpus consumer: identity-aware decode equals IR, encode equals bytes (sharing and views over one backing)"
+    },
+    {
+      "test": "V-67",
+      "level": "F",
+      "claim": "CLM-2",
+      "sub": "",
+      "instrument": "corpus consumer: canonical key-order fixtures of the canonical zone (KO-1, KO-2, KO-6)"
+    },
+    {
+      "test": "V-76",
+      "level": "F",
+      "claim": "CLM-2",
+      "sub": "S3",
+      "instrument": "corpus consumer reject run: non-canonical spellings (view, dense and arg families, duplicate-key rejects)"
+    },
+    {
+      "test": "V-73",
+      "level": "F",
+      "claim": "CLM-2",
+      "sub": "S1",
+      "instrument": "corpus consumer: KO-2b in-class tie ordered by value bytes; isomorphic-pair differential over aliased backings and census pair families"
+    },
+    {
+      "test": "V-74",
+      "level": "F",
+      "claim": "H-1",
+      "sub": "",
+      "instrument": "corpus consumer decode-only: KO-2a discriminator territory, the declared exception; multi-seed stability rides the census differential"
+    },
+    {
+      "test": "V-87",
+      "level": "F",
+      "claim": "CLM-3",
+      "sub": "",
+      "instrument": "corpus consumer: observable fixtures, nil versus empty, both directions"
+    },
+    {
+      "test": "V-54",
+      "level": "F",
+      "claim": "CLM-4",
+      "sub": "",
+      "instrument": "corpus consumer: grain fixtures of the topology zone; the bounded-exhaustive census declared beside them"
+    },
+    {
+      "test": "V-20",
+      "level": "F",
+      "claim": "CLM-5",
+      "sub": "",
+      "instrument": "corpus consumer over the promoted fixture subset of the denotation table"
+    },
+    {
+      "test": "V-79",
+      "level": "F",
+      "claim": "CLM-6",
+      "sub": "",
+      "instrument": "corpus consumer reject runs per class: budget and format sentinels"
+    },
+    {
+      "test": "TestSpecCorpus",
+      "level": "I",
+      "claim": "CLM-7",
+      "sub": "",
+      "instrument": "corpus consumer through the three-operation adapter: materialize, encode, decode to observables"
+    },
+    {
+      "test": "TestOracleByteIdempotence",
+      "level": "I",
+      "claim": "CLM-2",
+      "sub": "S2",
+      "instrument": "census byte-idempotence over the grammar corpus; the promoted fixture class is the census declaration"
+    },
+    {
+      "test": "TestPropertyDeterminism",
+      "level": "I",
+      "claim": "CLM-2",
+      "sub": "S1",
+      "instrument": "construction-order purity of the encoder over generated values"
+    },
+    {
+      "test": "TestPropertyMapOrder",
+      "level": "I",
+      "claim": "CLM-2",
+      "sub": "",
+      "instrument": "canonical ranking with the bytewise-ascending key oracle"
+    },
+    {
+      "test": "TestRankTieClassesAndMultiSeedStable",
+      "level": "I",
+      "claim": "H-1",
+      "sub": "",
+      "instrument": "tie classes and multi-seed stability of tie-rich maps"
+    },
+    {
+      "test": "TestStableGuardDeterminism",
+      "level": "I",
+      "claim": "CLM-2",
+      "sub": "guard",
+      "instrument": "guard determinism: reject class and path identical across map-iteration seeds"
+    },
+    {
+      "test": "V-112",
+      "level": "F",
+      "claim": "CLM-2",
+      "sub": "S2",
+      "instrument": "grammar-census differential class: the declaration fixture with pair, seed and mode byte-equality; V-112 anchors the fixed-byte arm"
+    },
+    {
+      "test": "TestSpecCensusDifferential",
+      "level": "I",
+      "claim": "CLM-4",
+      "sub": "",
+      "instrument": "the reference implementation against the grammar generator: the declared census driven as a differential"
+    }
+  ]
 }
