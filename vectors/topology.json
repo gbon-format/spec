@@ -11,7 +11,7 @@
       ],
       "verdict": "ok",
       "direction": "both",
-      "bytes": "67626f6e0000d1685b5d737472696e67dc0c66737472696e6782026178c59004",
+      "bytes": "67626f6e0001d1685b5d737472696e67dc0c66737472696e6782026178c59004",
       "ir": {
         "root": "v1",
         "nodes": [
@@ -58,7 +58,7 @@
       ],
       "verdict": "ok",
       "direction": "both",
-      "bytes": "67626f6e0000d56a2a7665632e7368617265d0697665632e736861726502625031d5662a696e743634d865696e74363408625032c5b02acb",
+      "bytes": "67626f6e0001d56a2a7665632e7368617265d0697665632e736861726502625031d5662a696e743634d865696e74363408625032c5b02acb",
       "ir": {
         "root": {
           "ref": "n1"
@@ -104,7 +104,7 @@
       ],
       "verdict": "ok",
       "direction": "both",
-      "bytes": "67626f6e0000d5692a7665632e72696e67d0687665632e72696e6703644e657874c06156d865696e743634086150d5662a696e743634c6b0b0cb242c1222cc0d",
+      "bytes": "67626f6e0001d5692a7665632e72696e67d0687665632e72696e6703644e657874c06156d865696e743634086150d5662a696e743634c6b0b0cb242c1222cc0d",
       "ir": {
         "root": {
           "ref": "n1"
@@ -191,7 +191,7 @@
       ],
       "verdict": "ok",
       "direction": "both",
-      "bytes": "67626f6e0000d36c176d61705b737472696e675d696e74657266616365207b7ddc0c66737472696e67d66c0c696e74657266616365207b7da16473656c66c0c6",
+      "bytes": "67626f6e0001d36c176d61705b737472696e675d696e74657266616365207b7ddc0c66737472696e67d66c0c696e74657266616365207b7da16473656c66c0c6",
       "ir": {
         "root": "m1",
         "nodes": [
@@ -236,7 +236,7 @@
         "WF-13"
       ],
       "verdict": "format",
-      "bytes": "67626f6e0000d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e74363408a16161c9"
+      "bytes": "67626f6e0001d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e74363408a16161c9"
     },
     {
       "id": "V-59",
@@ -246,7 +246,7 @@
         "WF-16"
       ],
       "verdict": "format",
-      "bytes": "67626f6e0000d5672a7665632e646dd0667665632e646d036141d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e743634086142c56153c7b0a1616122cc0f6178"
+      "bytes": "67626f6e0001d5672a7665632e646dd0667665632e646d036141d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e743634086142c56153c7b0a1616122cc0f6178"
     },
     {
       "id": "V-97",
@@ -257,7 +257,7 @@
       ],
       "verdict": "ok",
       "direction": "both",
-      "bytes": "67626f6e0000d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dc0c4",
+      "bytes": "67626f6e0001d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dc0c4",
       "ir": {
         "root": {
           "ref": "i1"
@@ -286,7 +286,7 @@
       ],
       "verdict": "ok",
       "direction": "decode",
-      "bytes": "67626f6e0000d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7d03",
+      "bytes": "67626f6e0001d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7d03",
       "ir": {
         "root": {
           "ref": "i1"
@@ -320,7 +320,7 @@
       ],
       "verdict": "ok",
       "direction": "decode",
-      "bytes": "67626f6e0000d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dc000",
+      "bytes": "67626f6e0001d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dc000",
       "ir": {
         "root": {
           "ref": "i1"
@@ -364,7 +364,7 @@
       ],
       "verdict": "ok",
       "direction": "both",
-      "bytes": "67626f6e0000d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd5682a6d61696e2e5331d0676d61696e2e533101624631c2c4",
+      "bytes": "67626f6e0001d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd0676d61696e2e533101624631c2b0d5682a6d61696e2e5331c4c7",
       "ir": {
         "root": {
           "ref": "b1"
@@ -407,7 +407,7 @@
       ],
       "verdict": "ok",
       "direction": "both",
-      "bytes": "67626f6e0000d56c0e2a2a696e74657266616365207b7dd56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd5682a6d61696e2e5331d0676d61696e2e533101624631c4c7",
+      "bytes": "67626f6e0001d56c0e2a2a696e74657266616365207b7dd56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dc2d0676d61696e2e533101624631c4b0d5682a6d61696e2e5331c7ca",
       "ir": {
         "root": {
           "ref": "p0"
@@ -458,7 +458,7 @@
       ],
       "verdict": "ok",
       "direction": "both",
-      "bytes": "67626f6e0000d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd5682a6d61696e2e5331d0676d61696e2e533101624631c2b003",
+      "bytes": "67626f6e0001d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd5682a6d61696e2e5331d0676d61696e2e533101624631c2b003",
       "ir": {
         "root": {
           "ref": "b1"
@@ -505,7 +505,7 @@
       ],
       "verdict": "ok",
       "direction": "both",
-      "bytes": "67626f6e0000d5682a6d61696e2e5331d0676d61696e2e533101624631d66c0c696e74657266616365207b7db0c0c7",
+      "bytes": "67626f6e0001d5682a6d61696e2e5331d0676d61696e2e533101624631d66c0c696e74657266616365207b7db0c0c7",
       "ir": {
         "root": {
           "ref": "n1"
@@ -548,7 +548,7 @@
       ],
       "verdict": "ok",
       "direction": "both",
-      "bytes": "67626f6e0000d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd5682a6d61696e2e5331d0676d61696e2e533101624631c2b0c5ca",
+      "bytes": "67626f6e0001d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd5682a6d61696e2e5331d0676d61696e2e533101624631c2b0c5ca",
       "ir": {
         "root": {
           "ref": "b1"
@@ -599,7 +599,7 @@
       ],
       "verdict": "ok",
       "direction": "both",
-      "bytes": "67626f6e0000d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd5682a6d61696e2e5331d0676d61696e2e533101624631c2b0c5c4",
+      "bytes": "67626f6e0001d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd0676d61696e2e533101624631c2b0d5682a6d61696e2e5331c4b0c8c7",
       "ir": {
         "root": {
           "ref": "b1"
@@ -653,6 +653,300 @@
         "slot cell id 4 reserved before the content tag DESC *main.S1 (id 5); node cell id 10 completes the two-ring",
         "closing REF C4 (slot cell id 4) from the second node's field position: the record materializes at the container grain and the ring crosses back through the entry slot (WF-13)"
       ]
+    },
+
+    {
+      "id": "V-106",
+      "desc": "canonical grain of a shared address: the record opens at the coarsest grain, a differing-grain position carries the grain tag, an equal-grain position a plain REF",
+      "tags": [
+        "WF-13",
+        "WF-18"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0001d5692a6d61696e2e426f78d0686d61696e2e426f78026150d5662a696e743634d865696e743634086151d5672a6d61696e2e53d0666d61696e2e53016141c7b0cc0cb02acc10",
+      "ir": {
+        "root": {
+          "ref": "b1"
+        },
+        "nodes": [
+          {
+            "node": "b1",
+            "kind": "struct",
+            "type": "main.Box",
+            "fields": [
+              {
+                "name": "P",
+                "value": {
+                  "ref": "c1"
+                }
+              },
+              {
+                "name": "Q",
+                "value": {
+                  "ref": "n1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "n1",
+            "kind": "struct",
+            "type": "main.S",
+            "fields": [
+              {
+                "name": "A",
+                "value": {
+                  "ref": "a1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "a1",
+            "kind": "int",
+            "value": "5"
+          },
+          {
+            "node": "c1",
+            "kind": "cell",
+            "of": "n1",
+            "name": "A"
+          }
+        ]
+      },
+      "deriv": [
+        "DECL tree: *main.Box(id0)/main.Box(id2) ARG2; P *int64(id5)/int64(id7) width 8; Q *main.S(id10)/main.S(id12) ARG1; A -> REF7 type-ref; B0 opens the Box record(id15)",
+        "P: grain-tag REF12 (u8 cc0c) names the main.S descriptor - the canonical grain of the shared address, the coarsest of the tracked grains {int64, main.S} - then B0 opens the S record(id16) with INT 2A (zz(5)=10); Q: REF16 (cc10) - equal-grain repeat, a plain identity edge (WF-13)"
+      ]
+    },
+    {
+      "id": "V-107",
+      "desc": "zero-size pointee: a non-nil pointer to a zero-size struct carries the selector-4 marker, no record, no address",
+      "tags": [
+        "WF-12",
+        "WF-13"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0001d56a2a737472756374207b7dd069737472756374207b7d0004",
+      "ir": {
+        "root": {
+          "ref": "z1"
+        },
+        "nodes": [
+          {
+            "node": "z1",
+            "kind": "struct",
+            "type": "struct {}"
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC POINTER *struct {}(id0) + DESC STRUCT struct {}(id2) with ARG0 fields",
+        "the root pointer position carries the NIL-class zero-size marker 04 (selector 4): no REF, no intern record, no address; decode materializes a fresh zero-size allocation with nil-ness preserved (WF-12)"
+      ]
+    },
+    {
+      "id": "V-108",
+      "desc": "layout-normal grain: two named conversions of one address share one record opened at the underlying struct",
+      "tags": [
+        "WF-13",
+        "WF-18"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0001d5672a6d61696e2e48d0666d61696e2e4802625041d5672a6d61696e2e41d0666d61696e2e41016158d865696e74363408625042d5672a6d61696e2e42d0666d61696e2e4201c9cab0d06c12737472756374207b205820696e743634207d01c9cab02acc14",
+      "ir": {
+        "root": {
+          "ref": "h1"
+        },
+        "nodes": [
+          {
+            "node": "h1",
+            "kind": "struct",
+            "type": "main.H",
+            "fields": [
+              {
+                "name": "PA",
+                "value": {
+                  "ref": "a1"
+                }
+              },
+              {
+                "name": "PB",
+                "value": {
+                  "ref": "a1",
+                  "type": "main.B"
+                }
+              }
+            ]
+          },
+          {
+            "node": "a1",
+            "kind": "struct",
+            "type": "main.A",
+            "fields": [
+              {
+                "name": "X",
+                "value": {
+                  "ref": "x1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "x1",
+            "kind": "int",
+            "value": "5"
+          }
+        ]
+      },
+      "deriv": [
+        "DECL tree: *main.H(id0)/main.H(id2) ARG2; PA *main.A(id5)/main.A(id7) ARG1 X -> REF10; PB *main.B(id13)/main.B(id15) ARG1 X -> REF9 (the interned field-name string, a repeat, WF-10) with type REF10; B0 opens the H record(id17)",
+        "PA: the layout-normal grain tag as a first-encounter DESC literal - struct { X int64 }(id18, name id19), field X -> REF9/REF10 - then B0 opens the shared record(id20) with INT 2A; PB: REF20 (cc14) - equal-grain repeat of one record for both named grains of the address (WF-13)"
+      ]
+    },
+    {
+      "id": "V-109",
+      "desc": "non-derivable descent: a REF from a *int64 position against a bool-grain record leaves a format error at the cell",
+      "tags": [
+        "WF-13"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0001d5672a6d61696e2e46d0666d61696e2e46026151d5652a626f6f6cd764626f6f6c6150d5662a696e743634d865696e74363408b011cc0f",
+      "deriv": [
+        "DECL tree: *main.F(id0)/main.F(id2) ARG2; Q *bool(id5)/bool(id7); P *int64(id10)/int64(id12) width 8; B0 opens the F record(id14)",
+        "Q: BOOL 11 opens the pointee record at the bool grain(id15); P: REF15 (cc0f) from the *int64 position - no offset-zero descent from bool to int64 exists, a format error at the cell (WF-13)"
+      ]
+    },
+    {
+      "id": "V-110",
+      "desc": "interior zero-size collision: the tracked int64 grain keeps the record, the zero-size alias of the same interior address carries the marker",
+      "tags": [
+        "WF-12",
+        "WF-13"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0001d5672a6d61696e2e57d0666d61696e2e570262504cd56a2a737472756374207b7dd069737472756374207b7d0062504dd5662a696e743634d865696e74363408b00424",
+      "ir": {
+        "root": {
+          "ref": "w1"
+        },
+        "nodes": [
+          {
+            "node": "w1",
+            "kind": "struct",
+            "type": "main.W",
+            "fields": [
+              {
+                "name": "PL",
+                "value": {
+                  "ref": "l1"
+                }
+              },
+              {
+                "name": "PM",
+                "value": {
+                  "ref": "m1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "t1",
+            "kind": "struct",
+            "type": "main.T",
+            "fields": [
+              {
+                "name": "H",
+                "value": {
+                  "ref": "h1"
+                }
+              },
+              {
+                "name": "M",
+                "value": {
+                  "ref": "m2"
+                }
+              }
+            ]
+          },
+          {
+            "node": "h1",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "m2",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "l1",
+            "kind": "cell",
+            "of": "t1",
+            "name": "L"
+          },
+          {
+            "node": "m1",
+            "kind": "cell",
+            "of": "t1",
+            "name": "M"
+          }
+        ]
+      },
+      "deriv": [
+        "DECL tree: *main.W(id0)/main.W(id2) ARG2; PL *struct {}(id5)/struct {}(id7) ARG0; PM *int64(id10)/int64(id12) width 8; B0 opens the W record(id14)",
+        "PL: marker 04 - the zero-size alias of the interior address tracks no record (WF-12 selector 4); PM: an equal-grain elided opening, INT 24 (zz(2)=4) opens the one tracked record(id15) of the address, no tag at grain equality (WF-13)"
+      ]
+    },
+    {
+      "id": "V-111",
+      "desc": "self-ring: the closing REF names the record with the started body; no id is reserved without a body",
+      "tags": [
+        "WF-13"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0001d5672a6d61696e2e4ed0666d61696e2e4e026156d865696e74363408644e657874c0b022c8",
+      "ir": {
+        "root": {
+          "ref": "n1"
+        },
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "struct",
+            "type": "main.N",
+            "fields": [
+              {
+                "name": "V",
+                "value": {
+                  "ref": "v1"
+                }
+              },
+              {
+                "name": "Next",
+                "value": {
+                  "ref": "n1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "v1",
+            "kind": "int",
+            "value": "1"
+          }
+        ]
+      },
+      "deriv": [
+        "DECL tree: *main.N(id0)/main.N(id2) ARG2; V int64(id5,6) width 8; Next -> REF0 (inline c0, type-ref to *main.N); B0 opens the root record(id8) - the body starts",
+        "V: INT 22 (zz(1)=2); Next: REF8 (c8, inline) - the closing REF names the record whose body started, an identity edge; the stream holds no reserved-without-body id (WF-13)"
+      ]
     }
+  
   ]
 }

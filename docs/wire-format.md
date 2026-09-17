@@ -6,15 +6,17 @@ docs/foundations.md).
 
 This document defines the format contract: the core grammar plus the
 CODER descriptor extension (kind 14) and the BIGINT descriptor
-extension (kind 15). A change to an opcode, descriptor rule, or
-canonical rule of the core requires a new major version of the format;
-additive extensions enter through minor versions only (WF-21). Sections
+extension (kind 15). A change to an opcode or a descriptor rule of the
+core requires a new major version of the format; additive extensions
+enter through minor versions only (WF-21); a change to a canonical rule
+of the core requires a new major version after finalization and rides a
+minor version while the format is in its draft era (WF-21). Sections
 carry stable IDs — core sections WF-1 through WF-24 — that are the
 reference keys of the repository (WF-24); the displayed section numbers
 are reader cosmetics.
 
 ```
-Format version: 0.0 (major 0, minor 0)
+Format version: 0.1 (major 0, minor 1)
 Document scope: token-level grammar, topology, canonical rules
 ```
 
@@ -192,7 +194,7 @@ magic(4B) ‖ major(u8) ‖ minor(u8)
 - `major` is the major version; this document specifies major `00`,
   the draft era of the format (WF-21). Finalization — the first
   stability commitment of the format — is major 1 (WF-21).
-- `minor` is the minor version; this document specifies minor `00`.
+- `minor` is the minor version; this document specifies minor `01`.
   Minors are additive within a major: an encoder emits the minor it
   implements.
 A decoder MUST reject with a format error any stream whose magic does not
@@ -226,12 +228,21 @@ The version ladder: major 0 is the draft era — minors are additive
 within it, and a decoder reads every stream of a known major. Major 1
 is finalization, the first stability commitment of the format; within
 the draft era a decoder rejects only unknown majors. The ladder carries
-no content history: every descriptor kind, token class, and argument form
-specified in this document is a start condition of 0.0, not an
-addition attributed to a minor.
+no content history for token grammar: every descriptor kind, token
+class, and argument form specified in this document is a start
+condition of 0.0, not an addition attributed to a minor.
 
 - Major version changes may break decoding; a decoder rejects unknown
   majors outright (WF-2).
+- Canonical-rule revisions ride minor versions while the major is 0,
+  each noted in this ladder; after finalization a canonical-rule change
+  requires a new major. Minor 1 carries the canonical grain rule set of
+  section 7.1: the coarsest-grain record with the derivable descent,
+  grain tags on differing-grain openings with elision at grain equality
+  for non-pointer grains and self-tags for pointer grains, layout-normal
+  grains for named conversions, and the zero-size pointee marker
+  (selector 4, WF-12). A decoder that implements minor 1 reads streams
+  of minors 0 and 1 alike: a 0.0 stream remains valid input.
 - Minor version changes are additive: new escape subclasses and new
   descriptor kinds appear only through a minor bump; an older decoder
   either knows the extension or fails on the specific token (WF-19).
@@ -395,10 +406,12 @@ with the same mechanics as any other slice (WF-15).
 
 Class 0x0 carries a nil-kind selector. The taxonomy of nil kinds — which
 nil sorts a projection distinguishes and which selector each occupies —
-is defined by the binding (GO-4 for the Go value model). Selectors 4..11
-are reserved. nil is never confused with empty: an empty non-nil slice is
-a VIEW with len 0 (WF-15); an empty non-nil map is a MAP with count 0
-(WF-16).
+is defined by the binding (GO-4 for the Go value model). Selector 4 is
+the zero-size pointee marker of section 7.1 — a non-nil pointer to a
+zero-size pointee, distinct from the nil pointer of selector 0;
+selectors 5..11 are reserved. nil is never confused with empty: an empty
+non-nil slice is a VIEW with len 0 (WF-15); an empty non-nil map is a
+MAP with count 0 (WF-16).
 
 ### 6.9 Arrays and Trailing-Zero Elision (core+annotation) [WF-14]
 
@@ -639,11 +652,19 @@ Rules:
   its own encoding begins — before any child is encoded. Cyclic structures
   therefore encode: a reference to an enclosing record closes through a REF
   token.
-- **REF token** (class 0xC): the argument is the id of a record
-  registered record. A repeated encounter MUST be a REF or a view over an
+- **REF token** (class 0xC): the argument is the id of a registered
+  record. A repeated encounter MUST be a REF or a view over an
   already-registered record; duplicating a record body in one stream is
   forbidden, with one carve-out for backing records (the join rule below).
-  A REF to an unregistered id is a format error.
+  A REF to an unregistered id is a format error. A REF names a record
+  whose body encoding has started: where the encoder reaches a reference
+  to an address whose record body has not started, it starts that body —
+  at the record's canonical grain, fixed ahead of emission by the
+  canonical grain rule below — before emitting any REF to it; an id
+  reserved without a body emits no bytes. The stream is closed under
+  reference topology: a REF that a decoder resolves always names a record
+  present in the stream with a started body, and a locally legal emission
+  whose REF would break this closure is not a legal encoding.
 - **Reference positions (type on the cell).** A value position holding
   a pointer — to an interface, to a concrete value, or to a map object
   — encodes the pointer's own state through one leading token of the
@@ -676,30 +697,79 @@ Rules:
   between the position and its named cell materialize as the stream
   reserved them, one cell per reserved id; levels without an id of
   their own carry none. Identity interning is by address: l-values
-  equal in address are one record. A subvalue at the start of its
-  container's storage therefore shares the container's record — the
-  record serves a position either as that position's own target or
-  through its leading subvalue, and the consuming position fixes only
-  the reference grain of the materialized handle. Conformance requires
-  the round trip: a decoder reconstructs the encoded record-and-edge
-  graph exactly — structure, types, identity — so that encoding the
-  decoded value reproduces the stream byte for byte; a resolution that
-  cannot re-encode identically is a format error, not a decode result.
-- **Slot-rooted record reference (named × slot-root cell).** A whole-value
-  REF from a pointer position of grain `*T`, where `T` is a struct whose
-  leading field carries the interface grain, may name the slot cell at
-  the start of that record's storage: the encoder reserved one cell for
-  the l-value the leading field denotes, and by the address-interning
-  rule above that cell is the record's storage. The stream carries the
-  cell exactly as reserved — its id, its content tag, and the closing
-  REF are unchanged — and the materialized grain of the named record
-  follows its content tag: a decoder materializes the cell at the
-  container grain `*T`, the slot being the leading field's storage, so
-  the REF resolves in the exact branch and the record-and-edge graph
-  reconstructs with the slot identity intact. Rings entered through a
-  root, an interface slot, or a field of this shape decode uniformly;
-  a leading field whose type cannot serve the slot's grain leaves the
-  REF a format error at the cell.
+  equal in address are one record. A subvalue reachable from the
+  record's canonical grain by the derivable descent of this section
+  therefore resolves through the record — the record serves a position
+  either as that position's own target or through a derivable subvalue,
+  and the consuming position fixes the reference grain of the
+  materialized handle. Conformance requires the round trip: a decoder
+  reconstructs the encoded record-and-edge graph exactly — structure,
+  types, identity — so that encoding the decoded value reproduces the
+  stream byte for byte; a resolution that cannot re-encode identically
+  is a format error, not a decode result. A value skipped by a decoder
+  resolves its grain by the one resolution rule of this section: the
+  skip and the decode paths share it, and a grain a decoded position
+  resolves is a grain a skipped position steps over.
+- **Canonical grain rule.** Each address held by the stream's tracked
+  reference grains carries one record, opened at the canonical grain of
+  the address: the coarsest grain among the tracked grains the stream
+  holds for that address, fixed by an encoder pass over the value ahead
+  of emission. A tracked grain is the grain of a pointee l-value a
+  reference position of the stream denotes; zero-size pointee grains
+  track nothing (the zero-size rule below). Opening one address at two
+  grains is forbidden: the record opens once, at the canonical grain,
+  and every position of that address resolves through it.
+- **Layout-normal grain.** Where one address carries two or more
+  tracked grains that are distinct named types of identical underlying
+  layout, the canonical grain is the layout-normal form — the
+  underlying type: the intern key, the record's grain, and the record's
+  descriptor use the underlying type, and a position of a named grain
+  materializes through the legal value conversion of the projection.
+  The scope of normalization is the intern key and the record's grain
+  alone; the type descriptors of positions (WF-18) keep their names.
+- **Grain tags, elision, self-tags.** Where a pointer position is the
+  opening — the first encounter — of a record whose canonical grain
+  differs from the position's static pointee type, the opening carries
+  an explicit grain tag: a REF naming the canonical grain's type
+  descriptor, or a first-encounter DESC literal of it, ahead of the
+  record body. Where the canonical grain equals the position's static
+  pointee type and that grain is not itself a pointer type, the tag is
+  elided and the body follows directly: the grain is statically
+  derivable at the position. Where the record's canonical grain is
+  itself a pointer type, the opening carries the explicit tag at grain
+  equality too — a self-tag — so an opening and a repeat of a
+  pointer-grain record stay byte-distinct. A repeated encounter of an
+  open record is a bare REF without a tag: the record's grain rides on
+  the descriptor under which the record opened. The grain of a record
+  is derivable from the stream alone — at an opening by the tag and the
+  body's sort and content tag, at grain equality by the position's
+  static type, on a repeat by the named record's descriptor;
+  resolution never depends on which position asks.
+- **Derivable descent.** Where a reference position of static pointee
+  grain Pg resolves against a record of canonical grain Cg with Pg
+  distinct from Cg, Pg MUST be derivable from Cg by descent: following
+  struct fields at offset zero — every offset-zero field, with
+  zero-size fields skipped — and array elements at index zero, each
+  step fixed by the reflect type of the pair plus the record's content
+  tag. The descent carries no bytes, and a position whose grain is not
+  derivable this way leaves the REF a format error at the cell.
+- **Interface-grain discrimination.** Where a pointer position of
+  interface grain reads a leading descriptor that names both a
+  compatible container grain — a struct whose leading-field chain
+  reaches the position grain — and a compatible dynamic type of the
+  interface value, the container reading wins: the record opens at the
+  named container grain. The byte shape of a degenerate payload form —
+  a dynamic type that is itself a struct with a leading interface-field
+  — read this way is a declared carve-out of the dynamic reading's
+  round-trip identity, and encoders MUST NOT emit the interface-dynamic
+  reading of that shape on interface-grain positions.
+- **Uniform resolution.** Every REF of the stream resolves through the
+  one resolution rule of this section: the sort and content tag of the
+  named record, the grain tags and descent above, and no other path.
+  Rings entered through a root, an interface slot, a field, an element,
+  or a map value; double-pointer chains; shared cells; and containers
+  reached through their leading storage all resolve by it, at any depth
+  and from any entry point.
 - **Backing join rule (guard).** A slice/blob position over memory already
   closed by a backing record joins that record — and emits a view over it —
   exactly when: (a) its whole extent-window [ptr, ptr+extent·es) lies
@@ -716,8 +786,17 @@ Rules:
   encounters, mirroring pointer and map identity interning — mutations of
   already-encoded content between values are invisible, exactly as they
   are within one value.
-- Zero-size reference identity is neither preserved nor observable: the
-  format does not track it.
+- **Zero-size pointee rule.** A pointee type of zero size tracks no
+  record. A non-nil pointer to a zero-size pointee encodes as the
+  zero-size marker — the NIL-class token of selector 4 (WF-12) — with
+  no REF and no address, and decodes into a fresh zero-size allocation
+  whose nil-ness is preserved: the marker and the nil pointer of
+  selector 0 stay byte-distinct. Reference identity of zero-size
+  pointees is neither preserved nor observable. Where a zero-size grain
+  and a non-zero-size tracked grain share an interior address, the
+  tracked grain keeps the record — opened at its own grain, never at a
+  struct grain of the unrelated container — and the zero-size alias
+  carries the marker.
 
 ## 8. Canonical and Portable Profiles
 
@@ -1061,9 +1140,9 @@ appendix collects the baseline illustrations. Every byte below follows
 directly from the normative tables of this document.
 
 **Stream header.** Every stream of this specification begins with the
-same six bytes — the magic, major `00`, minor `00` (WF-2):
+same six bytes — the magic, major `00`, minor `01` (WF-2):
 
-    67 62 6F 6E 00 00
+    67 62 6F 6E 00 01
 
 **Inline arguments.** An ARG whose value is 0..11 is the selector
 itself (WF-4): the value `5` in a bare argument position is the single

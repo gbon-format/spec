@@ -601,6 +601,36 @@
       "id": "V-105",
       "category": "topology",
       "verdict": "ok"
+    },
+    {
+      "id": "V-106",
+      "category": "topology",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-107",
+      "category": "topology",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-108",
+      "category": "topology",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-109",
+      "category": "topology",
+      "verdict": "format"
+    },
+    {
+      "id": "V-110",
+      "category": "topology",
+      "verdict": "ok"
+    },
+    {
+      "id": "V-111",
+      "category": "topology",
+      "verdict": "ok"
     }
   ],
   "coverage": {

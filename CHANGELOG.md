@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0] - 2026-09-16
+
+### Changed
+
+- WF-13 canonical grain rule: each interned address opens one record at
+  its canonical grain — the coarsest among the tracked reference grains
+  of that address, fixed by an encoder pass ahead of emission. The
+  slot-rooted record reference rule is its slot-root instance; the
+  section carries the derivable descent (offset-zero fields with
+  zero-size fields skipped, array element zero), grain tags on
+  differing-grain openings with elision at grain equality for
+  non-pointer grains and self-tags for pointer grains, layout-normal
+  grains for named conversions of identical underlying layout,
+  interface-grain discrimination with the declared degenerate-payload
+  carve-out, the uniform single-path resolution, the closure property
+  with REF-on-started-body, and skip/decode parity.
+- WF-12: selector 4 is the zero-size pointee marker — a non-nil pointer
+  to a zero-size pointee with no REF and no address; selectors 5..11
+  stay reserved.
+- WF-21 draft-era version policy: canonical-rule revisions ride minor
+  versions while the major is 0, each noted in the version ladder.
+  Format version 0.1 (header `67 62 6F 6E 00 01`); a 0.1 decoder reads
+  0.0 streams.
+- Conformance corpus rebaselined at minor 1: 101 behavioral vectors
+  re-emitted (header states after the rebase: `...0001` x 108,
+  `...0002` x 1, `...0200` x 1, `67626f6f` x 1); the version-behavioral
+  vectors V-3/V-4/V-5 are byte-identical.
+
+### Added
+
+- Six topology vectors V-106..V-111: canonical grain with grain tag and
+  descent (V-106), zero-size pointee marker (V-107), layout-normal grain
+  (V-108), non-derivable descent negative (V-109), interior zero-size
+  collision (V-110), started-body ring (V-111). Corpus 105 -> 111,
+  manifest synced.
+
 ## [0.0.5] - 2026-09-13
 
 ### Changed

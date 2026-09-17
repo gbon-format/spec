@@ -292,8 +292,8 @@ gate_f() { # conformance corpus integrity (jq required; LC_ALL pinned)
     vectors/*.json 2>/dev/null || true)
   [ -n "$out" ] && red $g "bad bytes hex: $out"
   # IR field vocabulary whitelist and kind enumeration (corpus contract)
-  local WH=" node kind value bits bytes real imag sort elements backing off len extent pairs key fields name type ref root nodes"
-  local KINDS=" int uint bool float complex string blob nil array view map struct iface bigint descriptor"
+  local WH=" node kind value bits bytes real imag sort elements backing off len extent pairs key fields name type ref root nodes of"
+  local KINDS=" int uint bool float complex string blob nil array view map struct iface bigint descriptor cell"
   out=$(jq -r --arg wh "$WH" '
     .vectors[] | select(.verdict == "ok") | .ir | [.. | objects | keys[]] | unique
     | map(select(. as $k | ("\($wh) " | index(" \($k) ")) | not)) | if length > 0 then "x" else empty end' \
