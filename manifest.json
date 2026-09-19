@@ -662,6 +662,21 @@
       "id": "V-114",
       "category": "aliased",
       "verdict": "ok"
+    },
+    {
+      "id": "V-115",
+      "category": "aliased",
+      "verdict": "format"
+    },
+    {
+      "id": "V-116",
+      "category": "aliased",
+      "verdict": "format"
+    },
+    {
+      "id": "V-117",
+      "category": "aliased",
+      "verdict": "format"
     }
   ],
   "coverage": {
@@ -798,7 +813,10 @@
         "V-105",
         "V-112",
         "V-113",
-        "V-114"
+        "V-114",
+        "V-115",
+        "V-116",
+        "V-117"
       ],
       "WF-14": [
         "V-40",
@@ -891,7 +909,10 @@
       ],
       "WF-23": [
         "V-52",
-        "V-53"
+        "V-53",
+        "V-115",
+        "V-116",
+        "V-117"
       ],
       "WF-3": [
         "V-6"

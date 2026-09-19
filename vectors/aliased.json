@@ -551,6 +551,45 @@
         "descriptors: D5 *[3]int64 (12/13) with target D2 [3]int64 (14/15), the array body ARG 3 plus REF C9 to the int64 descriptor (WF-18); map record 16, key 17, shared backing 18, array-grain record 19 (WF-13)",
         "round trip: the decoded P is a fresh array — aliasing with W's backing is projection memory, not a wire observable; re-encode reproduces the stream (WF-13 re-encode fidelity)"
       ]
+    },
+    {
+      "id": "V-115",
+      "desc": "narrowed target rejects a kept REF to the map record its skipped field opened",
+      "tags": [
+        "WF-23",
+        "WF-13"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0001d06c0c7665632e6d6170736861726502624631d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e74363408624632c3b0a2616b22617824ca",
+      "class": "bad_ref",
+      "narrow_target": "vec.mapshare",
+      "narrow_offset": 74
+    },
+    {
+      "id": "V-116",
+      "desc": "narrowed target rejects a kept view over the shared backing its skipped field left unmaterialized",
+      "tags": [
+        "WF-23",
+        "WF-15"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0001d06c0d7665632e766965777368617265026142d1675b5d696e743634d865696e743634086157c3b084042c142c282c3c2c5090089208010203",
+      "class": "bad_ref",
+      "narrow_target": "vec.viewshare",
+      "narrow_offset": 63
+    },
+    {
+      "id": "V-117",
+      "desc": "dropped map position carrying a REF to a blob record rejects typed (wrong sort)",
+      "tags": [
+        "WF-23",
+        "WF-13"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0001d06c0d7665632e77726f6e67736f7274036153dc0d665b5d627974656152c3614dd36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e74363408b0740401020304900c0d920c0d010203cc0d",
+      "class": "bad_ref",
+      "narrow_target": "vec.wrongsort",
+      "narrow_offset": 93
     }
   ]
 }

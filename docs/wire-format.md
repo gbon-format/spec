@@ -276,7 +276,18 @@ exactly as the writer allocated it: string and descriptor literals intern
 and pointer targets stay unmaterialized (GO-3). Adding fields to a struct
 is therefore wire-compatible in
 both directions (new encoder → old target: skip; old encoder → new target:
-zero), matching the Avro/protobuf evolution discipline.
+zero), matching the Avro/protobuf evolution discipline. An evolution
+pair whose kept position resolves a REF naming a map record, or a view
+over a shared backing, at a record position the narrower target skipped
+rejects loud (the bad_ref class): the skipped record or backing stays
+unmaterialized, so the kept reference cannot be served — the carve-out
+is bounded to these aliased map and backing shapes, and adding fields
+stays wire-compatible for non-aliased narrowing. Narrowing that cuts a
+pointer cycle across fields — a kept position whose reference targets a
+record opened inside the skipped region — is a known-open cell: such
+streams reject with a mis-parse or grain-mismatch class outside this
+carve-out, and a subsequent minor version may open a typed reject form
+through the change process (WF-21).
 A change of canonical form for an existing value class follows the same
 discipline through migration by rewrite: streams encoded under the
 earlier spelling stay readable forever (the kind-14 "big.Int" spelling,
@@ -1082,6 +1093,11 @@ WF-20 apply as written.
   counter as input bytes, before the allocation happens; a crafted
   L·es or ext length exceeding the budget fails by budget, never by
   allocation.
+- The MaxBytes counter's scope is one value: it opens at each record's
+  start and resets when the next record begins, so cumulative
+  consumption beyond MaxBytes across the records of a stream is
+  conformant — there is no per-stream cumulative cap. Within one value,
+  input bytes and charged allocations share the counter.
 - Truncated input is a format error; no partial values are returned. No
   partial state is exposed either: decode is atomic with respect to the
   target — on any decode error, including a budget error raised from a

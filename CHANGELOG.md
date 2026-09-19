@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-19
+
 ### Added
 
+- wire-format.md: the per-value scope of the decode budget (MaxBytes
+  guards one value, absolute stream positions); the WF-23 carve-out —
+  decode-into-narrower over aliased map-records and shared backings
+  rejects loudly (V-115..117 golden vectors, corpus 114→117).
 - manifest.json + scripts/gate.sh + docs/meta/claims.md: verification
   ledger — the `ledger` block (schema version 2; one row per bound
   test over the claim registry), the aliased-backing fixture vectors
@@ -164,6 +170,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Consolidated external anchor map (docs/references.md) with gate-verified
   two-way citations.
 
-[Unreleased]: https://github.com/gbon-format/spec/compare/v0.0.2...HEAD
+[Unreleased]: https://github.com/gbon-format/spec/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/gbon-format/spec/compare/v0.1.0...v0.1.1
 [0.0.2]: https://github.com/gbon-format/spec/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/gbon-format/spec/releases/tag/v0.0.1

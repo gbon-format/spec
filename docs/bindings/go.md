@@ -128,6 +128,43 @@ canonical structural name alone fixes the type, so the stateless
 `Register` bindings take precedence; every other shape — named types
 above all — keeps its `unknown_name` rejection.
 
+**Registration closure (rule 1).**
+
+A registration covers the whole pointer chain of its base. On a
+registry miss, the descriptor name's leading stars strip away and the
+base resolves through the registration family before the stars
+re-wrap: a scope-bound wire name (bound at any level of its chain),
+the canonical name of a binding's chain level, a
+target-tree pool entry, or the base of a registered pointer entry
+(registering `**T` implies `*T` and `T`, at any depth). Wire-name
+bindings on the two ends of a stream may sit at different levels of
+one chain — the value and the pointer arg forms interoperate: the
+canonical chain name of an any-slot payload bridges through the
+binding, and the bound wire name validates at every level of its
+chain. Explicit `Register` bindings keep precedence over
+derivation; a plain `Register` of a bare name does not carry its
+pointer forms (the incomplete-registry contract). One wire name
+covers one chain: a second binding touching an existing binding's
+chain under a different name rejects with the registration-conflict
+class (`register_conflict`); re-binding the same name at another
+level of the chain is a no-op. Wire names equal up to leading stars
+are one chain name — the star prefix is the chain-level convention,
+mirroring the resolution side's starred keys.
+
+**Derivable surface (consolidated).**
+
+| source | names | examples |
+|---|---|---|
+| chain grammar | unnamed pointer chains to an interface point, with one slice or `map[string]` level over the chain | `*interface {}`, `[]*interface {}`, `map[string]*interface {}` |
+| basic seeds | the predeclared value types, `[]byte`, and the basic composites | `int64`, `[]byte`, `[]interface {}`, `map[string]interface {}`, `[]string`, `[]int64`, `map[string]string` |
+| target-tree pool | the named types of the decode target's static tree, under their qualified names | a struct field's package-qualified type |
+| registration family (rule 1) | bound wire names, canonical chain-level names of scope bindings, implied bases of registered pointer entries | a wire name bound to a struct type; `Register((*Point)(nil))` implying `Point` |
+
+Names outside the surface — stars over unnamed composites
+(`*[]interface {}`, `*map[string]interface {}`, `*map[string]int64`),
+non-basic composites (`map[string]int64`), unregistered named types —
+keep the `unknown_name` rejection: no structural materialization.
+
 ### 1.4 Descriptor Names in Go
 
 The core's namespace-qualification rule (WF-18) projects onto Go as
@@ -246,12 +283,15 @@ range-check against the target type's actual size.
   live references to the backing memory for the whole stream: the price of
   address stability without reuse (ABA) hazards. The memory is
   producer-owned; the codec never frees it.
-- **Broad recover in Decode.** A decode-time panic of any origin
-  surfaces as a budget-class error wrap instead of a process crash (WF-22). The
-  expected class is reflect allocation panics that survive the budget
+- **Broad recover in Decode.** A decode-time panic of any origin —
+  including a panic of the caller-supplied Reader in the stream-header
+  fill or the end-of-stream probe, before any value token — surfaces as
+  a classified error instead of a process crash (WF-22). The expected
+  class is reflect allocation panics that survive the budget
   gates under user-raised limits (a crafted backing length admitted by
-  MaxBytes can still fail at the allocation itself); a non-allocation
-  decoder bug is masked as a budget-class error — breadth is deliberate:
+  MaxBytes can still fail at the allocation itself; `budget_alloc`);
+  any other panic — a Reader fault or a decoder bug — maps to
+  `internal_panic`. Breadth is deliberate:
   never-panic on crafted input outranks bug signaling.
 - **Linear-time slot grouping components.** Slot grouping uses an
   interval index: O(s·log s) to index s overlapping windows and O(1) per
@@ -388,7 +428,10 @@ implementation identifiers and live outside this document
 interpolates no untrusted input: decoded values, keys, and stream
 names surface only through the structured fields; caller arguments
 (registry names, Go types, configured limits) are trusted and stay in
-the text. Path key segments are bounded: printable keys of up to 16
+the text. In trusted-input mode (the opt-in diagnostics flag) the
+stream-borne name joins the trusted set: the `unknown_name` detail
+carries the missing name literal, so the registry fix has its exact
+spelling. Path key segments are bounded: printable keys of up to 16
 runes render quoted, anything longer or non-printable renders as a
 shape marker with the rune count — an address segment never carries a
 full untrusted value. Value paths chain `$` (root), `.field`, `[i]`,
@@ -444,7 +487,9 @@ onto a problem-details identity and a status. The mapping derives from
 the six families, with four exceptions where the family default
 misstates the consumer's lever: `unknown_name` and `contract_mismatch`
 are consumer-side setup problems (422 / FailedPrecondition — fix the
-registry or the target, do not retry the bytes), and `io_read` and
+registry or the target, do not retry the bytes; in trusted-input mode
+the `unknown_name` detail names the missing wire name, giving the
+registry fix its exact spelling), and `io_read` and
 `io_write` are environment faults worth a retry under policy
 (503 / Unavailable). The
 families themselves: data/format answers 400 / InvalidArgument, budget
