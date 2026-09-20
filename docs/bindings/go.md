@@ -1,13 +1,13 @@
 # GBON Go Binding
 
 Binding of the GBON wire-format core to the Go value model. The core
-specification (docs/wire-format.md, format 0.1, minor 1) is
+specification (docs/wire-format.md, format 0.2, minor 2) is
 normative and language-independent; this document is the Go projection —
 an appendix non-normative with respect to the core — carrying the parts
 of the contract specific to the Go value model. Sections of this
 binding carry stable IDs GO-1..GO-7; core
 rules are cited by their WF-n section IDs (the ID scheme is defined by
-core section WF-24). Resolvability of every ID reference across the
+core section WF-1). Resolvability of every ID reference across the
 repository is enforced by the reference-lint gate (non-normative: see
 the gbon-go repository).
 
@@ -43,13 +43,13 @@ chan, func, and unsafe.Pointer have no opcodes in any class — the category
 has no wire image. The encoder reports an unsupported-type error with the
 path to the offending field.
 
-**Comparable restriction (from core WF-20, KO-4).**
+**Comparable restriction (from core WF-25, KO-4).**
 
 The comparable/uncomparable split of the core's key-domain exclusion
 mirrors Go's comparable restriction: the reject — an encoder error,
 never a runtime panic — is the core's own contract.
 
-**Statically uncomparable keys (from core WF-20, KO-7).**
+**Statically uncomparable keys (from core WF-25, KO-7).**
 
 Statically uncomparable key types are impossible at the Go type level,
 so the encoder meets them only inside interface values — the reject is
@@ -62,38 +62,45 @@ causes.
 
 ### 1.2 Nil Model [GO-4]
 
-The nil taxonomy of the core's nil tokens (WF-12) is a property of the
-Go value model: class 0x0 selects one of four nil kinds.
+The core's nil layer (WF-15) carries one nil state: selector 0,
+absent. No selector encodes a nil sort — the sort of a nil is
+derived, never read from the token: from the static type of the
+position or, for a typed nil in an interface or reference position,
+from the dynamic descriptor carried with the nil body (WF-15, WF-24).
+Which nil sorts a projection distinguishes is binding content (WF-15);
+Go distinguishes four:
 
-| Selector | Meaning |
+| Go nil sort | How the sort reaches the decoder |
 |---|---|
-| 0 | nil pointer |
-| 1 | nil slice |
-| 2 | nil map |
-| 3 | nil interface |
+| nil pointer | static type of the position; dynamic descriptor when the nil rides an interface or reference position |
+| nil slice | static type of the position |
+| nil map | static type of the position |
+| nil interface | the position itself — a nil interface carries no dynamic descriptor |
 
-Selectors 4..11 are reserved (WF-12). nil is never confused with empty
-(WF-12): an empty non-nil slice is a VIEW with len 0 (WF-15); an empty
-non-nil map is a MAP with count 0 (WF-16).
+Selector 4 is the zero-size marker — a non-nil pointer to a zero-size
+target (WF-24); selectors 1..11 are otherwise reserved (WF-15). nil is
+never confused with empty (WF-15): an empty non-nil slice is a VIEW
+with len 0 (WF-17); an empty non-nil map is a MAP with count 0
+(WF-18).
 
-**Bigint nil and zero (from core WF-3, WF-18).**
+**Nil and zero on the integer ladder (from core WF-8, WF-4).**
 
-The BIGINT value body has one byte where the nil pointer token and the
-inline zero argument coincide (WF-3): a nil `*big.Int` and a zero integer
-encode to the same body. The projection reads the coincidence byte by its
-own shape — pointer and interface positions materialize nil, value
-positions zero — so a nil round-trips as nil and a zero as zero, and
-either re-encodes to the same byte.
+nil and zero are distinct tokens over the whole INT ladder, the
+arbitrary-precision rung included: nil is the selector-0 token of
+WF-15, zero is an INT value body (WF-8). At the byte level a nil token
+and an inline argument never conflict — the positions are distinct
+(WF-4).
 
-**Typed-nil distinctness (from core WF-20, KO-4).**
+**Typed-nil distinctness (from core WF-25, KO-4).**
 
-A typed-nil interface value is distinct from a nil interface and encodes
-accordingly — nil-interface and typed-nil are distinct tokens (KO-4);
-the nil kinds of the table above are the tokens a typed nil occupies.
+A typed-nil interface value is distinct from a nil interface and
+encodes accordingly — a nil interface is the bare nil token, a typed
+nil is the dynamic type's descriptor followed by a nil body (KO-4);
+the nil sorts of the table above are the sorts a typed nil occupies.
 
 ### 1.3 Interface Positions and Method Sets
 
-The core's INTERFACE descriptor (WF-18, kind 6) is an opaque,
+The core's INTERFACE descriptor (WF-22, kind 6) is an opaque,
 interface-like wrapper; method sets are a binding concern and are not
 encodable. In this binding, an interface position carries the dynamic
 value's own descriptor and body — the wire image of a Go interface
@@ -102,7 +109,7 @@ method set. Function values are outside the encodable categories
 (GO-1), so no interface position carries behavior across the wire:
 what crosses is data.
 
-**Decode targets and reference positions (from core WF-13).**
+**Decode targets and reference positions (from core WF-24).**
 
 A stream's reference graph decodes into any target type whose
 reference structure carries it. Pointer chains over an interface
@@ -167,77 +174,109 @@ keep the `unknown_name` rejection: no structural materialization.
 
 ### 1.4 Descriptor Names in Go
 
-The core's namespace-qualification rule (WF-18) projects onto Go as
-the name derivation of the reference implementation: types from the
-standard library and types defined in main packages take the short
-form (`pkg.Type` — time.Time, big.Int); every other defined type takes
-the import-path-qualified form (`import/path/pkg.Type`); unnamed
-composites take their canonical structural string ("[]T", "[N]T",
-"map[K]V", "*T"). This section is the Go projection of the core rule,
-not an additional norm.
+The core's descriptor identity is structural (WF-22): descriptors
+intern by canonical structure — kind, arguments, and child type-refs,
+recursively — and nominal names do not participate in the structural
+key: a nominal wrapper and its base intern independently. A nominal
+name is qualified by the binding's namespace grammar (binding content,
+WF-22), and instantiation is unified under the grammar `Name[args]`:
+a type expression's wire name is the constructor name followed by its
+bracketed argument list, the arguments being canonical structural
+names.
+
+The namespace grammar of this projection is the name derivation of the
+reference implementation: types from the standard library and types
+defined in main packages take the short form (`pkg.Type` — time.Time);
+every other defined type takes the import-path-qualified form
+(`import/path/pkg.Type`); unnamed composites take their canonical
+structural string ("[]T", "[N]T", "map[K]V", "*T"). This section is
+the Go projection of the core rule, not an additional norm.
+
+Collisions follow the core's hybrid policy (WF-22): derived qualified
+names stay clean — no renaming and no disambiguation suffixes; if two
+distinct nominal types derive one qualified name within one stream,
+the encoder rejects at registry start with an unsupported-type error
+naming both origins (the decode-side counterpart is a format error at
+the colliding descriptor), and the resolution is explicit name
+binding. The reserved standard namespace `std.` cannot collide with a
+language-derived name (WF-22).
 
 The platform names carried in the short form in this projection:
 
-| Short-form name | Wire kind |
+| Short-form name | Wire kind (WF-22) |
 |---|---|
-| bool, int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, complex64, complex128, string | primitive kinds 7..12 |
-| `[]byte` | BLOB (13) |
-| time.Time | CODER (14) |
-| big.Int | BIGINT (15) — reserved |
+| bool, int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, string | BOOL (9), INT (10), UINT (11), FLOAT (12), STRING (13) — width per type |
+| `[]byte` | BLOB (14) |
+| time.Time | CODER (15) |
+
+complex64 and complex128 carry no primitive kind: they project as
+TUPLE(re, im) of FLOAT components under a NAMED wrapper (WF-22; the
+degradation table, 2.1). `math/big` integers carry no platform name:
+they ride the INT arbitrary-precision rung (WF-8; 2.1).
 
 ## 2. Lifecycle and Behavioral Notes
 
 ### 2.1 Cross-Version Stability Notes [GO-2]
 
-**Version state.** The binding tracks the core at format 0.1 (major 0,
-minor 1); the stability notes of this section are stated against that
-state. The per-construct grounding of the mapping sits in the
-denotation table (5.2); the host-language degeneracy causes in the
-register (5.3).
+**Version state.** The binding tracks the core at format 0.2 (major 0,
+minor 2); the stability notes of this section are stated against that
+state. Unknown minors are rejected while the major is 0 — the draft
+era carries no cross-minor compatibility promises; the freeze
+discipline starts at major 1. The per-construct grounding of the
+mapping sits in the denotation table (5.2); the host-language
+degeneracy causes in the register (5.3).
 
 The stored representation of ±0 map keys is a property of the Go runtime
 (key overwrite on update); signers over canonical bytes must pin the Go
 version of the encoding side — the core excludes the stored sign from
-the cross-implementation canonical claim (axiom E4 in WF-20). Zero-size
-reference identity is
-neither preserved nor observable (WF-13). *Core, restated here for the
-signer:* the ESC reserved nibble is part of
-the canonical surface: a nonzero low nibble is a decode reject (WF-19), so a
-future subclass promotion never forks the spelling of existing tokens.
+the cross-implementation canonical claim (axiom E4 of WF-25). Zero-size
+reference identity is neither preserved nor observable: a non-nil
+pointer to a zero-size target is the zero-size marker, selector 4
+(WF-24). *Core, restated here for the signer:* the ESC reserved nibble
+is part of the canonical surface: a nonzero low nibble is a decode
+reject (WF-23), so a future subclass promotion never forks the spelling
+of existing tokens.
 
-**E5 tie-break instantiation (from core WF-20).**
+**Identity layer (declaration).**
 
-The core's E5 tie-break — the one place implementation-defined identity
-participates in map-pair order — is instantiated by the KO-2a pointer
-discriminator (the allocation-sequence discriminator). It fixes the
-ORDER of otherwise indistinguishable map pairs, never byte content:
-within one encoding the order is deterministic; across processes or
-replays it is not specified. For each key, the discriminator is the
-DFS-preorder sequence of runtime addresses of its reference-kind
-components, compared lexicographically: a nil slot orders below every
-address; a shorter prefix below its extension. Addresses never enter
-the encoded bytes — the discriminator fixes only the order of the tied
-pairs.
+Go's identity layer is pointer keys: pointer values compare by address
+(axiom E2), and the identity discriminator of a composite key is
+carried by its reference-kind components (KO-2, KO-2a). Every
+non-pointer Go key compares by value; no other identity keys exist.
 
-**Big integers (from core WF-5, WF-18).**
+**Stability tier T2 declaration (identity-determinant instantiation of
+WF-25).** determinant form — the KO-2a allocation-sequence
+discriminator: the DFS-preorder sequence of runtime addresses of the
+reference-kind components of the key, compared lexicographically; a
+nil slot orders below every address; a shorter prefix below its
+extension. determinism scope — one encoding within one process: Go's
+tier-2 coverage collapses to stability tier T1 union T3 — no
+cross-machine determinant is declarable over runtime addresses.
+verification hook — re-encode byte identity within one process over
+the tied-pair fixture family. The discriminator fixes the ORDER of
+otherwise indistinguishable map pairs (axiom E5), never byte content:
+addresses never enter the encoded bytes.
 
-The whole integer domain is a built-in value class:
-`math/big` integers ride the BIGINT descriptor kind under the reserved
-wire name "big.Int". Both Go projections — `big.Int` and `*big.Int` —
-encode to the same kind and name (pointer-ness is absorbed by the kind,
-as `[]byte`'s is by BLOB), and both accept the stream on decode. The
-encode ladder outranks the automatic text adapter: a big integer never
-encodes as an adapter STRING. Streams carrying the kind-14 adapter form
-under the same name decode as well; the re-encode of an adapter-read
-value is the canonical kind-15 spelling (migration by rewrite, WF-23).
+**Big integers (from core WF-8).**
 
-**Bigint map keys (from core WF-20).**
+`math/big` integers ride the arbitrary-precision rung of the INT
+ladder: width arb (WF-8, WF-22). Both Go projections — the value form
+and the pointer form of `math/big`'s integer — encode as INT width-arb
+values (pointer-ness is absorbed by the reference-position rule of
+WF-24, a nil pointer as the nil token of WF-15), and both accept the
+stream on decode. No reserved wire name and no nominal wrapper exist
+for them — INT is structural — and the tier-1 claim covers the whole
+integer domain, the arbitrary-precision rung included (WF-25).
 
-`*big.Int` map keys are pointer-identity keys, like every pointer key
-category (E2/E5): two keys with equal values in distinct slots are
-distinct keys — byte-equal skeletons ordered by the identity tie-break —
-and no value-equality of keys is introduced. The canonical key order over
-the integers is the argument-byte order of the zigzag image (KO-6).
+**Big integer map keys (from core WF-25).**
+
+A `math/big` integer held by pointer as a map key is a
+pointer-identity key, like every pointer key category (E2, KO-2a): two
+keys with equal values in distinct slots are distinct keys —
+byte-equal skeletons ordered by the identity tie-break — and no
+value-equality of keys is introduced. The canonical key order over the
+integers is the argument-byte order of the zigzag image over the whole
+domain, the arbitrary-precision rung included (KO-6).
 
 **Platform-dependent integer widths (from core WF-22).**
 
@@ -247,10 +286,20 @@ types `int`, `uint`, and `uintptr` varies with the encoding platform's
 pointer size (4 on 32-bit, 8 on 64-bit). Decoders accept both widths and
 range-check against the target type's actual size.
 
+**Degradation table (per the core annotation WF-11).**
+
+Degrades are declared with blame on receive, never as silent
+widening:
+
+| trigger | native? | behavior on receive | blame/class | escape hatch |
+|---|---|---|---|---|
+| FLOAT binary16 or binary128 into a Go value position | no — Go has no half or quad float type | loud classified reject naming the form and the value path; a skipped field of that form consumes grammatically (WF-6) | `unsupported_kind` (GO-5) — the unsupported-form family | none — no native Go type exists |
+| complex64/complex128 | yes — as a composition | TUPLE(re, im) of FLOAT components under a NAMED wrapper (WF-22) | — (a composition convention, not a degrade) | — |
+
 ### 2.2 Known Limitations [GO-3]
 
 - **Decode atomicity leans on the sticky-error quarantine.** Target
-  atomicity (WF-22) extends to the intern space only because the stream
+  atomicity (WF-26) extends to the intern space only because the stream
   never resumes: after a failed decode the sticky error makes every
   subsequent call fail, so intern scratch state polluted by the failed
   record (partially filled backings, registered pointer targets,
@@ -262,10 +311,10 @@ range-check against the target type's actual size.
   require an epoch/generation reset of the intern space at the failure
   point; the obligation is never-resume.
 - **Skipped container records are not materialized.** When a struct field
-  is skipped under the WF-23 evolution contract (absent on the target),
+  is skipped under the WF-6 evolution contract (absent on the target),
   its map, blob/array backing, and pointer-target records are consumed
   parse-only and never materialized (skipped string and descriptor
-  literals do intern — the WF-13 mirror is exact, and subsequent REFs from kept
+  literals do intern — the WF-24 mirror is exact, and subsequent REFs from kept
   positions resolve). A subsequent REF or view from a known position onto a
   skipped map, backing, or pointer target is a format error ("not
   materialized", "shared backing unavailable", "not a pointer target"):
@@ -273,7 +322,7 @@ range-check against the target type's actual size.
 - **Stream-lifetime backing retention.** Materialized backings — and
   interned strings and descriptors — live for the whole stream on the
   decode side; each materialization is charged against the MaxBytes budget
-  of its value at production (WF-22), so the retained total grows with the
+  of its value at production (WF-26), so the retained total grows with the
   stream. An in-place materialized root cell — the caller's storage
   registered in the stream intern space when a pointer-target record root
   decodes directly into it — belongs to the same retention class: it lives
@@ -286,7 +335,7 @@ range-check against the target type's actual size.
 - **Broad recover in Decode.** A decode-time panic of any origin —
   including a panic of the caller-supplied Reader in the stream-header
   fill or the end-of-stream probe, before any value token — surfaces as
-  a classified error instead of a process crash (WF-22). The expected
+  a classified error instead of a process crash (WF-26). The expected
   class is reflect allocation panics that survive the budget
   gates under user-raised limits (a crafted backing length admitted by
   MaxBytes can still fail at the allocation itself; `budget_alloc`);
@@ -304,29 +353,23 @@ range-check against the target type's actual size.
   rejected with an unsupported-type error naming the offending path.
 
 The denotation table (5.2) carries the per-construct rows subsuming
-these notes — decimal128 under floats, pointer-to-map keys under
-exotic map keys; the register (5.3) carries the host-language causes.
+these notes — the float-form rejects under floats (the degradation
+table, 2.1), pointer-to-map keys under exotic map keys; the register
+(5.3) carries the host-language causes.
 
-**decimal128 degradation (from core WF-8).**
-
-The Go projection has no decimal128 type: a materializing decode of the
-form-2 FLOAT (width 16) is a loud unsupported-type error naming
-decimal128 — the stream is valid, the projection is incomplete — while a
-skipped field of that shape consumes grammatically (WF-23). There is no
-encode path to the form from any built-in value.
-
-**Extent binding (from core WF-1, WF-13, WF-15).**
+**Extent binding (from core WF-24, WF-17, WF-25).**
 
 The core's extent is the Go slice capacity — the backing join predicate
-is the capacity-window rule, byte for byte. The core's view-extent field
-(the reserved reach beyond the length) is therefore the slice capacity
-in this binding. A projection without a capacity notion binds
-extent = len: a documented degradation annotation (the shorter window
-can decline a join the capacity-bearing projection takes, so two such
-implementations may diverge on join boundaries), attributed to the
-projection, never silently to the core (core §8.2).
+is the capacity-window rule, byte for byte (WF-24). The core's
+view-extent field (the reserved reach beyond the length) is therefore
+the slice capacity in this binding (WF-17). A projection without a
+capacity notion binds extent = len: a documented projection annotation
+— two such implementations may diverge on join boundaries only
+through their extent binding, a qualification of the tier-1 claim
+(WF-25 (i)) — attributed to the projection, never silently to the
+core (core §8.2).
 
-**Strings and blobs (from core WF-10, WF-11).**
+**Strings and blobs (from core WF-13, WF-14).**
 
 A Go string is not required to be UTF-8 — the core's "a string is a byte
 sequence, not mandated text" carries the Go fact unchanged. The
@@ -335,11 +378,13 @@ text-versus-binary distinction; the core itself carries two internable
 byte-bearing record classes, and a projection with a single
 byte-sequence kind maps both onto its own distinction.
 
-**Descriptor field order (from core WF-18).**
+**Struct field order (from core WF-22).**
 
-Struct field order in descriptors is the owning type's source
-declaration order (Go projection of the core's "deterministic
-declaration order").
+Struct field order in descriptors and in value bodies is the canonical
+name-sorted order — the bytewise-lexicographic ascending
+order of the field-name byte sequences, case-sensitive — as fixed by
+the descriptor's field table (WF-22). The order in which fields are
+declared in the Go source does not participate.
 
 ### 2.3 Schema Snapshot Mechanics [GO-6]
 
@@ -370,7 +415,7 @@ set. The binding-side mechanics:
   stream — an order derived from the sorted member set, not from the
   value-stream encounter order. Tags are stable across rebuilds and
   declaration permutations (SA-4).
-- Determinism: permuting the declaration order and rebuilding the same
+- Determinism: permuting the declarations and rebuilding the same
   scope produce identical artifact bytes.
 
 ### 2.4 Evolution Intents [GO-7]
@@ -470,6 +515,17 @@ faults are codec capability):
 | `unstable_tie_break` | contract | unsupported | stable mode: map pairs tied in key skeleton and value bytes (pointer tie-break order, E5) |
 | `unstable_zero_float_key` | contract | unsupported | stable mode: zero float map key of ambiguous stored sign (E4) |
 
+The recover taxonomy and the registration closure carry class
+semantics the table compresses: `budget_alloc` is the budget-family
+exit for allocation panics that survived user-raised limits (2.2),
+while `internal_panic` carries every other recovered panic — a
+Reader fault or a decoder bug; `register_conflict` is the
+registry-side face of the one-chain-one-name law (1.3). The core's
+evolution carve-out class `evolution_ref_unmaterialized` (WF-6)
+projects onto `contract_mismatch`: a kept reference whose target
+stayed unmaterialized under narrowing is a decode-target setup
+problem, not a bytes problem.
+
 ### 3.2 Coder Error Contract
 
 A custom Coder returns a raw error and owns no location: the codec's
@@ -536,30 +592,42 @@ of each binding concern in the sections above.
 
 ## 5. Grounding
 
+The grounding apparatus is shared across the binding series; the
+terminology block below is its verbatim carrier (edits land in all
+three bindings).
+
+<!-- BEGIN shared terminology (verbatim; edits land in all three bindings) -->
+Stability tiers are named with the qualified vocabulary only (stability
+tier T1/T2/T3). A tier-2 instantiation fills the core slot: determinant
+form, determinism scope, verification hook. Status vocabulary: EXACT,
+REPRESENTATIONAL, DEGRADED, UNSUPPORTED. Doc-source hierarchy ranks are
+named source rank 1..4.
+<!-- END shared terminology -->
+
 ### 5.1 Source Hierarchy
 
 Every claim this binding makes about the Go value model is grounded in
-a four-tier source hierarchy, in normative order:
+a four-rank source hierarchy, in normative order:
 
-1. **Tier 1 — the Go Language Specification.** The language
+1. **Source rank 1 — the Go Language Specification.** The language
    specification is the first source for every claim about the value
    model; a construct's semantics is stated here before the
    documentation of any implementation is consulted.
-2. **Tier 2 — the reflect documentation.** The documentation of the
-   reflect package grounds what reflection observes about values and
-   types; it never overrides tier 1.
-3. **Tier 3 — the unsafe documentation.** The documentation of the
+2. **Source rank 2 — the reflect documentation.** The documentation of
+   the reflect package grounds what reflection observes about values and
+   types; it never overrides source rank 1.
+3. **Source rank 3 — the unsafe documentation.** The documentation of the
    unsafe package grounds memory-layout observation — aliasing and
    pointer conversion — where this binding speaks of layout.
-4. **Tier 4 — gc/runtime behavior.** Runtime behavior grounds a claim
+4. **Source rank 4 — gc/runtime behavior.** Runtime behavior grounds a claim
    only in zones the language specification itself marks
    implementation-defined, and there only pinned by tests; everywhere
    else it is not a source.
 
-A claim that needs a lower tier where a higher tier speaks is a defect
-(the falsification class of CLM-5 in docs/meta/claims.md).
+A claim that needs a lower source rank where a higher rank speaks is a
+defect (the falsification class of CLM-5 in docs/meta/claims.md).
 
-**Version pin (tier 1).** The Go Language Specification is pinned by
+**Version pin (source rank 1).** The Go Language Specification is pinned by
 its fetch record: page https://go.dev/ref/spec/, fetched
 17 September 2026, 341470 bytes, sha256
 7a0e32461098566bd7f9ec16dfbef3e0e92ee2768c2106357d8b205395a36507.
@@ -593,18 +661,18 @@ degeneracy recorded in the register (5.3).
 | Construct | GBON denotation | Identity/equality | Preserved observables | Intentional loss | Status | Decode environment |
 |---|---|---|---|---|---|---|
 | bool | BOOL primitive (gspec:Boolean types) | value equality (≡_GBON value dimension); key order by bytewise skeleton (E3) | value | none | EXACT | none beyond the stream |
-| integers | INT/UINT descriptors; math/big integers ride BIGINT under the reserved name big.Int (WF-18) (gspec:Numeric types) | value equality; bigint key order is the argument-byte order of the zigzag image (KO-6) | value; recorded width — 4 or 8 for int, uint, uintptr (WF-22) | none | EXACT | decoder accepts both widths and range-checks the target size (WF-22) |
-| floats | FLOAT by width | bit equality: ±0, NaN payloads, subnormals are representation-level distinctions of ≡_GBON; float keys round-trip bitwise (KO-3) (gspec:Numeric types) | raw bits; stored ±0 sign of map keys (E4) | NaN is outside the key domain (E1) — a value-model limit, not a register cause | EXACT | decimal128 form-2 materialization is a loud unsupported-type reject (no Go type; a skipped field consumes grammatically, WF-23) |
-| complex | a pair of FLOAT values (real and imaginary parts) (gspec:Numeric types) | "Complex types are comparable." (gspec:Comparison operators); wire equality is pairwise bit equality | raw bits of both parts | none | EXACT | none beyond the stream |
+| integers | INT/UINT descriptors; math/big integers ride the INT arb rung (WF-8, WF-22) (gspec:Numeric types) | value equality; integer key order is the argument-byte order of the zigzag image over the whole domain (KO-6) | value; recorded width — 4 or 8 for int, uint, uintptr (WF-22) | none | EXACT | decoder accepts both widths and range-checks the target size |
+| floats | FLOAT by width | bit equality: ±0, NaN payloads, subnormals are representation-level distinctions of ≡_GBON; float keys round-trip bitwise (KO-3) (gspec:Numeric types) | raw bits; stored ±0 sign of map keys (E4) | NaN is outside the key domain (E1) — a value-model limit, not a register cause | EXACT | binary16/binary128 materialization is a loud classified reject on receive with blame (`unsupported_kind`, GO-5 — the degradation table, 2.1); a skipped field of those forms consumes grammatically (WF-6) |
+| complex | TUPLE(re, im) of FLOAT components under a NAMED wrapper (WF-22) (gspec:Numeric types) | "Complex types are comparable." (gspec:Comparison operators); wire equality is pairwise bit equality | raw bits of both parts | none | EXACT | none beyond the stream |
 | strings | STRING (internable) (gspec:String types) | bytewise equality — "A string type represents the set of string values." | the byte sequence, not mandated UTF-8 | none | EXACT | none beyond the stream |
 | arrays | ARRAY of fixed length | elementwise equality when comparable (gspec:Array types) | elements; length | none | EXACT | none beyond the stream |
-| structs | STRUCT descriptor; field order is declaration order (WF-18) | fieldwise equality when comparable (gspec:Struct types) | fields in declaration order | identity of zero-size values neither preserved nor observable (G-6) — register 5.3 zero-size | EXACT | reflect-materializable target fields |
-| slices | VIEW over a backing; extent is the slice capacity (WF-15) | slices are not host-comparable; identity of the backing is preserved (≡_GBON sharing; G-1) (gspec:Slice types) | len; capacity (extent); sharing; cycles | zero-tail degeneracy qualified by extent agreement (WF-20 (i)) — register 5.3 zero-tail | EXACT | backing join by the capacity window |
+| structs | STRUCT descriptor; fields in canonical name-sorted order (WF-22) | fieldwise equality when comparable (gspec:Struct types) | fields in canonical order | identity of zero-size values neither preserved nor observable (G-6) — register 5.3 zero-size | EXACT | reflect-materializable target fields |
+| slices | VIEW over a backing; extent is the slice capacity (WF-17) | slices are not host-comparable; identity of the backing is preserved (≡_GBON sharing; G-1) (gspec:Slice types) | len; capacity (extent); sharing; cycles | zero-tail degeneracy qualified by extent agreement (WF-25 (i)) — register 5.3 zero-tail | EXACT | backing join by the capacity window |
 | maps | MAP with count | key domain and order per E1–E5 and KO-1, KO-2, KO-2b, KO-2a; slot keys materialize separately (KO-2); "The comparison operators == and != must be fully defined for operands of the key type; thus the key type must not be a function, map, or slice." (gspec:Map types) | pair count; key distinction; deterministic pair order within one encoding | none | EXACT | key materialization per the KO scheme |
-| pointers | pointer-target record plus REF resolution (WF-13) | "Pointer types are comparable." (gspec:Comparison operators) — pointer identity, not pointee value; pointer keys are identity keys (E2, KO-2a) (gspec:Pointer types) | identity (sharing); nil-ness | address-identity across processes unspecified (E5) — register 5.3 address-weak | EXACT | REF resolution against pointer-target records |
-| interfaces | the dynamic value's own descriptor and body (WF-18) | "Two interface values are equal if they have identical dynamic types and equal dynamic values or if both have value nil." (gspec:Comparison operators) (gspec:Interface types) | dynamic type and value; nil-interface vs typed-nil distinction (KO-4) | none | EXACT | name resolution through the registry for dynamic types (`unknown_name` on miss; unnamed chain derivation on a miss, 1.3) |
-| typed nil | one nil class with a kind selector — pointer, slice, map, interface (WF-12) | nil-ness and nil kind round-trip; the representation is merged, the distinction is positional (gspec:Variables) | nil-ness; nil kind | *big.Int nil and inline zero share one body byte (WF-3) — register 5.3 nil-merge | REPRESENTATIONAL | position shape: pointer and interface positions materialize nil, value positions zero |
-| time.Time | CODER kind 14 under the short-form name time.Time (1.4) | a struct type of the standard library (gspec:Struct types); wire equality is byte equality of the coder image | the coder's byte image round-trips | none declared beyond the coder contract | EXACT | registered coder (CODER 14) |
+| pointers | pointer-target record plus REF resolution (WF-24) | "Pointer types are comparable." (gspec:Comparison operators) — pointer identity, not pointee value; pointer keys are identity keys (E2, KO-2a) (gspec:Pointer types) | identity (sharing); nil-ness | address-identity across processes unspecified (E5) — register 5.3 address-weak | EXACT | REF resolution against pointer-target records |
+| interfaces | the dynamic value's own descriptor and body (WF-22) | "Two interface values are equal if they have identical dynamic types and equal dynamic values or if both have value nil." (gspec:Comparison operators) (gspec:Interface types) | dynamic type and value; nil-interface vs typed-nil distinction (KO-4) | none | EXACT | name resolution through the registry for dynamic types (`unknown_name` on miss; unnamed chain derivation on a miss, 1.3) |
+| typed nil | one nil token — selector 0 — with the sort derived from the position (WF-15) | nil-ness and nil sort round-trip; the representation is merged, the distinction is derived (gspec:Variables) | nil-ness; nil sort | all Go nil sorts share the one nil token (WF-15) — register 5.3 nil-merge | REPRESENTATIONAL | nil sort materializes from the static type of the position or the dynamic descriptor (WF-15, WF-24) |
+| time.Time | CODER kind 15 under the short-form name time.Time (1.4) | a struct type of the standard library (gspec:Struct types); wire equality is byte equality of the coder image | the coder's byte image round-trips | none declared beyond the coder contract | EXACT | registered coder (CODER 15) |
 | Coder-backed types | CODER records with canonical tags (GO-6) | a defined type binds an identifier to a new type (gspec:Type declarations); wire equality is byte equality of the coded image | the coder's byte image; tag stability across rebuilds | none declared beyond the coder contract | EXACT | registered coder and name resolution (coder error contract, 3.2) |
 | functions | no wire image — no opcodes in any class (GO-1) | "Slice, map, and function types are not comparable." (gspec:Comparison operators) (gspec:Function types) | — | format limit, not a degeneracy cause | UNSUPPORTED | n/a — classified reject `unsupported_kind` with the path |
 | channels | no wire image — no opcodes in any class (GO-1) | comparable channels compare by identity — no denotation (gspec:Channel types) | — | format limit, not a degeneracy cause | UNSUPPORTED | n/a — classified reject `unsupported_kind` with the path |
@@ -630,21 +698,22 @@ entries, prose elsewhere references the register.
 
 | Cause | Degeneracy cause in the host language | Constructs | Declared treatment |
 |---|---|---|---|
-| zero-size | distinct zero-size values carry no bytes and no address identity the language tier distinguishes; the runtime may place them at one shared base address (an implementation-defined zone, tier 4 of 5.1) | zero-size arrays, structs, and composites — nil-ness observable, identity neither preserved nor observable (G-6, WF-13) | REPRESENTATIONAL |
-| nil-merge | the nil values of the reference kinds share one predeclared nil (gspec:Variables), and for `*big.Int` the nil token coincides with the inline zero argument byte (WF-3) | typed nil — the four nil kinds of one class with a selector (WF-12); the *big.Int nil/zero coincidence | REPRESENTATIONAL |
-| zero-tail | a non-nil slice of length zero presents no elements: its observable shape degenerates to the extent window over its backing (WF-15) | zero-length non-nil slices (VIEW len 0) | REPRESENTATIONAL |
-| address-weak | pointer identity is an address, an artifact of allocation — stable within one process, unspecified across processes (E5); pointer keys are identity keys (E2, KO-2a), and the stable-class predicate stays with the core (WF-20) | pointer map keys; identity-keyed map pairs | REPRESENTATIONAL |
+| zero-size | distinct zero-size values carry no bytes and no address identity the language distinguishes; the runtime may place them at one shared base address (an implementation-defined zone, source rank 4 of 5.1) | zero-size arrays, structs, and composites — nil-ness observable, identity neither preserved nor observable (G-6); a non-nil pointer to a zero-size target is the zero-size marker, selector 4 (WF-24) | REPRESENTATIONAL |
+| nil-merge | the nil values of the reference kinds share one predeclared nil (gspec:Variables) and one wire token — selector 0, absent; the sort of a nil is derived from the position, never read from the token (WF-15) | typed nil — the four Go nil sorts of one token with a derived sort (WF-15) | REPRESENTATIONAL |
+| zero-tail | a non-nil slice of length zero presents no elements: its observable shape degenerates to the extent window over its backing (WF-17) | zero-length non-nil slices (VIEW len 0) | REPRESENTATIONAL |
+| address-weak | pointer identity is an address, an artifact of allocation — stable within one process, unspecified across processes (E5); pointer keys are identity keys (E2, KO-2a), and the stable-class predicate stays with the core (WF-25) | pointer map keys; identity-keyed map pairs | REPRESENTATIONAL |
 
 The zero-tail entry carries the extent-agreement qualification of the
-canonical claim (WF-20 (i)): two projections binding different extents
+canonical claim (WF-25 (i)): two projections binding different extents
 may diverge on join boundaries — a documented projection annotation,
 not a core divergence.
 
 ### 5.4 Stable-class projection
 
-The core's stable class and its guard contract (wire-format.md section
-8.1, WF-20) are normative there; this section is the binding's
-projection of the class, in two halves (CLM-2 Scope in
+The core's stable class — the class over which the stability tier T1
+claim holds — and its guard contract (wire-format.md section 8.1,
+WF-25) are normative there; this section is the binding's projection
+of the class, in two halves (CLM-2 Scope in
 docs/meta/claims.md names both).
 
 **Static conservative predicate over types.** The reference encoder's
@@ -665,7 +734,7 @@ dynamic may still hold only in-class values:
 | bool, integer, string keys | statically stable — distinct slots carry distinct skeletons |
 | struct/array keys of the above | statically stable |
 | float32/float64, complex64/128 keys | dynamic — E4 zero-sign ambiguity |
-| pointer keys (including `*big.Int`) | dynamic — E5 tie eligibility |
+| pointer keys (math/big integers included) | dynamic — E5 tie eligibility |
 | interface keys | dynamic — the verdict is per dynamic key |
 | keys with pointer/interface/float/complex components | dynamic |
 
@@ -677,7 +746,8 @@ per-map check; the guard then runs only where value facts can violate
 the class.
 
 **Dynamic exact predicate at encode time.** Stable mode (the reference
-implementation's `MarshalStable` and `Encoder.SetStable`) checks the
+implementation's `MarshalStable` and `Encoder.SetStable`) is the one
+mode — the stability tier T1 guarantee — and checks the
 two rules exactly: the `unstable_tie_break` class when any map applies
 the E5 tie-break — pairs equal in key skeleton and pair value bytes
 across distinct identity slots, ordered by the KO-2a pointer
@@ -688,4 +758,4 @@ key-overwrite semantics, GO-2). Both rejects name the value path of the
 offender in sorted-index form; the classification is a function of the
 offending rule alone, never of process state. An application may
 restore membership by moving identity into value — a declared
-discriminator inside the key (WF-20), without any format change.
+discriminator inside the key (WF-25), without any format change.

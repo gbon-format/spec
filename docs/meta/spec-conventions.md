@@ -40,7 +40,7 @@ already are the parts.
   encodings by kind; 7 Graph encodings; 8 Canonical and portable
   profiles (restriction clauses over the base encoding); 9 Limits and
   budgeted decode; 10 Security considerations; Appendix A Examples;
-  Appendix B Declared Origins.
+  Appendix B References.
 - `foundations.md` spine: unnumbered Introduction (layering overview,
   annex status list); 1 Scope with the layering statement; 2
   Definitions; 3 Model overview; constructive mechanisms; equality and
@@ -88,9 +88,9 @@ bindings.
   identical bytes. Where a rule needs a vocabulary originating in one
   ecosystem (a reserved-name table, a type-name form), state the
   neutral rule plus a declared origin in the core, and carry the
-  inventory in the binding (the WF-18 namespace pattern).
-- Frozen artifacts inherited from history (the reserved `big.Int` wire
-  name) are presented as origin facts, not as neutral norms.
+  inventory in the binding (the WF-22 namespace pattern).
+- Frozen artifacts inherited from history are presented as origin
+  facts, not as neutral norms.
 - Repository positioning: the `gbon-go` README states that it is the
   reference implementation of the GBON specification, developed by the
   specification's author; the specification README states that the
@@ -117,7 +117,7 @@ not restate them.
 
 Place worked examples inline at each construct and consolidated in
 Appendix A. Place rationale, comparisons, and history in informative
-appendices (`Appendix B Declared Origins`) or the bibliography annex.
+appendices or the bibliography annex.
 Declared-origin notes (SC-5) are the one admissible form of history
 inside normative clauses.
 
@@ -133,8 +133,11 @@ inside normative clauses.
   specification text that derives them; each vector carries its
   derivation chain. Extracting expected bytes from implementation
   behavior is not a valid source.
-- Wire-format bytes are frozen: no edit may change any byte of a
-  legitimate stream. A disagreement between the text and the reference
+- Wire-format bytes: in the draft era (major 0) a minor release may
+  change the bytes of a legitimate stream, and decoders reject
+  streams of unknown minor versions; from major 1 on, bytes are
+  frozen — no edit may change any byte of a legitimate stream. A
+  disagreement between the text and the reference
   implementation is a defect report against one of them — never a
   silent adaptation of either side.
 - Never edit `LICENSE` or identity files.
@@ -145,3 +148,13 @@ RFC 8949 (STD 94); ISO/IEC 8824-1 (ITU-T X.680); ISO/IEC 8825-1
 (ITU-T X.690); the Protobuf encoding specification; the Amazon Ion
 specification; the BSON specification. The consolidated anchor map —
 sources, roles, and verification statuses — is `docs/references.md`.
+
+## SC-11. Stability tier vocabulary
+
+The byte-determinism ladder of the canonical profile (WF-25) is named
+only in the qualified form: "stability tier T1", "stability tier T2",
+"stability tier T3", with the hyphenated adjectival forms tier-1,
+tier-2, tier-3. Unqualified "Tier n" is reserved for binding
+document-source hierarchies (the doc-source tiers of a binding's
+grounding section). Core documents never name a stability tier in the
+unqualified form, and no document may conflate the two hierarchies.

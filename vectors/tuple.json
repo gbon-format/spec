@@ -1,0 +1,140 @@
+{
+  "category": "tuple",
+  "section": "6.13",
+  "vectors": [
+    {
+      "id": "V-68",
+      "desc": "TUPLE positional, never reordered: (2, 1)",
+      "tags": [
+        "WF-20",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d202e0d80a0808d1502422",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "tuple",
+            "elems": [
+              2,
+              1
+            ]
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC E0 D2 TUPLE: ARG arity 02, then two type-refs - INT64 DESC literal E0 D8 0A 08 08 (id 1) and D1 REF: structural identity hash-conses both positions onto one INT64 record (WF-22)",
+        "TUPLE value 50 (low nibble reserved zero, WF-23): elements strictly positional - 24 (zz(2)=4) then 22 (zz(1)=2): the (2,1) order is the encoding (WF-20)",
+        "positions are never reordered: canonical name-sorted order governs named tables (struct fields WF-19, variants WF-21), not positional products (WF-20)"
+      ]
+    },
+    {
+      "id": "V-69",
+      "desc": "TUPLE arity 3, heterogeneous positional elements",
+      "tags": [
+        "WF-20"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d203e0d80a0808e0d80de0d80950280e62686911",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "tuple",
+            "elems": [
+              7,
+              "hi",
+              true
+            ]
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC E0 D2 TUPLE: ARG arity 03; positional type-refs INT64 (id 1), STRING E0 D8 0D (id 2), BOOL E0 D8 09 (id 3) - heterogeneous positions (WF-22 TUPLE body)",
+        "TUPLE value 50: 280e (zz(7)=14, u8 rung, WF-8) | 62 6869 (STRING len 2 \"hi\", interns id 4, WF-24) | 11 (BOOL true, WF-10) - no tags, no names; each element fills its positional slot (WF-20)"
+      ]
+    },
+    {
+      "id": "V-70",
+      "desc": "TUPLE nesting: TUPLE(TUPLE(1,2), true)",
+      "tags": [
+        "WF-20"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d202e0d202e0d80a0808d2e0d8095050222411",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "tuple",
+            "elems": [
+              [
+                1,
+                2
+              ],
+              true
+            ]
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC E0 D2 TUPLE (id 0): type-ref 1 = inner TUPLE DESC E0 D2 02 (id 1) over INT64 (id 2) + D2 REF; type-ref 2 = BOOL DESC (id 3) (WF-22)",
+        "value 50: outer body = inner TUPLE token 50 with 22 24 (zz(1,2)=2,4), then 11 (true) - the product composes over the product, nesting positional all the way down (WF-20)",
+        "each TUPLE token carries no arity byte: arity lives in the descriptor's structure, and the value body just fills positions (WF-20/WF-22)"
+      ]
+    },
+    {
+      "id": "V-71",
+      "desc": "complex = TUPLE(re, im): 1.0 + 2.0i as a FLOAT-64 pair",
+      "tags": [
+        "WF-12",
+        "WF-20",
+        "WF-22",
+        "WF-11"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d202e0d80c0808d150403ff0000000000000404000000000000000",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "complex",
+            "re": "1.0",
+            "im": "2.0",
+            "width": 8
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC E0 D2 TUPLE: FLOAT64 DESC E0 D8 0C 08 08 (id 1) + D1 REF - the re/im pair hash-conses onto one FLOAT64 record (WF-22 identity)",
+        "TUPLE value 50: 40 3ff0000000000000 (re=1.0) | 40 4000000000000000 (im=2.0) - raw IEEE bits at descriptor width, re before im positionally (WF-11)",
+        "complex is no core kind: it rides the library-level positional product TUPLE(re, im) (WF-12; WF-20) - 1.0+2.0i is the FLOAT-64 pair"
+      ]
+    },
+    {
+      "id": "V-72",
+      "desc": "TUPLE arity mismatch: descriptor arity 2, body of one element",
+      "tags": [
+        "WF-20",
+        "WF-22"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d202e0d80a0808d15024",
+      "class": "tuple_arity_mismatch",
+      "deriv": [
+        "root DESC TUPLE arity 02 (INT64 + D1 REF) exactly as V-68; TUPLE value 50 carries 24 (zz(2)=4) - a body of one element",
+        "the TUPLE token carries no count of its own: the descriptor's arity fixes the body at exactly arity element values in positional order (WF-20/WF-22)",
+        "the second element never arrives - the stream ends mid-body; a body whose element count differs from the descriptor's arity is a format error (WF-20; WF-4 truncation is a format error, never a hang)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "category": "stream-version",
+  "section": "4",
+  "vectors": [
+    {
+      "id": "V-1",
+      "desc": "canonical header 00 02, root BOOL true",
+      "tags": [
+        "WF-3",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80911",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "bool",
+            "value": true
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 09 — BOOL kind 9, empty body, fused before the value token (WF-22 :598-616; old-corpus V-1 form)",
+        "header: magic 67 62 6F 6E, major 00, minor 02 — the six bytes every stream of this specification begins with (WF-3 :194-198, App A :1334-1337)",
+        "BOOL true: class 0x1 selector 1, token byte 11 (WF-23 :704, App A :1347-1349)"
+      ]
+    },
+    {
+      "id": "V-2",
+      "desc": "wrong stream magic rejected",
+      "tags": [
+        "WF-3"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6f",
+      "class": "bad_magic",
+      "deriv": [
+        "magic byte 4 is 6F, not 6E; no stream can exist with this prefix — halt prefix through the offending byte (WF-3 :194, :200-201; class bad_magic)"
+      ]
+    },
+    {
+      "id": "V-3",
+      "desc": "unknown major version rejected",
+      "tags": [
+        "WF-3",
+        "WF-5"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e01",
+      "class": "unknown_major",
+      "deriv": [
+        "major 01 (finalization era): this decoder implements major 00 only, rejects unknown majors outright — halt at the major byte (WF-3 :200-201, WF-5 :238-239; class unknown_major)"
+      ]
+    },
+    {
+      "id": "V-4",
+      "desc": "unknown higher minor rejected in the draft era",
+      "tags": [
+        "WF-3",
+        "WF-5"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0003",
+      "class": "unknown_minor",
+      "deriv": [
+        "major 0, minor 03: the draft era carries no cross-minor compatibility promises, unknown minors rejected outright (WF-3 :200-203, WF-5 :230-233; class unknown_minor)"
+      ]
+    },
+    {
+      "id": "V-5",
+      "desc": "superseded draft minor rejected identically",
+      "tags": [
+        "WF-3",
+        "WF-5"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0001",
+      "class": "unknown_minor",
+      "deriv": [
+        "major 0, minor 01: minor 02 is the only minor of this decoder's knowledge; the superseded draft minor rejects by the same law, not by ordering (WF-5 :230-233; class unknown_minor)"
+      ]
+    },
+    {
+      "id": "V-6",
+      "desc": "truncated header: 5-byte prefix",
+      "tags": [
+        "WF-3",
+        "WF-4"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e00",
+      "class": "truncation",
+      "deriv": [
+        "the 6-byte header is incomplete at a value boundary that expects more input — a strict prefix is never well-formed, a format error never a hang (WF-3 :188, WF-4 :217; class truncation)"
+      ]
+    },
+    {
+      "id": "V-7",
+      "desc": "truncation at value boundary, mid-token",
+      "tags": [
+        "WF-4",
+        "WF-7"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d80a080828",
+      "class": "truncation",
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0A 08 08 — INT-8, width 8 rides the u8 rung (the canonical root example; width bullet WF-22 :633-639, :707-711) — would-be prefix before the truncated token",
+        "header ok; INT u8-rung token 28 opens a 1-byte payload that never arrives — truncation is a format error, never a hang (WF-4 :217; class truncation)"
+      ]
+    },
+    {
+      "id": "V-8",
+      "desc": "canonical header, root NIL absent",
+      "tags": [
+        "WF-3",
+        "WF-15",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80800",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "nil"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 08 — INTERFACE, the minimal empty-body descriptor; a root nil derives its sort from the position's static type (WF-22 :610-616, :688-691; WF-15 :443-446)",
+        "header (WF-3 :194-198)",
+        "NIL absent: class 0x0 selector 0, token byte 00 (WF-23 :703, WF-15)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,376 @@
+{
+  "category": "descriptors",
+  "section": "6.15",
+  "vectors": [
+    {
+      "id": "V-83",
+      "desc": "STRUCT descriptor, name-sorted field table, hash-consed repeat type-ref",
+      "tags": [
+        "WF-22",
+        "VS-8"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d0026178e0d80a016179d2b02422",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n4"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "struct",
+            "fields": [
+              {
+                "name": "x",
+                "type": "d2"
+              },
+              {
+                "name": "y",
+                "type": "d2"
+              }
+            ]
+          },
+          {
+            "node": "d2",
+            "kind": "desc",
+            "type": "int",
+            "width": 1
+          },
+          {
+            "node": "n4",
+            "kind": "struct",
+            "fields": [
+              {
+                "name": "x",
+                "value": "n5"
+              },
+              {
+                "name": "y",
+                "value": "n6"
+              }
+            ]
+          },
+          {
+            "node": "n5",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "n6",
+            "kind": "int",
+            "value": "1"
+          }
+        ]
+      },
+      "deriv": [
+        "kind 0 STRUCT rides the inline selector D0 (kinds 0..7 inline, 8..15 as D8 u8 — minimality, WF-22 :598-608); body ARG n=2, then pairs {field name, type-ref} in canonical name-sorted order x < y (WF-22 :668-674)",
+        "the second field's type-ref is REF d2 — structural identity: two descriptors with the same kind, arguments, and child type-refs are one intern record, the second occurrence a REF (WF-22 :657-660)",
+        "value: STRUCT b0, field values in table order — zz(2)=4 (24), zz(1)=2 (22); no per-field tags (WF-19 :541-546)"
+      ]
+    },
+    {
+      "id": "V-84",
+      "desc": "NAMED wrapper with Name[args] wire name; wrapper and base intern independently",
+      "tags": [
+        "WF-22",
+        "VS-25"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d6680a426f785b696e7436345de0d80a0808280e",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n3"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "named",
+            "name": "Box[int64]",
+            "base": "d2"
+          },
+          {
+            "node": "d2",
+            "kind": "desc",
+            "type": "int",
+            "width": 8
+          },
+          {
+            "node": "n3",
+            "kind": "int",
+            "value": "7"
+          }
+        ]
+      },
+      "deriv": [
+        "kind 6 NAMED, inline D6; the name position exists exactly for the nominal kinds — VARIANT, NAMED, CODER; structural kinds omit it (WF-22 :608, :633-641)",
+        "wire name 'Box[int64]' — the Name[args] grammar: constructor name plus bracketed argument list, the arguments canonical structural names (VS-25; WF-22 :641-646)",
+        "the wrapper and its base intern independently — nominal names do not participate in the structural key: one structural record per structure, one wrapper per name (WF-22 :657-663); value zz(7)=14 -> 28 0E under the base width (WF-8 :328-331)",
+        "the width-8 argument rides the u8 rung 08 08 — the inline rung caps at 7; width 16 is 08 10 (WF-22 :635-639)",
+        "the name length 10 exceeds the inline cap 7 — u8 rung 68 0A; a nibble may not carry 8..15 as a value (WF-7 :286-287)"
+      ]
+    },
+    {
+      "id": "V-85",
+      "desc": "width argument minimality: INT-16 rides the u8 rung 08 10",
+      "tags": [
+        "WF-22",
+        "WF-7"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80a081022",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n2"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "int",
+            "width": 16
+          },
+          {
+            "node": "n2",
+            "kind": "int",
+            "value": "1"
+          }
+        ]
+      },
+      "deriv": [
+        "kind 10 INT rides the u8 form D8 0A; the width is one WF-7 argument: 0 = arb (the INT rung only, no fixed width), 1/2/4/8 the machine widths as inline selectors, 16 the u8 form 08 10 — the inline rung caps at 7 (WF-22 :622, :627-631)",
+        "value zz(1)=2 (22) fits the 16-wide domain; the width is part of the descriptor's structure (WF-8 :328-331; WF-22 :627-631)"
+      ]
+    },
+    {
+      "id": "V-86",
+      "desc": "u8-form kind rung: STRING kind D8 0D, empty body",
+      "tags": [
+        "WF-22"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80d626869",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n2"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "string"
+          },
+          {
+            "node": "n2",
+            "kind": "string",
+            "value": "hi"
+          }
+        ]
+      },
+      "deriv": [
+        "kind 13 STRING: selector D8 0D, body empty — as are BOOL (D8 09), BLOB (D8 0E), INTERFACE (D8 08); kinds 8..15 ride the u8 form and no kind that fits the inline rung rides it (WF-22 :598-608, table :610-616)",
+        "value STRING 'hi' = 62 68 69 — token 6, ARG len 2, raw bytes; the literal interns id 1 in the unified space (WF-13 :411-423; WF-24 :752)"
+      ]
+    },
+    {
+      "id": "V-87",
+      "desc": "ARRAY kind D4: ARG N plus one element type-ref, never duplicated inside the record",
+      "tags": [
+        "WF-22",
+        "WF-16"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d403e0d80a018303222426",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n3"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "array",
+            "length": 3,
+            "elem": "d2"
+          },
+          {
+            "node": "d2",
+            "kind": "desc",
+            "type": "int",
+            "width": 1
+          },
+          {
+            "node": "n3",
+            "kind": "array",
+            "length": 3,
+            "dense": 3,
+            "elements": [
+              "n4",
+              "n5",
+              "n6"
+            ]
+          },
+          {
+            "node": "n4",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "n5",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "n6",
+            "kind": "int",
+            "value": "3"
+          }
+        ]
+      },
+      "deriv": [
+        "kind 4 ARRAY ([N]T): inline D4, body ARG N = 3, then exactly one type-ref — the element type is never duplicated inside the record; the descriptor context fixes it (WF-22 :606, :610-616, :686-688)",
+        "value: ARRAY L=3 E=3 — 83 03, elements zz(1/2/3) = 22 24 26 (WF-16 :458-460; WF-8 :328-331)"
+      ]
+    },
+    {
+      "id": "V-88",
+      "desc": "kind 16 reserved: D8 10 rejected",
+      "tags": [
+        "WF-22"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d810",
+      "class": "desc_kind_reserved",
+      "deriv": [
+        "the u8 kind byte 10 reads as kind 16 — kinds 16..255 are reserved and unknown kinds are a format error; the prefix halts at the kind byte (WF-22 :602-604)"
+      ]
+    },
+    {
+      "id": "V-89",
+      "desc": "selector non-minimal: inline-capable kind 2 riding the D8 form",
+      "tags": [
+        "WF-22",
+        "WF-7"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d802",
+      "class": "desc_selector_nonminimal",
+      "deriv": [
+        "D8 02: kind 2 (TUPLE) fits the inline rung D0..D7 — the kind selector is subject to minimality and no kind that fits the inline rung rides the u8 form (WF-22 :604-608)",
+        "canonical spelling opens e0 d2 (V-77's descriptor); one legal selector per kind"
+      ]
+    },
+    {
+      "id": "V-90",
+      "desc": "hybrid collision: two distinct nominal types deriving one qualified name",
+      "tags": [
+        "WF-22",
+        "VS-10"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d66154e0d80a01e0d6d1e0d809",
+      "class": "nominal_name_collision",
+      "deriv": [
+        "two NAMED descriptors both derive the qualified name 'T' (first: 61 54 literal, interning id 1; second: name position REF d1) with distinct bases INT-8 and BOOL — one qualified name maps to exactly one descriptor per stream (WF-22 :633-641)",
+        "the name policy is hybrid: derived names stay clean, no renaming, no disambiguation suffixes — the encoder rejects at registry start naming both origins, the decode-side counterpart is this format error at the colliding descriptor; the resolution is explicit name binding (VS-10; WF-22 :645-651)"
+      ]
+    },
+    {
+      "id": "V-91",
+      "desc": "std.decimal reserved: rebinding the standard namespace rejected",
+      "tags": [
+        "WF-22",
+        "WF-11"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d6680b7374642e646563696d616ce0d80a01",
+      "class": "name_binding_conflict",
+      "deriv": [
+        "a NAMED descriptor deriving 'std.decimal' over an INT-8 base: the reserved standard namespace cannot collide with a language-derived name — std.decimal names the decimal interchange composition (unscaled INT-arb, scale INT-32) and a binding may not rebind it (WF-22 :651-653; WF-11 :393-397)",
+        "a name bound to two different types, or a binding conflicting with a reserved standard name, rejects with an unsupported-type error — the decode-side class is the binding conflict (WF-22 :684-687)",
+        "the name 'std.decimal' is 11 bytes — 7374642e646563696d616c on the u8 length rung 68 0B (WF-7 :286-287; WF-22 :717)"
+      ]
+    },
+    {
+      "id": "V-92",
+      "desc": "custom coder body unskippable: decode without the registration",
+      "tags": [
+        "WF-22",
+        "WF-6"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d80f626378012a2b",
+      "class": "custom_coder_unsupported",
+      "deriv": [
+        "kind 15 CODER: D8 0F, nominal name 'cx' (62 63 78), ARG coderTag 1, body 2A defined by the coder registered for the name; the tag binds 1:1 to the name per stream (WF-22 :610-616, :682-685); the value body 2B is the coder's own encoding",
+        "a decoder without that registration cannot step over the body — its length is not derivable from the grammar; bodies of user-registered coders stay unskippable and reject with an unsupported-type error, never a silent skip (WF-6 :261, :273-274); would-be canonical bytes under the registered encoder"
+      ]
+    },
+    {
+      "id": "V-142",
+      "desc": "TUPLE-typed root, value token 51 — nonzero reserved low nibble",
+      "tags": [
+        "WF-23"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d20051",
+      "class": "unknown_opcode_or_form",
+      "deriv": [
+        "envelope: root DESC TUPLE E0 D2 with arity ARG 00 — zero elements (WF-22 :621, :692-693); the value position is known and TUPLE-typed, the token 51",
+        "for the FLOAT, TUPLE, STRUCT, and DESC value tokens (40, 50, B0, E0) the low nibble is reserved — a decoder MUST reject a nonzero nibble (WF-23 :772-775); an unknown opcode — any selector or form not defined for its class and position — in a known position is a format error, silent skipping forbidden (:777-779)",
+        "not a BOOL-selector case: the position is TUPLE-typed and the token is class 5, so the BOOL row's enumerated selectors (:745) never apply — V-40 keeps the BOOL-selector class on its own bytes"
+      ]
+    },
+    {
+      "id": "V-144",
+      "desc": "root byte-slice position whose desc spells SLICE-of-UINT-8 where BLOB is the canonical grain",
+      "tags": [
+        "WF-22",
+        "WF-25"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d3e0d80b01",
+      "class": "slice_of_uint8_in_blob_position",
+      "deriv": [
+        "the root type is a byte slice, whose canonical kind is BLOB — the canonical byte-sequence kind: a byte slice encoded as a SLICE of UINT-8 is non-canonical (WF-22 :700-701)",
+        "the desc spells the violation itself — E0 D3 (SLICE) over E0 D8 0B 01 (UINT-8) — and canonical mode is always on, a decode-side contract: a SLICE of UINT-8 in a byte-slice position is a decoder reject, not an encoder convention (WF-25 :967-973); the prefix halts at the desc, no value body can follow legally"
+      ]
+    }
+  ]
+}

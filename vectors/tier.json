@@ -1,0 +1,310 @@
+{
+  "category": "tier",
+  "section": "8.1",
+  "vectors": [
+    {
+      "id": "V-113",
+      "desc": "T1 in-class differential: isomorphic constructions produce identical bytes",
+      "tags": [
+        "WF-25",
+        "KO-1",
+        "KO-2",
+        "VS-1"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d5e0d80de0d80a01a3636f6e65226374776f2665746872656524",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "map",
+            "count": 3,
+            "pairs": [
+              {
+                "key": "n2",
+                "value": "n5"
+              },
+              {
+                "key": "n3",
+                "value": "n6"
+              },
+              {
+                "key": "n4",
+                "value": "n7"
+              }
+            ]
+          },
+          {
+            "node": "n2",
+            "kind": "string",
+            "value": "one"
+          },
+          {
+            "node": "n3",
+            "kind": "string",
+            "value": "three"
+          },
+          {
+            "node": "n4",
+            "kind": "string",
+            "value": "two"
+          },
+          {
+            "node": "n5",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "n6",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "n7",
+            "kind": "int",
+            "value": "3"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D5 (STRING id 1, INT-8 id 2) — root DESC MAP: E0 D5, key type-ref, elem type-ref, in this order (WF-22 :620)",
+        "map {one:1, three:2, two:3} of pointer-free keys: the value is inside the stable class — no map applies the E5 tie-break and no zero float key exists (WF-25 :1114-1120), so the encoding is a function of the value alone (tier ladder :940-943)",
+        "the pair sort precedes emission and is independent of the in-memory iteration order: skeletons 'one' (63 6f..) < 'two' (63 74..) < 'three' (65 74..) bytewise (KO-1 :1021-1029; KO-2 :1031-1035); inserted in any order, by any process, any conforming implementation, the bytes are these bytes — the T1 differential asserted on this fixture (DD-2 predicate: two isomorphs, byte equality)",
+        "values are INT inline tokens of the zigzag image: zz(1)=2 (22), zz(2)=4 (24), zz(3)=6 (26) (WF-8 :328-339, WF-7 :286)"
+      ]
+    },
+    {
+      "id": "V-114",
+      "desc": "T2 tied-pair, composite key: nil slot orders below every address in the declared discriminator",
+      "tags": [
+        "WF-25",
+        "E5",
+        "KO-2a",
+        "VS-2"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d0026161e0d7e0d8096162d2d311d311e0d5d0e0d80a01a2b000d522b0d6d522",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n6",
+              "n7",
+              "n8"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "struct",
+            "fields": [
+              {
+                "name": "a",
+                "type": "d2"
+              },
+              {
+                "name": "b",
+                "type": "d2"
+              }
+            ]
+          },
+          {
+            "node": "d2",
+            "kind": "desc",
+            "type": "pointer",
+            "target": "d3"
+          },
+          {
+            "node": "d3",
+            "kind": "desc",
+            "type": "bool"
+          },
+          {
+            "node": "n6",
+            "kind": "bool",
+            "value": "true"
+          },
+          {
+            "node": "n7",
+            "kind": "bool",
+            "value": "true"
+          },
+          {
+            "node": "n8",
+            "kind": "map",
+            "count": 2,
+            "pairs": [
+              {
+                "key": "n9",
+                "value": "n11"
+              },
+              {
+                "key": "n10",
+                "value": "n12"
+              }
+            ]
+          },
+          {
+            "node": "n9",
+            "kind": "struct",
+            "fields": [
+              {
+                "name": "a",
+                "value": null
+              },
+              {
+                "name": "b",
+                "value": "n7"
+              }
+            ]
+          },
+          {
+            "node": "n10",
+            "kind": "struct",
+            "fields": [
+              {
+                "name": "a",
+                "value": "n6"
+              },
+              {
+                "name": "b",
+                "value": "n7"
+              }
+            ]
+          },
+          {
+            "node": "n11",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "n12",
+            "kind": "int",
+            "value": "1"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): per-value — value 1 stays the struct DESC (ids 0..4 unchanged); values 2-3 (the cells, records 5/6) gain the type repeat REF d3 (BOOL desc id 3); value 4 = DESC MAP E0 D5, key type-ref REF d0 (the struct desc), elem type-ref DESC INT-8 (id 8) (WF-22 :620, :654-660)",
+        "key type struct{a *bool, b *bool}: DESC E0 D0 02, field 'a' with POINTER literal E0 D7 D8 09 (ids: struct 0, 'a' 1, pointer 2, bool 3), field 'b' type-ref REF d2 — structural hash-consing of the identical pointer descriptor (WF-22 :608-616, :654-660)",
+        "keys {nil, p1} and {p0, p1}: every reference-kind component collapses to the nil token in the skeleton (E2 :997-1003) — both skeleton to {nil, nil}, byte-equal; pair values are byte-equal INT 1 (22) — a genuine E5 tie across distinct identity slots (E5 :1013-1019)",
+        "cells open before the referencing map (record-then-fill, WF-24 :762-765): p1 registers id 5 (reached first by the sorted-leading pair), p0 id 6 — under the r5 per-value envelope REF d3 + body; wire keys carry REFs, skeletons never do (KO-1 :1026-1028)",
+        "order is the go binding's declared tier-2 instantiation: the allocation-sequence discriminator compares identity sequences lexicographically with a nil slot below every address (go.md 2.1 :210-217; KO-2a :1049-1061) — pair {nil, p1} precedes {p0, p1}; companion to V-105 (bare pointer keys), this fixture pins the composite-key nil rule",
+        "the value is OUTSIDE the stable class: cross-language byte order is not claimed — within the declared scope the encoding agrees, and the decode-side canonicality rejects hold in every tier (tier ladder :944-949, :954-956) (WF-25)",
+        "c4 DD r2: bool type-ref restored to DESC literal — e0 d7 e0 d8 09 (WF-22 :662-663); ids shift: bool desc 3, 'b' 4"
+      ]
+    },
+    {
+      "id": "V-115",
+      "desc": "T3 re-encode identity: sharing and views reproduce the stream bit-for-bit",
+      "tags": [
+        "WF-25",
+        "WF-24",
+        "VS-3"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80e74026162e0d202e0d3d0d350900191010202",
+      "ir": {
+        "root": "t1",
+        "nodes": [
+          {
+            "node": "b1",
+            "kind": "blob",
+            "L": 4,
+            "dense": "6162"
+          },
+          {
+            "node": "t1",
+            "kind": "tuple",
+            "children": [
+              "v1",
+              "v2"
+            ]
+          },
+          {
+            "node": "v1",
+            "kind": "view",
+            "form": 0,
+            "backing": "b1"
+          },
+          {
+            "node": "v2",
+            "kind": "view",
+            "form": 1,
+            "backing": "b1",
+            "off": 2,
+            "len": 2
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC per-value: value 1 = DESC BLOB (id 0) + backing (id 1); value 2 = DESC TUPLE E0 D2 02, both component type-refs DESC SLICE E0 D3 (id 3, elem type-ref REF d0) then REF d3 (WF-22 :612, :618, :654-660)",
+        "blob backing 'ab\\0\\0': token 74 = class 7 << 4 | inline L 4, ARG E = 02, then E raw bytes 61 62 (WF-14 :428-434; WF-23 :703, :712 — the V-41 spelling); a decoder materializes the record-and-edge graph exactly, so encoding the decoded value reproduces the stream byte for byte — the T3 claim (WF-24 :823-827; tier ladder :950-952)",
+        "view over the whole backing: off 0, len=extent=4=L — form 0, body id only (90 01); window [2,4): off 2 len 2, extent=len, form-0 geometry fails — form 1 (91 01 02 02); both minimal spellings, exactly one legal byte sequence per view (WF-17 :481-499)",
+        "record invariant: max(0+4, 2+2)=4 = L — the join is fully determined by the closed geometry and the live bytes, never by allocation history (WF-24 :968-977); the re-encode identity is deterministic within one process for every tier (T3) and value-derived here"
+      ]
+    },
+    {
+      "id": "V-116",
+      "desc": "guard G1: stable mode rejects a value applying the E5 tie-break",
+      "tags": [
+        "WF-25",
+        "E5",
+        "VS-6"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d7e0d80911d011e0d5d0e0d80a01a2d222d322",
+      "class": "guard_e5_tiebreak",
+      "deriv": [
+        "envelope (c4 DD r5): root DESC per-value as V-104 — would-be canonical bytes: DESC POINTER(BOOL), cells 2/3, DESC MAP(REF d0 key, INT-8 id 4 elem); the mode refuses, the bytes never exist in stable mode (WF-22 :617, :620)",
+        "two distinct *bool cells (11 11, records 2/3 under DESC POINTER(BOOL) id 0, BOOL id 1) key one map with byte-equal values INT 1 (22 22): skeletons collapse to nil (E2), values tie (KO-2b leaves nothing to order) — the E5 tie-break applies, the value is outside the stable class (E5 :1013-1019; :1114-1120)",
+        "bytes are the would-be canonical encoding (V-104/V-105 shape): the encoding exists — the mode refuses; stable mode invoked on this value MUST reject with a deterministic classified error naming the path, the classification a function of the offending rule alone, never of process state (guard contract :1130-1136)",
+        "the go projection names the class unstable_tie_break (go.md 5.4 :692-699); the decode-side canonicality rejects stay tier-invariant — the guard is the encode-side complement of that invariance (:954-956)"
+      ]
+    },
+    {
+      "id": "V-117",
+      "desc": "guard G2: stable mode rejects a map holding a zero float key of either sign",
+      "tags": [
+        "WF-25",
+        "E4",
+        "KO-3",
+        "VS-6"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d5e0d80c04e0d80a01a1400000000022",
+      "class": "guard_zero_float_key",
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D5 (FLOAT-32 id 1, INT-8 id 2) — would-be canonical bytes of the zero-float-key map; the mode refuses (WF-22 :620, :626-631)",
+        "key type FLOAT-32 as the MAP's nested type-ref E0 D8 0C 04 (WF-22 :610-616); the key is +0.0, raw bits 00000000 big-endian — this sole zero slot is legal on the wire (V-111 carries the -0.0 decode-side counterpart, KO-3 :1063-1066)",
+        "the stored sign of a zero float key is the zero-sign determinant, a projection concern excluded from the tier-1 claim (E4 :1006-1012; :1117-1120) — a map holding a zero float key of EITHER sign places the value outside the stable class",
+        "stable mode MUST reject with the classified error naming the path (guard contract :1130-1136; go class unstable_zero_float_key, go.md 5.4 :698-701); bytes are the would-be canonical encoding — the mode refuses, the stream never exists in stable mode"
+      ]
+    },
+    {
+      "id": "V-141",
+      "desc": "map with a NaN FLOAT-16 key: the core-level key-domain ban",
+      "tags": [
+        "E1",
+        "KO-3",
+        "VS-6"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d5e0d80c02e0d80a01a1407e0022",
+      "class": "nan_key",
+      "deriv": [
+        "envelope: stream header 67 62 6f 6e 00 02 (WF-3 :711), root DESC MAP E0 D5 with FLOAT-16 key E0 D8 0C 02 and INT-8 elem E0 D8 0A 01 — ids 0/1/2 (WF-22 :624, :629-631)",
+        "map a1, sole pair: key FLOAT-16 token 40 + raw bits 7e 00 big-endian (KO-3 :1104), value zz(1)=2 → 22 (WF-8 :328-339); NaN is the only core-level key ban — unreachable and undeletable through observable operations, identical raw bits across slots breaking injectivity (E1 :1029-1031; KO-3 :1107-1111)",
+        "NaN values outside key positions are legal (KO-3 :1111) — the key position alone rejects; complete would-be canonical bytes in the V-117 refusal idiom: the encoder refuses with a typed error naming the path, the stream never exists"
+      ]
+    }
+  ]
+}

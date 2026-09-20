@@ -69,7 +69,11 @@ specified by the wire document (its clause 8.2).
 - **Value-graph** — the subject of serialization: a graph of values
   with identity edges (backing records, map objects, addressable
   values, interned strings, type descriptors), not a flat sequence of
-  records.
+  records. The sorts of the value nodes are the primitives (booleans,
+  integers, floats, strings, blobs), the products (structures with
+  named fields, tuples with positional fields), the sums (variants),
+  the sequences (arrays, slices), the maps, and the reference sorts
+  (pointers, interfaces).
 - **Identity, sharing, cycles** — the topology contract: records have
   stream identity, repeated encounters are references, cycles are legal
   and close through references.
@@ -115,11 +119,15 @@ The model is defined by what it requires of any serialization of it:
 
 Identity is a first-class, observable layer of the model; its
 operational form on the wire is the intern space of the wire document
-(WF-13).
+(WF-24).
 
 - All reference-nature records — backing arrays, map objects,
   addressable values (pointer targets), interned strings, and type
   descriptors — share one id space per stream.
+- Type descriptors intern by canonical structure: structurally
+  identical descriptors are one record of the intern space; names are
+  the nominal overlay — carried by nominal kinds alone, injective
+  within one stream, never part of the structural key.
 - A record is registered when its own encoding begins, before its
   children: a reference to an enclosing record closes a cycle.
 - Sharing is never silently duplicated: a repeated encounter of memory
@@ -168,7 +176,7 @@ own structure. The layer is part of the model and carries six axioms:
 Descent from a record's canonical grain to a position's view is
 derivable, carries no bytes, and is fixed by the record's content tag
 and the view structure. The grain layer is a domain-level construct
-with operational rules on the wire (WF-13, the grain rules of the
+with operational rules on the wire (WF-24, the grain rules of the
 graph-encodings section); host vocabulary belongs to the bindings.
 
 ## 5. Equality and Canonical Form
@@ -177,24 +185,37 @@ The model carries an equality and a canonical form:
 
 - **Canonical encoding** is a decode-side contract: there is exactly
   one legal byte sequence for every value — qualified by the
-  pointer-identity tie-break (KO-2a): map pairs keyed by
-  reference-carrying values order by the allocation-sequence
+  pointer-identity tie-break (KO-2a), an identity determinant
+  instantiated by binding declaration: the binding document names
+  the determinant form and its determinism scope, the core states
+  the ordering requirement the declaration must satisfy. Map pairs
+  keyed by reference-carrying values order by the declared
   discriminator, so their byte spelling is fixed within one encoding
-  but not specified across processes or replays. Non-canonical
-  spellings are decoder rejects. The operational clauses live in the
-  wire document (WF-20, with the KO ordering contract).
+  and, across processes, only within the declared determinism scope.
+  Non-canonical
+  spellings are decoder rejects. Descriptor field tables and variant
+  tables are name-sorted — bytewise-lexicographic, case-sensitive —
+  so the canonical bytes are a pure function of value structure, not
+  of source declaration order. The operational clauses live in the
+  wire document (WF-25, with the KO ordering contract).
 - **Map-key equality** is defined by the model through axioms — key
   domain, skeleton, total order, ±0 collapse, tie-break (E1–E5 of the
   wire document); encodings implement it, they do not reinterpret it.
+  The key domain admits sequence and VARIANT keys — value equality,
+  byte-equal skeletons are duplicates — and float keys; map-in-key
+  support is per-binding; NaN is the only core-level ban, and cycles
+  reachable from key positions are a loud encoder reject.
 - **The upper bound of canonicalization.** Isomorphic-graph
   canonicalization ("isomorphic graphs map to equal bytes") is
   computationally unjustified for this model: canonical labeling is
   worst-case as hard as graph isomorphism (quasipolynomial in the
   worst case, linear only in the average case — Annex B). The model
   therefore claims traversal canonicality, qualified by the
-  pointer-identity tie-break (KO-2a), not isomorphism canonicality.
-  Consequence: any claim of the shape "equal values imply equal bytes"
-  carries the KO-2a qualification.
+  binding-declared pointer-identity tie-break (KO-2a), not
+  isomorphism canonicality. Consequence: any claim of the shape
+  "equal values imply equal bytes" carries the KO-2a qualification —
+  upper bounds on agreement are qualified by which determinants a
+  binding declares, never by a host's mechanics.
 
 ### 5.1 The Value Equivalence ≡_GBON
 
@@ -228,12 +249,13 @@ The relation is decidable: every value of the domain has a decidable
 `≡_GBON` is not arbitrary graph isomorphism: it preserves the identity
 layer and the declared representation observables, nothing weaker.
 The upper bound of canonicalization stated in this clause stands: the
-model claims traversal canonicality, qualified by the pointer-identity
-tie-break (KO-2a), not isomorphism canonicality — no claim of the
+model claims traversal canonicality, qualified by the binding-declared
+pointer-identity tie-break (KO-2a), not isomorphism canonicality — no
+claim of the
 shape "isomorphic graphs imply equal bytes" is made or implied. Where
 equality is decided operationally as a byte comparison, the decision
 runs through the canonical encoding contract of the wire document
-(WF-20).
+(WF-25).
 
 ## 6. Requirements on the Wire Layer
 
@@ -257,19 +279,19 @@ The declared observables carry the consolidated classification:
 
 | Observable | Classification | Basis |
 |---|---|---|
-| value contents | MUST preserve | observables survive the round trip (WF-1); the byte-bearing sorts |
-| identity and sharing | MUST preserve | the identity layer (clause 4; WF-13); core-invariant ladder row (6.5) |
-| cycle topology | MUST preserve | cycles close through references (clause 4; WF-13); core-invariant ladder row |
-| reference topology | MUST preserve | references resolve to their named records (WF-13) |
-| map-key semantics | MUST preserve | map-key axioms (E1–E5; WF-16) |
-| nil versus empty | MUST preserve | nil tokens are distinct from empty containers (WF-12) |
-| slice extent | MAY degrade with declared blame | annotations ladder row (6.5); extent agreement at the boundary (WF-15; WF-20 (i)); the stream carries the geometry bitwise |
-| NaN payloads | MUST preserve | raw IEEE bit patterns (WF-8) |
-| ±0 | MUST preserve | raw IEEE bit patterns (WF-8) |
-| subnormals | MUST preserve | raw IEEE bit patterns (WF-8) |
-| non-UTF-8 byte sequences | MUST preserve | strings are byte sequences without a Unicode gate (WF-10) |
-| exact numeric representations | MAY degrade with declared blame | unrepresentable ladder row (6.5): beyond-width integers are a loud error at a narrow host, never truncation; the core carries the exact representation (WF-6; WF-18) |
-| typed nils | MAY degrade with declared blame | annotations ladder row (6.5); the nil taxonomy belongs to the binding (WF-12) |
+| value contents | MUST preserve | observables survive the round trip (WF-2); the byte-bearing sorts |
+| identity and sharing | MUST preserve | the identity layer (clause 4; WF-24); core-invariant ladder row (6.5) |
+| cycle topology | MUST preserve | cycles close through references (clause 4; WF-24); core-invariant ladder row |
+| reference topology | MUST preserve | references resolve to their named records (WF-24) |
+| map-key semantics | MUST preserve | map-key axioms (E1–E5; WF-18) |
+| nil versus empty | MUST preserve | nil tokens are distinct from empty containers (WF-15) |
+| slice extent | MAY degrade with declared blame | annotations ladder row (6.5); extent agreement at the boundary (WF-17; WF-25 (i)); the stream carries the geometry bitwise |
+| NaN payloads | MUST preserve | raw IEEE bit patterns (WF-11) |
+| ±0 | MUST preserve | raw IEEE bit patterns (WF-11) |
+| subnormals | MUST preserve | raw IEEE bit patterns (WF-11) |
+| non-UTF-8 byte sequences | MUST preserve | strings are byte sequences without a Unicode gate (WF-13) |
+| exact numeric representations | MAY degrade with declared blame | unrepresentable ladder row (6.5): beyond-width integers are a loud error at a narrow host, never truncation; the core carries the exact representation (WF-8, WF-22) |
+| typed nils | MAY degrade with declared blame | annotations ladder row (6.5); the nil sorts are a binding materialization over the derived nil state (WF-15) |
 
 No declared observable carries the third class: an artifact with no
 domain counterpart — a host memory address, a lock state — is not a
@@ -288,9 +310,8 @@ anchor `crosby-wallach-2003` (Crosby–Wallach and companions)).
 Format evolution is additive (minor bumps): what an old decoder cannot
 know it rejects loudly at the token, never misparses; what a new
 decoder receives from an old encoder it completes with declared
-defaults. A change of canonical form for an existing value class
-migrates by rewrite — old streams stay readable forever — never by
-forking the format.
+defaults. In the draft era (major 0) a decoder rejects unknown minors
+outright — cross-minor compatibility promises begin at major 1.
 
 ### 6.5 Projections: Full Abstraction and the Degradation Ladder
 
@@ -318,36 +339,38 @@ boundary.
 ### A.1 Per-Section Anchor Map of the Wire Document
 
 The per-section grounding map of docs/wire-format.md: every section
-WF-1..WF-24 carries a primary class, an anchor, and a status (the
+WF-1..WF-26 carries a primary class, an anchor, and a status (the
 classes and statuses are clause 2). The map is informative; the
 normative text it grounds lives in the wire document.
 
 | WF | Section statement | Class | Anchor | What it grounds | Status |
 |---|---|---|---|---|---|
-| WF-1 | Self-delimiting stream; observables survive the round trip; one core, a second implementation is written against it | A1 | Kraft 1949; McMillan 1956 + A3: Milner 1977; Strong et al. 1958 | Prefix-freeness without lookahead; preservation of observables is full abstraction of the embedding; the layer model is the premise of spec-first federation (element series 8, A.3) | w |
-| WF-2 | Magic constant and 6-byte header; reject unknown major / read unknown minor | A4 | — (magic/layout zone, registry A.2) | The identity constant and the layout are design freedom; no-collision with adjacent signatures is a testable engineering invariant; the major/minor semantics inherits the WF-21 anchor | — |
-| WF-3 | Definite-length grammar, no indefinite forms, truncation is a format error | A1 | Kraft 1949; McMillan 1956; Elias 1975 | Prefix-free grammar: self-delimitation and unique decodability without lookahead | w,v |
-| WF-4 | ARG: selector ladder inline→u8/u16/u32/u64→ext (0x10), minimal length, BE comparability | A1 | Elias 1975 (universal codeword sets) + family-notes: start-step-stop (Fraenkel & Klein), LEB128/DWARF, protobuf varint — non-normative | The width ladder is a universal code of the integers; minimality is the canonical form of the code; the ext form closes the domain at ≥2^64 (successor form) | v + NEW |
-| WF-5 | Zigzag bijection ℤ→ℕ (n≥0→2n, n<0→−2n−1), the int64 section plus the extension to all of ℤ | A4 | — (bijection zone, registry A.2) + precedent-note protobuf ZigZag | The concrete bijection is an engineering device: bijectivity and monotonicity modulo sign are testable invariants; the choice within the class of equivalent bijections is free; the composition with ARG inherits the A1 anchor of WF-4 | NEW-note |
-| WF-6 | UINT: direct value; boundary 2^64−1, beyond it BIGINT | A1 | Goguen–Thatcher–Wagner–Wright 1977 | The finite unsigned sort of the neutral model's signature; the boundary is a derivative of the u64 rung of WF-4, not a freedom | v |
-| WF-7 | Bool: selectors 0/1, the rest reserved | A1 | Goguen et al. 1977 | The two-element sort of the model; reserved selectors are the evolutionary reserve of WF-21 | v |
-| WF-8 | Floats: f32/f64 form 0/1, decimal128 form 2 — raw IEEE bits, bitwise round trip | A2 | IEEE 754-2019 (IEEE Std; = ISO/IEC 60559:2020), incl. decimal128 | The normative standard of the formats: binary32/64, decimal128; bitwise preservation of NaN/±0/subnormals is the standard semantics of the formats | NEW (the decimal item is verify-on-write) |
-| WF-9 | Complex: a pair of raw bit patterns per WF-8, not synthesized as a struct | A1 | Goguen et al. 1977 | The product sort as a sort of its own (irreducibility to STRUCT — a signature-sorts distinction) | v |
-| WF-10 | String = a byte sequence, no UTF-8 gate; interning | A1 | Burstall 1969; Hoare 1975 | The sequence sort (the free monoid of octets); the refusal of Unicode normativity is a layer decision about observability, not a freedom zone | w,v |
-| WF-11 | Blob = a backing record in the intern space; trailing-zero elision; minimal E | A1 | Ershov 1958 + Kraft 1949; McMillan 1956 | Interning/value numbering for byte backings; minimal E is canonical uniqueness (elision is semantically transparent economy, not a freedom zone) | w |
-| WF-12 | Nil tokens: the core carries the selectors, the taxonomy belongs to the binding (GO-4); nil ≠ empty | A3 | Milner 1977; Plotkin 1977 | The distinctions of nil sorts are observables of projections: they must survive (adequacy); routing the taxonomy to the binding is the observability rule | w |
-| WF-13 | Intern space: DFS identifiers, registration before children, backing join | A1 | Courcelle 1983; Barendregt et al. 1987; Schorr & Waite 1967; Ershov 1958 + Reynolds 1978 | Cycles are rational trees; term graphs make sharing an object of the theory; traversal with bounded memory; hash-consing of the intern space; the identity layer is observable (element series 2, A.3) | w,v |
-| WF-14 | Arrays: L/E plus trailing-zero elision, a bit-level predicate (−0.0 is never elided) | A1 | Goguen et al. 1977 + Kraft 1949; McMillan 1956 | The array sort; minimal E is canonical uniqueness; the bit-level nature of the predicate follows from the bitwise round trip of WF-8 | v,w |
-| WF-15 | Slice views: geometry {off,len,extent}, view-form minimality, record-then-fill | A3 | Milner 1977; Plotkin 1977; Findler & Felleisen 2002; Siek & Taha 2006 | Extent is a capacity-like annotation: degradable with blame at the language boundary (extent agreement, WF-20); the geometric invariants are derivatives and testable | w |
-| WF-16 | Maps: pair count, canonical order, intern record, duplicate reject | A1 | Goguen et al. 1977 + Ershov 1958 | The finite function/associative sort; the map object as an intern record; order and duplicates are the WF-20 contract (KO) | v,w |
-| WF-17 | Structs: field values in descriptor order, no per-field tags | A1 | Burstall 1969; Hoare 1975; Cardelli & Mitchell 1991 | Records are labeled products sorted by label; determinism of field order is declaration order | w,v |
-| WF-18 | Type descriptors as data: kinds 0–15, name-interning, kind 15 BIGINT | A1 | Goguen et al. 1977 + Ershov 1958 + Elias 1975 (ext body) | The DESC language is the concrete syntax of the signature's universe of datatypes; descriptor interning; kind 15: the ℤ sort (Goguen) plus the ext body (Elias). The numbering of kinds is the layout zone of WF-19 | v |
-| WF-19 | Opcode table: class<<4 \| arg-form, the 16 nibble classes fully allocated, ESC ranges | A4 | — (opcode/kind layout zone, registry A.2) | The class→nibble assignment and the selectors are a stable but arbitrary constant (it only needs fixing); exhaustion of the classes follows from the field width; unknown→error is the hygiene of WF-22; the ESC reserve is the evolutionary mechanism of WF-21 | — |
-| WF-20 | Canonical encoding: decode-side contract, KO-1..8, axioms E1–E5 | A1 | Kraft 1949; McMillan 1956 + canonicalization complexity (clause 5): McKay 1981; Luks 1982; Babai–Luks 1983; Babai–Kucera 1979; Babai 2016 + Reynolds 1978 (the identity layer, KO-2a) | Injectivity/unique decodability of the canonical form; not claiming iso-canonicalization is the upper complexity bound (clause 5); E5 is honest intra-contract underspecification | w,v |
-| WF-21 | Versioning: major breaks / minor additive-only; ESC graduation | A1 | Cardelli & Mitchell 1991 (width subtyping) + A4 sub-zone: the governance policy (registry A.2; fallback RFC 8949) | Adding a field is semantically correct for an old reader (skip/zero is the operational consequence); numbering and graduation mechanics are standards engineering, not academia | w |
-| WF-22 | Decoder hygiene: budgets, validate-before-allocate, atomicity, no panic/hang | A3 | Crosby & Wallach 2003; Tarjan 1985; Miller et al. 1990 | The budget dimensions cover the classes of complexity attacks; charge-before-allocation is the potential method; fuzzing empirics; the composition of the five budgets is authorial (registry A.2) | w |
-| WF-23 | Evolution: skip/zero/by-name, strict name+structure, the kind-14 channel stays readable forever | A1 | Cardelli & Mitchell 1991 + practice-note: Avro/protobuf evolution (non-normative) | Width subtyping is bidirectional wire compatibility; the kind-14 channel migrates by rewrite (a consequence of the discipline) | w + NEW |
-| WF-24 | Stable section IDs, reference-lint, a dictionary computed from headings | A4 | — (editorial, registry A.2) + precedent-note RFC/STD numbering | An editorial convention of the repository, wire-invisible; the freedom of the ID scheme lays no claim to an anchor | NEW-note |
+| WF-1 | Stable section IDs, reference-lint, a dictionary computed from headings | A4 | — (editorial, registry A.2) + precedent-note RFC/STD numbering | An editorial convention of the repository, wire-invisible; the freedom of the ID scheme lays no claim to an anchor | NEW-note |
+| WF-2 | Self-delimiting stream; observables survive the round trip; one core, a second implementation is written against it | A1 | Kraft 1949; McMillan 1956 + A3: Milner 1977; Strong et al. 1958 | Prefix-freeness without lookahead; preservation of observables is full abstraction of the embedding; the layer model is the premise of spec-first federation (element series 8, A.3) | w |
+| WF-3 | Magic constant and 6-byte header; major 0 rejects unknown minors, additive from major 1 | A4 | — (magic/layout zone, registry A.2) | The identity constant and the layout are design freedom; no-collision with adjacent signatures is a testable engineering invariant; the major/minor semantics inherits the WF-5 anchor | — |
+| WF-4 | Definite-length grammar, no indefinite forms, truncation is a format error | A1 | Kraft 1949; McMillan 1956; Elias 1975 | Prefix-free grammar: self-delimitation and unique decodability without lookahead | w,v |
+| WF-5 | Versioning: major breaks; unknown minors rejected in the draft era; additive-only from major 1; ESC graduation | A1 | Cardelli & Mitchell 1991 (width subtyping) + A4 sub-zone: the governance policy (registry A.2; fallback RFC 8949) | Adding a field is semantically correct for an old reader (skip/zero is the operational consequence); numbering and graduation mechanics are standards engineering, not academia | w |
+| WF-6 | Evolution: skip/zero/by-name, strict name+structure matching, unskippable coder bodies | A1 | Cardelli & Mitchell 1991 + practice-note: Avro/protobuf evolution (non-normative) | Width subtyping is bidirectional wire compatibility; by-name matching keeps evolution nominal, never positional | w |
+| WF-7 | ARG: selector ladder inline→u8/u16/u32/u64→ext (0x10), minimal length, BE comparability; ext covers the u128 rung and the arb continuation | A1 | Elias 1975 (universal codeword sets) + family-notes: start-step-stop (Fraenkel & Klein), LEB128/DWARF, protobuf varint — non-normative | The width ladder is a universal code of the integers; minimality is the canonical form of the code; the ext form is the one successor form from 2^64 upward, across the 128-bit rung and the arbitrary-precision rung alike | v + NEW |
+| WF-8 | Zigzag bijection ℤ→ℕ (n≥0→2n, n<0→−2n−1) over the one INT ladder — widths {1,2,4,8,16} plus the arbitrary-precision rung | A4 | — (bijection zone, registry A.2) + precedent-note protobuf ZigZag | The concrete bijection is an engineering device: bijectivity and monotonicity modulo sign are testable invariants; the choice within the class of equivalent bijections is free; the composition with ARG inherits the A1 anchor of WF-7 | NEW-note |
+| WF-9 | UINT: direct value; machine widths {1,2,4,8,16}, u128 top 2^128−1; no unbounded unsigned | A1 | Goguen–Thatcher–Wagner–Wright 1977 | The finite unsigned sorts of the neutral model's signature; the top is a derivative of the ARG ladder of WF-7, not a freedom | v |
+| WF-10 | Bool: selectors 0/1, the rest reserved | A1 | Goguen et al. 1977 | The two-element sort of the model; reserved selectors are the evolutionary reserve of WF-5 | v |
+| WF-11 | Floats: the binary forms binary16/32/64/128 by width argument (2/4/8/16 bytes), width↔form bijection — raw IEEE bits, bitwise round trip | A2 | IEEE 754-2019 (IEEE Std; = ISO/IEC 60559:2020) | The normative standard of the formats: binary16/32/64/128; bitwise preservation of NaN/±0/subnormals is the standard semantics of the formats; decimal interchange is the structural composition of the model, not a form here | NEW |
+| WF-12 | Complex convention: complex numbers decompose as TUPLE(re, im) of FLOAT forms; no dedicated kind | A1 | Goguen et al. 1977 | The complex number is a product of floats — a structural composition in the signature's universe of datatypes, not a primitive sort | v |
+| WF-13 | String = a byte sequence, no UTF-8 gate; interning | A1 | Burstall 1969; Hoare 1975 | The sequence sort (the free monoid of octets); the refusal of Unicode normativity is a layer decision about observability, not a freedom zone | w,v |
+| WF-14 | Blob = a backing record in the intern space; trailing-zero elision; minimal E | A1 | Ershov 1958 + Kraft 1949; McMillan 1956 | Interning/value numbering for byte backings; minimal E is canonical uniqueness (elision is semantically transparent economy, not a freedom zone) | w |
+| WF-15 | Nil layer: selector 0 = absent — the sort derived from the static type or a dynamic descriptor of a typed nil; selector 4 = zero-size marker; nil ≠ empty | A3 | Milner 1977; Plotkin 1977 | The distinctions of nil sorts are observables of projections: they must survive (adequacy); the sort rides type information, never a selector; routing the materialization to the binding is the observability rule | w |
+| WF-16 | Arrays: L/E plus trailing-zero elision, a bit-level predicate (−0.0 is never elided) | A1 | Goguen et al. 1977 + Kraft 1949; McMillan 1956 | The array sort; minimal E is canonical uniqueness; the bit-level nature of the predicate follows from the bitwise round trip of WF-11 | v,w |
+| WF-17 | Slice views: geometry {off,len,extent}, view-form minimality, record-then-fill | A3 | Milner 1977; Plotkin 1977; Findler & Felleisen 2002; Siek & Taha 2006 | Extent is a capacity-like annotation: degradable with blame at the language boundary (extent agreement, WF-25); the geometric invariants are derivatives and testable | w |
+| WF-18 | Maps: pair count, canonical order, intern record, duplicate reject | A1 | Goguen et al. 1977 + Ershov 1958 | The finite function/associative sort; the map object as an intern record; order and duplicates are the WF-25 contract (KO) | v,w |
+| WF-19 | Structs: field values in canonical name-sorted order, no per-field tags | A1 | Burstall 1969; Hoare 1975; Cardelli & Mitchell 1991 | Records are labeled products sorted by label; the bytewise name sort makes the encoding a pure function of value structure, independent of declaration order | w,v |
+| WF-20 | Tuples: positional products; arity from the descriptor; no tags, no names | A1 | Goguen–Thatcher–Wagner–Wright 1977 | The positional product sort: arity is part of the structure; positions never sort | NEW |
+| WF-21 | Variants: closed sums; name-sorted variant tables; tag = index into the in-stream table; evolution by name | A1 | Goguen–Thatcher–Wagner–Wright 1977 | The sum sort: alternatives form a labeled coproduct; the canonical table order extends the name sort of structures; self-describing tags carry no cross-stream index stability | NEW |
+| WF-22 | Type descriptors as data: 16 kinds; structural interning by canonical structure; names the nominal overlay | A1 | Goguen et al. 1977 + Ershov 1958 + Elias 1975 (ext body) | The DESC language is the concrete syntax of the signature's universe of datatypes; hash-consing of descriptors by structure; the arbitrary-precision integers are the arb rung of WF-8 plus the ext body (Elias). The numbering of kinds is the layout zone of WF-23 | v |
+| WF-23 | Opcode table: class<<4 \| arg-form, the 16 nibble classes fully allocated, one ESC class with subclass split | A4 | — (opcode/kind layout zone, registry A.2) | The class→nibble assignment and the selectors are a stable but arbitrary constant (it only needs fixing); exhaustion of the classes follows from the field width; unknown→error is the hygiene of WF-26; the ESC reserve is the evolutionary mechanism of WF-5 | — |
+| WF-24 | Intern space: DFS identifiers, registration before children, backing join | A1 | Courcelle 1983; Barendregt et al. 1987; Schorr & Waite 1967; Ershov 1958 + Reynolds 1978 | Cycles are rational trees; term graphs make sharing an object of the theory; traversal with bounded memory; hash-consing of the intern space; the identity layer is observable (element series 2, A.3) | w,v |
+| WF-25 | Canonical encoding: decode-side contract, KO-1..8, axioms E1–E5 (key domain: sequences and variants inside; NaN and key-reachable cycles out; map-in-key per binding) | A1 | Kraft 1949; McMillan 1956 + canonicalization complexity (clause 5): McKay 1981; Luks 1982; Babai–Luks 1983; Babai–Kucera 1979; Babai 2016 + Reynolds 1978 (the identity layer, KO-2a) | Injectivity/unique decodability of the canonical form; not claiming iso-canonicalization is the upper complexity bound (clause 5); E5 is honest intra-contract underspecification | w,v |
+| WF-26 | Decoder hygiene: budgets, validate-before-allocate, atomicity, no panic/hang | A3 | Crosby & Wallach 2003; Tarjan 1985; Miller et al. 1990 | The budget dimensions cover the classes of complexity attacks; charge-before-allocation is the potential method; fuzzing empirics; the composition of the five budgets is authorial (registry A.2) | w |
 
 ### A.2 Registered Design Freedoms
 
@@ -357,13 +380,13 @@ registered here; the map rows point to their zones.
 
 | Item | Status | Fallback |
 |---|---|---|
-| The magic constant and the 6-byte header layout (WF-2) | identity and layout are design freedom; no-collision with adjacent signatures is a testable engineering invariant | the major/minor semantics — the WF-21 anchor |
-| The opcode and kind layout: class→nibble, selectors, kind numbering 0–15 (WF-19; the numbering inside WF-18) | a stable but arbitrary constant — it only needs fixing | the WF-19 opcode table |
-| The zigzag bijection ℤ→ℕ (WF-5) | a choice within the class of equivalent bijections; bijectivity and monotonicity modulo sign are testable invariants | protobuf ZigZag — an engineering precedent (the anchor `protobuf-encoding`) |
-| Versioning governance of the format (major/minor practice; the A4 sub-zone of the WF-21 row) | standards engineering | RFC 8949 (an IETF standard, not academia — the outermost option) |
+| The magic constant and the 6-byte header layout (WF-3) | identity and layout are design freedom; no-collision with adjacent signatures is a testable engineering invariant | the major/minor semantics — the WF-5 anchor |
+| The opcode and kind layout: class→nibble, selectors, kind numbering 0–15 (WF-23; the numbering inside WF-22) | a stable but arbitrary constant — it only needs fixing | the WF-23 opcode table |
+| The zigzag bijection ℤ→ℕ (WF-8) | a choice within the class of equivalent bijections; bijectivity and monotonicity modulo sign are testable invariants | protobuf ZigZag — an engineering precedent (the anchor `protobuf-encoding`) |
+| Versioning governance of the format (major/minor practice; the A4 sub-zone of the WF-5 row) | standards engineering | RFC 8949 (an IETF standard, not academia — the outermost option) |
 | The composition of the five budgets | design: the dimensions come from the Crosby–Wallach taxonomy, the set is authorial | Crosby–Wallach as the map of attack classes |
 | "Native ergonomics" of projections | no formal theory exists | an explicit design decision without an anchor |
-| The section-ID scheme (WF-24) | an editorial convention of the repository, wire-invisible | the practice of stable RFC/STD numbering (the anchor `stable-rfc-std-numbering`) |
+| The section-ID scheme (WF-1) | an editorial convention of the repository, wire-invisible | the practice of stable RFC/STD numbering (the anchor `stable-rfc-std-numbering`) |
 
 ### A.3 Element Index
 
@@ -373,19 +396,19 @@ of docs/wire-format.md.
 
 | # | Element | Anchor series | Coverage |
 |---|---|---|---|
-| 1 | The value-graph as the subject; the intern space and traversal | Courcelle 1983; Barendregt et al. 1987 (+ Sleep & Plasmeijer 1993); Schorr & Waite 1967; Ershov 1958 | WF-11, WF-13, WF-14, WF-15 |
-| 2 | Identity/sharing as an observable contract | Reynolds 1978 (SCI); Reynolds 2002 (separation logic) | WF-13, WF-20 (KO-2a) |
-| 3 | The neutral value model = a universe of datatypes | Burstall 1969; Hoare 1975; Goguen–Thatcher–Wagner–Wright 1977; Backhouse et al. 1998 | WF-6, WF-7, WF-9, WF-10, WF-16, WF-17, WF-18 |
-| 4 | Canonical encoding | Kraft 1949; McMillan 1956; Elias 1975; McKay 1981; Babai–Kucera 1979; Babai–Luks 1983; Luks 1982; Babai 2016 | WF-1, WF-3, WF-4, WF-20; complexity — clause 5 |
-| 5 | Budgeted decode | Crosby & Wallach 2003; Tarjan 1985; Miller et al. 1990 | WF-22 |
-| 6 | Additive evolution (minor bumps) | Cardelli & Mitchell 1991 | WF-21, WF-23 |
-| 7 | The degradation ladder at the language boundary | Milner 1977; Plotkin 1977; Findler & Felleisen 2002; Siek & Taha 2006 | WF-12, WF-15; the portable-profile frame — clause 6.5 |
-| 8 | Spec-first federation | Strong et al. 1958; Conway 1958; Steel 1961; Macrakis 1992; Goguen & Burstall 1992 | WF-1 (supporting); the document level — A.4 |
+| 1 | The value-graph as the subject; the intern space and traversal | Courcelle 1983; Barendregt et al. 1987 (+ Sleep & Plasmeijer 1993); Schorr & Waite 1967; Ershov 1958 | WF-14, WF-24, WF-16, WF-17 |
+| 2 | Identity/sharing as an observable contract | Reynolds 1978 (SCI); Reynolds 2002 (separation logic) | WF-24, WF-25 (KO-2a) |
+| 3 | The neutral value model = a universe of datatypes | Burstall 1969; Hoare 1975; Goguen–Thatcher–Wagner–Wright 1977; Backhouse et al. 1998 | WF-9, WF-10, WF-12, WF-13, WF-18, WF-19, WF-20, WF-21, WF-22 |
+| 4 | Canonical encoding | Kraft 1949; McMillan 1956; Elias 1975; McKay 1981; Babai–Kucera 1979; Babai–Luks 1983; Luks 1982; Babai 2016 | WF-2, WF-4, WF-7, WF-25; complexity — clause 5 |
+| 5 | Budgeted decode | Crosby & Wallach 2003; Tarjan 1985; Miller et al. 1990 | WF-26 |
+| 6 | Additive evolution (minor bumps) | Cardelli & Mitchell 1991 | WF-5, WF-6 |
+| 7 | The degradation ladder at the language boundary | Milner 1977; Plotkin 1977; Findler & Felleisen 2002; Siek & Taha 2006 | WF-15, WF-17; the portable-profile frame — clause 6.5 |
+| 8 | Spec-first federation | Strong et al. 1958; Conway 1958; Steel 1961; Macrakis 1992; Goguen & Burstall 1992 | WF-2 (supporting); the document level — A.4 |
 
 The neutral core is carried by docs/wire-format.md; the Go projection
 is the binding docs/bindings/go.md. Sections outside the element
-series: WF-8 (a normative IEEE standard) and the A4 zones (WF-2, WF-5,
-WF-19, WF-24 — the registry A.2); their grounding is carried by the
+series: WF-11 (a normative IEEE standard) and the A4 zones (WF-3, WF-8,
+WF-23, WF-1 — the registry A.2); their grounding is carried by the
 map (A.1).
 
 ### A.4 Historical Note: Universal Cores

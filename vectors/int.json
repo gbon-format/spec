@@ -1,0 +1,239 @@
+{
+  "category": "int",
+  "section": "6",
+  "vectors": [
+    {
+      "id": "V-16",
+      "desc": "INT -1: zigzag edge, inline rung",
+      "tags": [
+        "WF-8",
+        "WF-7"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80a0121",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "int",
+            "value": "-1"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0A 01 (INT-8) — width ARG on the one ladder, minimal width carrying the value (WF-22 :627-631; WF-7 :286-311)",
+        "header (WF-3 :194-198)",
+        "zz(-1) = -2(-1)-1 = 1 (WF-8 :337): inline rung, token 0x20|1 = 21 (WF-8 :335, WF-7 :286)"
+      ]
+    },
+    {
+      "id": "V-17",
+      "desc": "INT -128: i8 MinInt image, u8 rung",
+      "tags": [
+        "WF-8",
+        "WF-7"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80a0128ff",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "int",
+            "value": "-128"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0A 01 (INT-8, the i8 domain edge) — width ARG on the one ladder, minimal width carrying the value (WF-22 :627-631; WF-7 :286-311)",
+        "zz(-128) = 255 (WF-8 :337): width-1 machine section domain edge; minimal rung of 255 is u8 (WF-7 :310), token 28 FF (WF-8 :344-346)"
+      ]
+    },
+    {
+      "id": "V-18",
+      "desc": "INT MinInt64: full zigzag image in the u64 rung",
+      "tags": [
+        "WF-8",
+        "WF-7"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80a08082bffffffffffffffff",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "int",
+            "value": "-9223372036854775808"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0A 08 08 (INT-64) — width ARG on the one ladder, minimal width carrying the value (WF-22 :627-631; WF-7 :286-311)",
+        "zz(-2^63) = 2^64-1 = 0xFFFFFFFFFFFFFFFF (WF-8 :335): minimal rung u64 (WF-7 :311), token 2B + FF x8"
+      ]
+    },
+    {
+      "id": "V-19",
+      "desc": "INT MaxInt64: zigzag image 2^64-2",
+      "tags": [
+        "WF-8",
+        "WF-7"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80a08082bfffffffffffffffe",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "int",
+            "value": "9223372036854775807"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0A 08 08 (INT-64) — width ARG on the one ladder, minimal width carrying the value (WF-22 :627-631; WF-7 :286-311)",
+        "zz(2^63-1) = 2^64-2 (WF-8 :337): u64 rung, token 2B + FF x7 FE — the negative neighbor maps one higher (2^64-1, V-18): bijection"
+      ]
+    },
+    {
+      "id": "V-20",
+      "desc": "INT MinInt128: i128 edge, u128 rung, image 2^128-1",
+      "tags": [
+        "WF-8",
+        "WF-7"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80a08102cffffffffffffffffffffffffffffffff",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "int",
+            "value": "-170141183460469231731687303715884105728"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0A 08 10 (INT-128) — width ARG on the one ladder, minimal width carrying the value (WF-22 :627-631; WF-7 :286-311)",
+        "width-16 section carries the i128 domain, image exactly 0..2^128-1; zz(-2^127) = 2^128-1 (WF-8 :347-348)",
+        "from 2^64 up the u128 rung: token 2C, one fixed 16-byte payload (WF-8 :349-351, WF-7 :290, :311)"
+      ]
+    },
+    {
+      "id": "V-21",
+      "desc": "INT MaxInt128: image 2^128-2, u128 rung",
+      "tags": [
+        "WF-8",
+        "WF-7"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80a08102cfffffffffffffffffffffffffffffffe",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "int",
+            "value": "170141183460469231731687303715884105727"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0A 08 10 (INT-128) — width ARG on the one ladder, minimal width carrying the value (WF-22 :627-631; WF-7 :286-311)",
+        "zz(2^127-1) = 2^128-2 (WF-8 :349): the width-16 domain top image; u128 rung token 2C + FF x15 FE"
+      ]
+    },
+    {
+      "id": "V-22",
+      "desc": "UINT 2^128-1: u128 top, direct value",
+      "tags": [
+        "WF-9",
+        "WF-7"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80b08103cffffffffffffffffffffffffffffffff",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "uint",
+            "value": "340282366920938463463374607431768211455"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0B 08 10 (UINT-128, the u128 top) — width ARG on the one ladder, minimal width carrying the value (WF-22 :627-631; WF-7 :286-311)",
+        "UINT width 16 tops out at 2^128-1 (WF-9 :366-367): direct value, not a zigzag image; boundary 2^128-1 -> u128 rung 3C (WF-7 :311)",
+        "no unbounded unsigned rung: beyond 2^128-1 is INT-arb territory (WF-9 :368-369)"
+      ]
+    },
+    {
+      "id": "V-23",
+      "desc": "INT -2^128: arb rung, least legal ext payload (17B)",
+      "tags": [
+        "WF-8",
+        "WF-7"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80a002d081101ffffffffffffffffffffffffffffffff",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "int",
+            "value": "-340282366920938463463374607431768211456"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0A 00 — width 0 = arb, the INT-only rung (WF-22 :633-635) — width ARG on the one ladder, minimal width carrying the value (WF-22 :627-631; WF-7 :286-311)",
+        "zz(-2^128) = 2^129-1 = 0x01 FF x16 — 17 bytes (WF-8 :337): beyond the width-16 domain, arb rung (WF-8 :352-355)",
+        "ext form 2D + ARG n: n=17 minimal u8 spelling 08 11 (WF-7 :292); 17 bytes is the least legal ext payload under minimality, leading byte 01 nonzero (WF-7 :314-321)"
+      ]
+    },
+    {
+      "id": "V-24",
+      "desc": "ext payload of 16 bytes rejected: value fits the u128 rung",
+      "tags": [
+        "WF-7",
+        "WF-8"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d80a002d0810ffffffffffffffffffffffffffffffff",
+      "class": "arg_nonminimal_width",
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0A 00 (INT-arb) — would-be canonical prefix before the short ext payload (WF-22 :633-635)",
+        "ext length ARG 08 10 = 16: a payload of 9..16 bytes carries a value the u128 rung spans — the image 2^128-1 is V-20's legal 2C spelling; under minimality the least legal ext payload is 17 bytes (WF-7 :317-319, :306-309; class arg_nonminimal_width)"
+      ]
+    },
+    {
+      "id": "V-25",
+      "desc": "ext length below the n>=9 floor rejected",
+      "tags": [
+        "WF-7"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d80a002d07",
+      "class": "ext_nonminimal",
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0A 00 (INT-arb) — would-be canonical prefix; halt at the length byte (WF-22 :633-635)",
+        "ext selector 2D, length ARG 07 = 7 < 9: the ext form keeps the length floor n >= 9 — halt prefix at the length byte (WF-7 :292, :317; class ext_nonminimal)"
+      ]
+    }
+  ]
+}

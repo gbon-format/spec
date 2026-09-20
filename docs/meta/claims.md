@@ -79,7 +79,7 @@ differ without a declared exception (CLM-2); two values distinct under
 with expected bytes).
 
 **Status.** codified — foundations clauses 2–5 (the equivalence
-`≡_GBON`: clause 5.1); WF-13. The grain fragment of the domain is
+`≡_GBON`: clause 5.1); WF-24. The grain fragment of the domain is
 codified at the model level (foundations 4.1; CLM-4).
 
 ### CLM-2 Canonicality: the Signature Contract
@@ -95,20 +95,32 @@ properties:
   invalid stream: canonicality is a decode-side contract, so any
   alternative byte sequence for the same value is rejected, never
   merely different.
-- **S1 (stability).** On the stable class — a decidable predicate on
-  the value domain — the encoding is a function of the value alone:
-  any process, any construction order, any conforming implementation
-  (with the extent agreement of WF-20) produces the same bytes.
-  Outside the stable class, S1 makes no claim; S2 and S3 hold
+- **S1 (stability).** On the stable class — the tier-1 class, a
+  decidable predicate on the value domain — the encoding is a
+  function of the value alone: any process, any construction order,
+  any conforming implementation produces the same bytes (stability
+  tier T1, with the extent agreement of WF-25). Where a binding
+  declares an instantiation of the identity determinants and their
+  determinism conditions, encodings agree across machines of that
+  language within the declared conditions (stability tier T2);
+  re-encoding a value within one process reproduces the bytes
+  bit-for-bit (stability tier T3). Outside the stable class, S1
+  claims only the tier-2 and tier-3 forms; S2 and S3 hold
   unconditionally.
 
-**Scope.** The stable class excludes exactly the declared
+**Scope.** S1's guarantee is the stability tier ladder of WF-25:
+tier-1 over the stable class; tier-2 where a binding declares the
+identity determinants' instantiation (determinant form, determinism
+scope, verification hook); tier-3 within one process. The stable
+class excludes exactly the declared
 re-derivation exceptions (H-1): the E5 tie-break (pairs equal in
 skeleton and value bytes occupying distinct identity slots) and the
 E4 zero-sign freedom (float keys holding a zero whose stored sign the
 projection leaves to key-overwrite semantics). A value leaves the
 class the moment any map in its graph triggers either rule. Encoder
-side: a stable mode MUST reject a value outside the class with a
+side: the stable mode is one mode, the tier-1 guarantee — tier-2 and
+tier-3 are declarations, not encoder modes — and it MUST reject a
+value outside the class with a
 deterministic classified error; the guard's completeness is
 conditional on H-1. Bindings declare the projection of the class — a
 static conservative predicate over types and a dynamic exact
@@ -119,7 +131,8 @@ without any format change.
 **Falsification.** A decoder accepting a non-canonical spelling (S3);
 a byte collision between `≡_GBON`-distinct values (S2);
 isomorphic-pair divergence on a value inside the declared stable
-class (S1 or H-1); a guard pass on a value whose encodings differ
+class (the stability tier T1 claim: S1 or H-1); a guard pass on a
+value whose encodings differ
 across processes.
 
 **Verification.** F: canonicality fixtures; reject vectors per
@@ -127,10 +140,11 @@ non-canonical class; the isomorphic-pair differential (two
 independently constructed `≡_GBON` instances, byte equality). I: guard
 determinism and error classification; the binding's class projection.
 
-**Status.** codified for S3 and the WF-20 determinism core (WF-20,
-KO-1..KO-8, E1–E5); derived for S2 (reference implementation;
+**Status.** codified for S3 and the WF-25 determinism core (WF-25,
+KO-1..KO-8, E1–E5, the stability tier ladder); derived for S2 (reference
+implementation;
 axiom-set audit assigned); codified for the stable-class predicate
-and the guard return-contract (wire-format 8.1); the guard
+and the guard return-contract (WF-25); the guard
 implementation is derived in the Go binding (stable mode) and
 instrumented by the isomorphic-pair differential.
 
@@ -160,7 +174,7 @@ expected observables, both directions. I: materialization fidelity of
 the binding for each observable.
 
 **Status.** codified — foundations 6.2 (the consolidated
-classification table), 6.5; WF-8, WF-11, WF-12, WF-14, WF-15, WF-16.
+classification table), 6.5; WF-11, WF-14, WF-15, WF-16, WF-17, WF-18.
 
 ### CLM-4 Grain Invariants
 
@@ -179,7 +193,8 @@ construct with wire-level operational rules; host vocabulary
 
 **Falsification.** Two records for one identity; a canonical grain
 that varies across runs or implementations for one tracked-view set
-(G-3, and a breach of S1); a resolution that depends on the asking
+(G-3, and a breach of the stability tier T1 claim); a resolution
+that depends on the asking
 position; a layout-normal divergence between the intern key and the
 record grain; a contentless view carrying a record.
 
@@ -188,7 +203,7 @@ grains and bytes); the bounded-exhaustive grammar corpus. I: the
 reference implementation against the grammar generator.
 
 **Status.** codified at the model level — foundations 4.1 (G-1..G-6);
-codified operationally — WF-13 (the grain rules of the wire graph
+codified operationally — WF-24 (the grain rules of the wire graph
 section); derived in the reference implementation.
 
 ### CLM-5 Binding Projection and Expressibility
@@ -254,7 +269,7 @@ degradation path without an error.
 **Verification.** F: reject vectors per class. I: the error taxonomy
 of the implementation, tripwires, budget gates.
 
-**Status.** codified — WF-22; GO-1, GO-5; derived in the reference
+**Status.** codified — WF-26; GO-1, GO-5; derived in the reference
 implementation; the completeness audit over the construct inventory
 is assigned under CLM-5.
 
@@ -309,7 +324,8 @@ and no others:
 
 1. The E5 tie-break (KO-2a): map pairs equal in skeleton bytes and
    pair-value bytes occupying distinct identity slots, ordered by a
-   process-local discriminator.
+   binding-declared identity determinant (fixed across processes
+   only by the binding's declared determinism scope).
 2. The E4 zero-sign freedom: a float key holding a zero whose stored
    sign the projection leaves to key-overwrite semantics.
 
@@ -319,7 +335,13 @@ and its nested recursion, grain selection (G-3), derivable descent,
 layout normalization, the backing join over closed geometry — is a
 function of the value alone. Platform-dependent type widths are
 denotation variance (distinct domain values), not re-derivation
-exceptions; extent binding is a projection annotation (WF-20 (i)).
+exceptions; extent binding is a projection annotation (WF-25 (i)).
+
+Under the stability tier ladder (WF-25), the same two identity
+determinants are the tier boundary: exactly the E5 tie-break and the
+E4 zero-sign separate stability tier T1 from tiers T2 and T3. The
+exhaustiveness extends to the ladder by relocation — the tier
+framing introduces no third order-sensitive component.
 
 **Falsification.** A value inside the declared stable class whose
 encodings differ between processes, construction orders, or
@@ -330,9 +352,10 @@ representation-decision point of the wire grammar; the
 isomorphic-pair differential bounded-exhaustively over the grammar
 corpus.
 
-**Status.** verified — the audit held (the exhaustiveness spike
-closed the question to the two declared rules); the differential
-instrument landed green.
+**Status.** verified — two-rule exhaustiveness (the audit closed the
+question to the declared rules; the differential instrument landed
+green); the stability tier extension of WF-25 is by relocation: no
+rules added, none removed, the verified mark carries over.
 
 ## 4. Verification Ledger Schema
 

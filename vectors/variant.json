@@ -1,0 +1,451 @@
+{
+  "category": "variant",
+  "section": "6.14",
+  "vectors": [
+    {
+      "id": "V-73",
+      "desc": "tag = index into the value's own in-stream table, ARG-minimal",
+      "tags": [
+        "WF-21",
+        "WF-22",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d16165026141e0d80a016142d3c126",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n3"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "variant",
+            "name": "e",
+            "alts": [
+              {
+                "name": "A",
+                "type": "d2"
+              },
+              {
+                "name": "B",
+                "type": "d2"
+              }
+            ]
+          },
+          {
+            "node": "d2",
+            "kind": "desc",
+            "type": "int",
+            "width": 1
+          },
+          {
+            "node": "n3",
+            "kind": "variant",
+            "tag": 1,
+            "alt": "B",
+            "payload": "n4"
+          },
+          {
+            "node": "n4",
+            "kind": "int",
+            "value": "3"
+          }
+        ]
+      },
+      "deriv": [
+        "DESC VARIANT: E0, kind 1 inline D1, nominal name 'e' (61 65), ARG n=2, alts 'A' (61 41) and 'B' (61 42) with their type-refs (WF-22 :598-600, :611, :620, :633-636); ids DFS: e=0, 'e'=1, 'A'=2, INT-8 DESC=3, 'B'=4 (WF-22 :657-667)",
+        "the second alt's type-ref is REF d3 — structural hash-consing: the second occurrence of one descriptor in a stream is a REF (WF-22 :654-660)",
+        "value: token c1 = class C << 4 | inline tag 1 — an index into the table, minimal on the inline rung (WF-23 :717; WF-21 :563-568); payload INT 3 under the alt's type: zz(3)=6 -> 26 (WF-8 :328-331)"
+      ]
+    },
+    {
+      "id": "V-74",
+      "desc": "name-sorted table case-sensitive ('B' < 'a'); STRUCT payload composition",
+      "tags": [
+        "WF-21",
+        "WF-19",
+        "WF-22"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d16176026142e0d80a016161e0d0026178d36179d3c1b02422",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n5"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "variant",
+            "name": "v",
+            "alts": [
+              {
+                "name": "B",
+                "type": "d3"
+              },
+              {
+                "name": "a",
+                "type": "d4"
+              }
+            ]
+          },
+          {
+            "node": "d3",
+            "kind": "desc",
+            "type": "int",
+            "width": 1
+          },
+          {
+            "node": "d4",
+            "kind": "desc",
+            "type": "struct",
+            "fields": [
+              {
+                "name": "x",
+                "type": "d3"
+              },
+              {
+                "name": "y",
+                "type": "d3"
+              }
+            ]
+          },
+          {
+            "node": "n5",
+            "kind": "variant",
+            "tag": 1,
+            "alt": "a",
+            "payload": "n6"
+          },
+          {
+            "node": "n6",
+            "kind": "struct",
+            "fields": [
+              {
+                "name": "x",
+                "value": "n7"
+              },
+              {
+                "name": "y",
+                "value": "n8"
+              }
+            ]
+          },
+          {
+            "node": "n7",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "n8",
+            "kind": "int",
+            "value": "1"
+          }
+        ]
+      },
+      "deriv": [
+        "table sorted by variant name under the WF-22 key — raw bytes, case-sensitive: 'B' (42) sorts before 'a' (61) although 'a' precedes 'B' in the binding's declaration; declaration order never leaks into the table (WF-21 :576-580; WF-22 :668-674)",
+        "alt 'a' carries an anonymous STRUCT payload {x: INT-8, y: INT-8} — the sum composes over the product kinds, never inside them (WF-21 :569-571); the field table sorts x < y and both type-refs REF d3, the already-registered INT-8 (WF-22 :654-660, :668-674)",
+        "value: c1 = tag 1 = 'a' (index into the sorted table), payload STRUCT b0 with field values in table order: x = zz(2) = 4 (24), y = zz(1) = 2 (22) (WF-19 :541-546; WF-23 :716)"
+      ]
+    },
+    {
+      "id": "V-75",
+      "desc": "payloadless alternative carries the empty TUPLE(0)",
+      "tags": [
+        "WF-21",
+        "WF-22"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d16175016141e0d200c050",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n3"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "variant",
+            "name": "u",
+            "alts": [
+              {
+                "name": "A",
+                "type": "d2"
+              }
+            ]
+          },
+          {
+            "node": "d2",
+            "kind": "desc",
+            "type": "tuple",
+            "arity": 0
+          },
+          {
+            "node": "n3",
+            "kind": "variant",
+            "tag": 0,
+            "alt": "A",
+            "payload": "n4"
+          },
+          {
+            "node": "n4",
+            "kind": "tuple",
+            "elements": []
+          }
+        ]
+      },
+      "deriv": [
+        "the payloadless alt's type-ref is TUPLE arity 0 — e0 d2 00, the unit of positional payload composition (WF-21 :571-573; WF-22 :606, :611-612)",
+        "value: c0 = tag 0 inline-minimal, then the payload body = TUPLE token 50 with a zero-element body — no bytes follow the token (WF-21 :571-573; WF-23 :712, :717)"
+      ]
+    },
+    {
+      "id": "V-76",
+      "desc": "Some(None): nesting resolves through the payload position; recursive table REF",
+      "tags": [
+        "WF-21",
+        "WF-24"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d1636f707402644e6f6e65e0d20064536f6d65d0c1c050",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n4"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "variant",
+            "name": "opt",
+            "alts": [
+              {
+                "name": "None",
+                "type": "d2"
+              },
+              {
+                "name": "Some",
+                "type": "d1"
+              }
+            ]
+          },
+          {
+            "node": "d2",
+            "kind": "desc",
+            "type": "tuple",
+            "arity": 0
+          },
+          {
+            "node": "n4",
+            "kind": "variant",
+            "tag": 1,
+            "alt": "Some",
+            "payload": "n5"
+          },
+          {
+            "node": "n5",
+            "kind": "variant",
+            "tag": 0,
+            "alt": "None",
+            "payload": "n6"
+          },
+          {
+            "node": "n6",
+            "kind": "tuple",
+            "elements": []
+          }
+        ]
+      },
+      "deriv": [
+        "Option is a library-level two-variant sum: table sorted 'None' (4E..) < 'Some' (53..); Some's type-ref is REF d0 — the descriptor's own id, registered before its children, so the recursive type closes through a REF (WF-21 :586-588; WF-24 :762-766; WF-22 :654-660)",
+        "value: c1 = tag 1 (Some); the payload is itself a variant of the same descriptor — c0 50 = tag 0 (None) with the empty TUPLE(0) body; Some(None) resolves naturally through the payload position, no extra machinery (WF-21 :586-588)"
+      ]
+    },
+    {
+      "id": "V-77",
+      "desc": "positional TUPLE payload: alt P -> TUPLE(INT-8, INT-8), elements never reordered",
+      "tags": [
+        "WF-21",
+        "WF-20"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d16174016150e0d202e0d80a01d4c0502422",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n5"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "variant",
+            "name": "t",
+            "alts": [
+              {
+                "name": "P",
+                "type": "d2"
+              }
+            ]
+          },
+          {
+            "node": "d2",
+            "kind": "desc",
+            "type": "tuple",
+            "arity": 2,
+            "elements": [
+              "d4",
+              "d4"
+            ]
+          },
+          {
+            "node": "d4",
+            "kind": "desc",
+            "type": "int",
+            "width": 1
+          },
+          {
+            "node": "n5",
+            "kind": "variant",
+            "tag": 0,
+            "alt": "P",
+            "payload": "n6"
+          },
+          {
+            "node": "n6",
+            "kind": "tuple",
+            "elements": [
+              "n7",
+              "n8"
+            ]
+          },
+          {
+            "node": "n7",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "n8",
+            "kind": "int",
+            "value": "1"
+          }
+        ]
+      },
+      "deriv": [
+        "alt 'P' carries a positional product: TUPLE arity 2, second element type-ref REF d4 (hash-consing, WF-22 :654-660) — the sum composes over positional products exactly as over named ones (WF-21 :569-571)",
+        "value: c0 + payload 50 24 22 — zz(2)=4, zz(1)=2 stay in declaration order; canonical name-sorted order governs named tables, not positional products (WF-20 :552-558)"
+      ]
+    },
+    {
+      "id": "V-78",
+      "desc": "variant table emitted unsorted rejected",
+      "tags": [
+        "WF-21",
+        "VS-1",
+        "VS-3"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d16165026162e0d80a016161",
+      "class": "variant_table_unsorted",
+      "deriv": [
+        "table [b, a]: the second alt name 'a' (61 61) sorts before 'b' (62) — a table emitted in any other order than name-sorted is non-canonical, a decoder reject; the prefix halts at the out-of-order name (WF-21 :576-580)",
+        "canonical spelling spells the same table [a, b] with tag indexes renumbered accordingly — one legal byte sequence per value (VS-1/VS-3)"
+      ]
+    },
+    {
+      "id": "V-79",
+      "desc": "non-minimal tag argument rejected: tag 0 on the u8 rung",
+      "tags": [
+        "WF-21",
+        "WF-7"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d16175016141e0d200c80050",
+      "class": "variant_nonminimal_tag",
+      "deriv": [
+        "value token c8 00: the tag rides the u8 rung with payload 00 — tag 0 fits the inline nibble (rung caps at 7); a tag argument wider than its minimal form is non-canonical and a decoder reject (WF-21 :563-568; WF-7 :299-311)",
+        "canonical spelling is c0 50 (V-75)"
+      ]
+    },
+    {
+      "id": "V-80",
+      "desc": "empty variant table rejected: a sum with no alternatives",
+      "tags": [
+        "WF-21",
+        "VS-29"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d1616500",
+      "class": "variant_table_empty",
+      "deriv": [
+        "ARG n = 0: a sum with no alternatives cannot be instantiated — a VARIANT descriptor whose variant table is empty is ill-formed and a decoder rejects it; the prefix halts at the zero arity (WF-21 :583-586)"
+      ]
+    },
+    {
+      "id": "V-81",
+      "desc": "by-name evolution: stream alt name absent from the decoding table",
+      "tags": [
+        "WF-21",
+        "WF-6",
+        "VS-2"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d1616501615ae0d80a01c026",
+      "class": "variant_name_absent",
+      "deriv": [
+        "the stream is a legal encoding of alt 'Z' (tag 0, payload INT 3) — the would-be canonical bytes; the violation is contextual: the decode target's table for 'e' holds no 'Z', and the decoder matches alternatives by name, never by position (WF-21 :580-582; WF-6 :256-258)",
+        "reject fires for that value; the rest of the stream is unaffected — evolution is additive-by-name, and a missing name is a format error, not a default (WF-21 :582)"
+      ]
+    },
+    {
+      "id": "V-82",
+      "desc": "evolution kind mismatch: alt present in both stream and target with incompatible kind",
+      "tags": [
+        "WF-6"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d16165016141e0d80a01c0280a",
+      "class": "evolution_kind_mismatch",
+      "deriv": [
+        "the stream encodes alt 'A' with an INT payload (zz(5)=10 -> 28 0A); the decoding descriptor declares 'A' with a STRING payload — a field present in both stream and target with an incompatible kind is a decoder reject, not a default-value skip (WF-6 :258-259)",
+        "the skip path stays loud: unknown shapes skip to defaults, incompatible kinds reject — the stream bytes themselves are canonical (would-be canonical bytes, the target refuses)"
+      ]
+    }
+  ]
+}

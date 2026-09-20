@@ -1,0 +1,330 @@
+{
+  "category": "float",
+  "section": "6.4",
+  "vectors": [
+    {
+      "id": "V-26",
+      "desc": "FLOAT binary16 +0.0: zero bits round-trip",
+      "tags": [
+        "WF-11",
+        "WF-22",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80c02400000",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "float",
+            "width": 2
+          },
+          {
+            "node": "n1",
+            "kind": "float",
+            "form": "binary16",
+            "bits": "0000"
+          }
+        ]
+      },
+      "deriv": [
+        "header 67626f6e 0002 (WF-3 :194-198); self-describing position: DESC literal E0, kind 12 = D8 0C, width 2 inline (WF-22 :598, :622, :628-630)",
+        "value token 40 — FLOAT low nibble reserved zero (WF-23 :703, :732-734); bits 0000 = binary16 +0.0 (WF-11 :386)"
+      ]
+    },
+    {
+      "id": "V-27",
+      "desc": "FLOAT binary16 -0.0: sign-only pattern, bit-for-bit distinct from +0.0",
+      "tags": [
+        "WF-11",
+        "WF-22",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80c02408000",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "float",
+            "width": 2
+          },
+          {
+            "node": "n1",
+            "kind": "float",
+            "form": "binary16",
+            "bits": "8000"
+          }
+        ]
+      },
+      "deriv": [
+        "header + DESC(FLOAT width 2) as V-26 (WF-3 :194-198; WF-22 :622, :628-630)",
+        "bits 8000 = binary16 -0.0: sign bit set, exponent and mantissa zero; preserved bit-for-bit, never collapsed onto +0.0 (WF-11 :390-392)"
+      ]
+    },
+    {
+      "id": "V-28",
+      "desc": "FLOAT binary16 least subnormal 2^-24: no flush-to-zero",
+      "tags": [
+        "WF-11",
+        "WF-22",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80c02400001",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "float",
+            "width": 2
+          },
+          {
+            "node": "n1",
+            "kind": "float",
+            "form": "binary16",
+            "bits": "0001"
+          }
+        ]
+      },
+      "deriv": [
+        "header + DESC(FLOAT width 2) as V-26 (WF-3 :194-198; WF-22 :622)",
+        "bits 0001: exponent 0, mantissa 1 — the least subnormal 2^-24; subnormals preserved bit-for-bit, round-trip equality is bitwise (WF-11 :390-392)"
+      ]
+    },
+    {
+      "id": "V-29",
+      "desc": "FLOAT binary16 quiet NaN with payload 1: payload bits preserved",
+      "tags": [
+        "WF-11",
+        "WF-22",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80c02407e01",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "float",
+            "width": 2
+          },
+          {
+            "node": "n1",
+            "kind": "float",
+            "form": "binary16",
+            "bits": "7e01"
+          }
+        ]
+      },
+      "deriv": [
+        "header + DESC(FLOAT width 2) as V-26 (WF-3 :194-198; WF-22 :622)",
+        "bits 7E01 = exponent all-ones 7C00 | quiet bit 0200 | payload 0001: NaN payloads preserved bit-for-bit — the payload survives the round trip unchanged (WF-11 :390-392)"
+      ]
+    },
+    {
+      "id": "V-30",
+      "desc": "FLOAT binary32 quiet NaN with payload 1: payload bits preserved at width 4",
+      "tags": [
+        "WF-11",
+        "WF-22",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80c04407fc00001",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "float",
+            "width": 4
+          },
+          {
+            "node": "n1",
+            "kind": "float",
+            "form": "binary32",
+            "bits": "7fc00001"
+          }
+        ]
+      },
+      "deriv": [
+        "header + DESC(FLOAT width 4): E0 D8 0C 04 (WF-3 :194-198; WF-22 :622, :628-630)",
+        "bits 7FC00001 = exponent all-ones | quiet bit 00400000 | payload 1 (WF-11 :386, :390-392)"
+      ]
+    },
+    {
+      "id": "V-31",
+      "desc": "FLOAT binary64 -0.0: full-width sign-only pattern",
+      "tags": [
+        "WF-11",
+        "WF-22",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80c0808408000000000000000",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "float",
+            "width": 8
+          },
+          {
+            "node": "n1",
+            "kind": "float",
+            "form": "binary64",
+            "bits": "8000000000000000"
+          }
+        ]
+      },
+      "deriv": [
+        "header + DESC(FLOAT width 8): E0 D8 0C 08 (WF-3 :194-198; WF-22 :622, :628-630)",
+        "bits 8000000000000000 = binary64 -0.0: sign-only, preserved bit-for-bit (WF-11 :390-392)",
+        "c4 DD r2: width-8 argument re-spelled on the WF-7 ladder — u8 rung 08 08 (inline caps at 7; the (01/02/04/08) parenthetical WF-22 :638 is a pre-rebalance residue; 16 remains 08 10)",
+        "c4 DD r2: width-8 u8 rung 08 08 (WF-7 ladder) and a dropped payload zero restored — binary64 bits 40 80 00 00 00 00 00 00; the round-1 hex was odd-length (17.5 bytes)"
+      ]
+    },
+    {
+      "id": "V-32",
+      "desc": "FLOAT binary64 quiet NaN with payload 1",
+      "tags": [
+        "WF-11",
+        "WF-22",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80c0808407ff8000000000001",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "float",
+            "width": 8
+          },
+          {
+            "node": "n1",
+            "kind": "float",
+            "form": "binary64",
+            "bits": "7ff8000000000001"
+          }
+        ]
+      },
+      "deriv": [
+        "header + DESC(FLOAT width 8) as V-31 (WF-3 :194-198; WF-22 :622)",
+        "bits 7FF8000000000001 = exponent all-ones | quiet bit | payload 1 — NaN payload preservation at width 8 (WF-11 :390-392)",
+        "c4 DD r2: width-8 argument re-spelled on the WF-7 ladder — u8 rung 08 08 (inline caps at 7; the (01/02/04/08) parenthetical WF-22 :638 is a pre-rebalance residue; 16 remains 08 10)"
+      ]
+    },
+    {
+      "id": "V-33",
+      "desc": "FLOAT binary128 quiet NaN with payload 1: width-16 form, width ARG rides u8 rung",
+      "tags": [
+        "WF-11",
+        "WF-22",
+        "WF-7",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80c0810407fff8000000000000000000000000001",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "float",
+            "width": 16
+          },
+          {
+            "node": "n1",
+            "kind": "float",
+            "form": "binary128",
+            "bits": "7fff8000000000000000000000000001"
+          }
+        ]
+      },
+      "deriv": [
+        "header + DESC(FLOAT width 16): E0 D8 0C, width ARG 08 10 — inline rung caps at 7, 16 rides u8 (WF-3 :194-198; WF-22 :622, :628-631; WF-7 :309-310)",
+        "bits 7FFF8000000000000000000000000001: exponent all-ones | quiet bit | payload 1 (WF-11 :386, :390-392)"
+      ]
+    },
+    {
+      "id": "V-34",
+      "desc": "1.0 in two forms: FLOAT descriptors of different widths intern independently — width is part of the structural key",
+      "tags": [
+        "WF-11",
+        "WF-22",
+        "WF-24"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d202e0d80c02e0d80c0450403c00403f800000",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "tuple",
+            "elems": [
+              "n2",
+              "n3"
+            ]
+          },
+          {
+            "node": "n2",
+            "kind": "float",
+            "form": "binary16",
+            "bits": "3c00"
+          },
+          {
+            "node": "n3",
+            "kind": "float",
+            "form": "binary32",
+            "bits": "3f800000"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D2 02 — TUPLE arity 2, one root descriptor for the whole stream; two type-refs as first-encounter literals: FLOAT-2 (id 1), FLOAT-4 (id 2), DFS order off the root (id 0) (WF-22 :660-662, :668-671)",
+        "token 50 opens the tuple body: 40 3C00 = binary16 1.0, then 40 3F800000 = binary32 1.0 — same value, two forms, positional order (WF-23 :732-734; WF-20)",
+        "the second type-ref is a literal, not a REF to the first — a FLOAT descriptor's width argument is part of its structure: structurally identical FLOATs of different forms are distinct intern records (WF-22 :663-665)"
+      ]
+    },
+    {
+      "id": "V-35",
+      "desc": "DESC FLOAT width 3 rejected: width↔form bijection violated",
+      "tags": [
+        "WF-11",
+        "WF-22"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d80c03",
+      "class": "float_width_form_mismatch",
+      "deriv": [
+        "DESC kind 12, width ARG 03: width equals the form bijectively — 2/4/8/16 map to binary16/32/64/128 and no form index exists, width 3 names no form; halt prefix at the width byte (WF-11 :386-389; WF-22 :628; class float_width_form_mismatch)"
+      ]
+    }
+  ]
+}

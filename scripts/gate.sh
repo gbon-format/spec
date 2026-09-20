@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
-# GBON spec repository gates (a)-(d) + optional factual-truth check.
-# Aggregate runner (exit 0 = all green). Dictionary carrier for the
-# authorial-content vocabulary scan (branch class: cycle labels).
+# GBON spec repository gates: anchors/structure (a), vocabulary
+# hygiene (b), residual tokens and dates (c), Cyrillic (d),
+# bibliography (e), conformance corpus (f), ledger lint (l).
+# Dictionary carrier for the authorial-content vocabulary scan
+# (branch class: cycle labels).
 # Modes:
-#   gate.sh                 run gates a,b,c,d
+#   gate.sh                 run gates a,b,c,d,e,f + l
 #   gate.sh --sb-e DIR      also run the error-class factual check against
 #                           DIR/errors.go of the Go implementation (read-only)
+#   gate.sh --lint DIR      run the ledger lint with the cross-repo I-row leg
 #   gate.sh --self-test     adversarial fixtures on a scratch copy; nothing
 #                           under the repository is modified
 set -u
 REPO="${GBON_SPEC_REPO:-$(cd "$(dirname "$0")/.." && pwd)}"
 cd "$REPO" || exit 2
-MD_FILES="docs/wire-format.md docs/foundations.md docs/bindings/go.md README.md docs/meta/spec-conventions.md docs/references.md docs/meta/claims.md"
-SCAN_FILES="docs/wire-format.md docs/foundations.md docs/bindings/go.md README.md CHANGELOG.md LICENSE scripts/gate.sh vectors/*.json manifest.json docs/meta/spec-conventions.md docs/references.md docs/meta/claims.md"
+MD_FILES="docs/wire-format.md docs/foundations.md docs/bindings/go.md docs/bindings/java.md docs/bindings/rust.md README.md docs/meta/spec-conventions.md docs/references.md docs/meta/claims.md"
+SCAN_FILES="docs/wire-format.md docs/foundations.md docs/bindings/go.md docs/bindings/java.md docs/bindings/rust.md README.md CHANGELOG.md LICENSE scripts/gate.sh vectors/*.json manifest.json docs/meta/spec-conventions.md docs/references.md docs/meta/claims.md"
 NR_FILES="$MD_FILES scripts/gate.sh"
 status=0
 
@@ -61,10 +64,38 @@ strip_fenced() {
 }
 strip_ticks() { sed -e 's/`[^`]*`//g'; }
 
-id_defs() { # file, header-tag series (WF|GO)
+id_defs() { # file, header-tag series (WF|GO|JV|RS)
   grep -hoE "^#{2,3} .*\\[$2-[0-9]+\\]$" "$1" 2>/dev/null \
     | grep -oE "\\[$2-[0-9]+\\]" | tr -d '[]' | sort
 }
+
+# Dictionary constants — the single derivation point of the gate: the
+# id-class def sets are live-derived from their carriers, the
+# corpus-side registries are read from the manifest; every leg
+# consumes these vars. Per-leg literal copies of these sets are the
+# drift degeneration and stay banned. IR_WH/IR_KINDS/F1T_PIN are
+# authoring-time derivations over the live tree (derivation commands
+# live in the repository change record), pinned here as the whitelist
+# the corpus is checked against.
+DICT_WF=$(id_defs docs/wire-format.md WF)
+DICT_GO=$(id_defs docs/bindings/go.md GO)
+DICT_JV=$(id_defs docs/bindings/java.md JV)
+DICT_RS=$(id_defs docs/bindings/rust.md RS)
+DICT_KO=$(grep -hoE '^\*\*KO-[0-9]+[ab]? ' docs/wire-format.md | tr -d '* ' | sort -u)
+DICT_E=$(grep -hoE '^- \*\*E[0-9] ' docs/wire-format.md | grep -oE 'E[0-9]' | sort -u)
+DICT_CLM=$(grep -hoE '^### CLM-[0-9]+ ' docs/meta/claims.md | grep -oE 'CLM-[0-9]+' | sort -u)
+DICT_H=$(grep -hoE '^### H-[0-9]+ ' docs/meta/claims.md | grep -oE 'H-[0-9]+' | sort -u)
+DICT_G=$(grep -hoE '^- \*\*G-[0-9]+ ' docs/foundations.md | grep -oE 'G-[0-9]+' | sort -u)
+DICT_SC=$(grep -E '^## SC-[0-9]+\.' docs/meta/spec-conventions.md | grep -oE 'SC-[0-9]+' | sort -u -V)
+BD_KEYS=" $(jq -r '.coverage.binding_dimensions | (.vs | keys[]), (.d | keys[])' manifest.json 2>/dev/null | tr '\n' ' ')"
+IR_WH=' E L alt alts args arity backing base bits bytes children count dense dynamic dynamic_ref elem elements elems extent fields form im key keys kind len length name nil node nodes off pairs payload pos re root selector tag target type value view width x '
+IR_KINDS=' array blob bool complex desc float iface int map nil ptr ref slice stream string struct tuple uint variant view zst zst_marker '
+F1T_PIN='GBON is a language-independent binary format for serializing object graphs under three hard contracts: bitwise-faithful round-trips, always-canonical encoding, and decoding under explicit resource budgets.'
+# Bare-GBON advisory whitelist: composite contexts enumerated by the
+# first run of the SEO scan (record: the change's cycle zone).
+SEO_WH='wire|value|denotation|format|transfer|specification|repository|input|files|bytes|uint|graph|rust|java|go|external|claim|conventions'
+
+dcount() { printf '%s\n' "$1" | grep -c . || true; }
 
 gate_a() { # anchor/TOC/structure integrity
   local g=a
@@ -72,45 +103,62 @@ gate_a() { # anchor/TOC/structure integrity
   if grep -rn '^# Part ' docs/ >/dev/null 2>&1; then
     red $g "Part-level headers present:"; grep -rn '^# Part ' docs/ >&2
   fi
-  # Def sets, exact and duplicate-free
-  local wf go ko e
-  wf=$(id_defs docs/wire-format.md WF)
-  [ "$(printf '%s\n' "$wf" | wc -l)" -eq 24 ] || red $g "WF def count $(printf '%s\n' "$wf" | wc -l) != 24"
-  local i exp_wf="" bad
-  for i in $(seq 1 24); do exp_wf="${exp_wf}WF-$i
+  # Def sets, exact and duplicate-free (dictionary constants)
+  local wf go jv rs ko e bad i
+  wf=$DICT_WF
+  [ "$(dcount "$wf")" -eq 26 ] || red $g "WF def count $(dcount "$wf") != 26"
+  local exp_wf=""
+  for i in $(seq 1 26); do exp_wf="${exp_wf}WF-$i
 "; done
   bad=$(printf '%s' "$exp_wf" | sort | diff - <(printf '%s\n' "$wf") | grep '^<' | tr -d '< ')
   [ -z "$bad" ] || red $g "WF def set mismatch: $bad"
-  go=$(id_defs docs/bindings/go.md GO)
-  [ "$(printf '%s\n' "$go" | wc -l)" -eq 7 ] || red $g "GO def count != 7"
+  go=$DICT_GO
+  [ "$(dcount "$go")" -eq 7 ] || red $g "GO def count != 7"
   local j exp_go=""
   for j in $(seq 1 7); do exp_go="${exp_go}GO-$j
 "; done
   bad=$(printf '%s' "$exp_go" | sort | diff - <(printf '%s\n' "$go") | grep '^<' | tr -d '< ')
   [ -z "$bad" ] || red $g "GO def set mismatch: $bad"
-  ko=$(grep -hoE '^\*\*KO-[0-9]+[ab]? ' docs/wire-format.md | tr -d '* ' | sort -u)
-  [ "$(printf '%s\n' "$ko" | wc -l)" -eq 10 ] || red $g "KO def count $(printf '%s\n' "$ko" | wc -l) != 10"
+  jv=$DICT_JV
+  [ "$(dcount "$jv")" -eq 7 ] || red $g "JV def count != 7"
+  local exp_jv=""
+  for j in $(seq 1 7); do exp_jv="${exp_jv}JV-$j
+"; done
+  bad=$(printf '%s' "$exp_jv" | sort | diff - <(printf '%s\n' "$jv") | grep '^<' | tr -d '< ')
+  [ -z "$bad" ] || red $g "JV def set mismatch: $bad"
+  rs=$DICT_RS
+  [ "$(dcount "$rs")" -eq 7 ] || red $g "RS def count != 7"
+  local exp_rs=""
+  for j in $(seq 1 7); do exp_rs="${exp_rs}RS-$j
+"; done
+  bad=$(printf '%s' "$exp_rs" | sort | diff - <(printf '%s\n' "$rs") | grep '^<' | tr -d '< ')
+  [ -z "$bad" ] || red $g "RS def set mismatch: $bad"
+  ko=$DICT_KO
+  [ "$(dcount "$ko")" -eq 10 ] || red $g "KO def count $(dcount "$ko") != 10"
   for i in 1 2 2b 2a 3 4 5 6 7 8; do
     printf '%s\n' "$ko" | grep -qx "KO-$i" || red $g "KO def KO-$i missing"
   done
-  e=$(grep -hoE '^- \*\*E[0-9] ' docs/wire-format.md | grep -oE 'E[0-9]' | sort -u)
-  [ "$(printf '%s\n' "$e" | wc -l)" -eq 5 ] || red $g "E def count != 5"
+  e=$DICT_E
+  [ "$(dcount "$e")" -eq 5 ] || red $g "E def count != 5"
   # Claims-registry def sets: the CLM/H home is docs/meta/claims.md,
-  # the grain-axiom G home is docs/foundations.md. Additive pins; the
-  # four corpus pins above keep their values and lines.
-  local clm h gd
-  clm=$(grep -hoE '^### CLM-[0-9]+ ' docs/meta/claims.md | grep -oE 'CLM-[0-9]+' | sort -u)
-  [ "$(printf '%s\n' "$clm" | wc -l)" -eq 7 ] || red $g "CLM def count $(printf '%s\n' "$clm" | wc -l) != 7"
+  # the grain-axiom G home is docs/foundations.md, the convention SC
+  # home is docs/meta/spec-conventions.md. Additive pins; the corpus
+  # pins above keep their values and lines.
+  local clm h gd sc
+  clm=$DICT_CLM
+  [ "$(dcount "$clm")" -eq 7 ] || red $g "CLM def count $(dcount "$clm") != 7"
   for i in $(seq 1 7); do printf '%s\n' "$clm" | grep -qx "CLM-$i" || red $g "CLM def CLM-$i missing"; done
-  h=$(grep -hoE '^### H-[0-9]+ ' docs/meta/claims.md | grep -oE 'H-[0-9]+' | sort -u)
-  [ "$(printf '%s\n' "$h" | wc -l)" -eq 1 ] || red $g "H def count $(printf '%s\n' "$h" | wc -l) != 1"
+  h=$DICT_H
+  [ "$(dcount "$h")" -eq 1 ] || red $g "H def count $(dcount "$h") != 1"
   printf '%s\n' "$h" | grep -qx "H-1" || red $g "H def H-1 missing"
-  gd=$(grep -hoE '^- \*\*G-[0-9]+ ' docs/foundations.md | grep -oE 'G-[0-9]+' | sort -u)
-  [ "$(printf '%s\n' "$gd" | wc -l)" -eq 6 ] || red $g "G def count $(printf '%s\n' "$gd" | wc -l) != 6"
+  gd=$DICT_G
+  [ "$(dcount "$gd")" -eq 6 ] || red $g "G def count $(dcount "$gd") != 6"
   for i in $(seq 1 6); do printf '%s\n' "$gd" | grep -qx "G-$i" || red $g "G def G-$i missing"; done
+  sc=$DICT_SC
+  [ "$(dcount "$sc")" -eq 11 ] || red $g "SC def count $(dcount "$sc") != 11"
   # Mentions resolve (fenced and tick spans stripped); SA is mention-only
   local toks
-  toks=$(strip_fenced $MD_FILES | strip_ticks | grep -oP '(?<![0-9A-Za-z-])((WF|GO|KO)-[0-9]+[ab]?|SA-[0-9]+|E[1-9]|CLM-[0-9]+|H-[0-9]+|G-[0-9]+)(?![0-9A-Fa-f])' || true)
+  toks=$(strip_fenced $MD_FILES | strip_ticks | grep -oP '(?<![0-9A-Za-z-])((WF|GO|JV|RS|KO)-[0-9]+[ab]?|SA-[0-9]+|E[1-9]|CLM-[0-9]+|H-[0-9]+|G-[0-9]+|SC-[0-9]+)(?![0-9A-Fa-f])' || true)
   local t ser num
   while IFS= read -r t; do
     [ -n "$t" ] || continue
@@ -118,12 +166,15 @@ gate_a() { # anchor/TOC/structure integrity
     case $ser in
       WF) printf '%s\n' "$wf" | grep -qx "WF-$num" || red $g "mention $t without def" ;;
       GO) printf '%s\n' "$go" | grep -qx "GO-$num" || red $g "mention $t without def" ;;
+      JV) printf '%s\n' "$jv" | grep -qx "JV-$num" || red $g "mention $t without def" ;;
+      RS) printf '%s\n' "$rs" | grep -qx "RS-$num" || red $g "mention $t without def" ;;
       KO) printf '%s\n' "$ko" | grep -qx "KO-$num" || red $g "mention $t without def" ;;
       E)  printf '%s\n' "$e" | grep -qx "E$num" || red $g "mention $t without def" ;;
       SA) [ "$num" -le 9 ] 2>/dev/null || red $g "mention $t outside known range" ;;
       CLM) printf '%s\n' "$clm" | grep -qx "CLM-$num" || red $g "mention $t without def" ;;
       H)   printf '%s\n' "$h" | grep -qx "H-$num" || red $g "mention $t without def" ;;
       G)   printf '%s\n' "$gd" | grep -qx "G-$num" || red $g "mention $t without def" ;;
+      SC)  printf '%s\n' "$sc" | grep -qx "SC-$num" || red $g "mention $t without def" ;;
     esac
   done < <(printf '%s\n' "$toks")
   local sa_n; sa_n=$(printf '%s\n' "$toks" | grep -c '^SA-' || true)
@@ -136,20 +187,36 @@ gate_a() { # anchor/TOC/structure integrity
     'Introduction' 'Scope' 'Definitions' 'Model' 'Identity' 'Equality' \
     'Requirements' 'Annex A' 'Annex B'
   spine_check docs/bindings/go.md \
-    'Type Mapping' 'Lifecycle' 'Error Conformance' 'Examples'
+    'Type Mapping' 'Lifecycle' 'Error Conformance' 'Examples' 'Grounding'
+  spine_check docs/bindings/java.md \
+    'Type Mapping' 'Lifecycle' 'Error Conformance' 'Examples' 'Grounding'
+  spine_check docs/bindings/rust.md \
+    'Type Mapping' 'Lifecycle' 'Error Conformance' 'Examples' 'Grounding'
   grep -qiE 'non-normative' <(head -20 docs/bindings/go.md) \
     || red $g "go.md: status declaration missing in header"
+  grep -qiE 'non-normative' <(head -20 docs/bindings/java.md) \
+    || red $g "java.md: status declaration missing in header"
+  grep -qiE 'non-normative' <(head -20 docs/bindings/rust.md) \
+    || red $g "rust.md: status declaration missing in header"
   toc_check docs/wire-format.md
   toc_check docs/foundations.md
   toc_check docs/bindings/go.md
+  toc_check docs/bindings/java.md
+  toc_check docs/bindings/rust.md
   toc_check docs/meta/claims.md
-  # Intro claims equal the actual ID sets
-  local claim exp
+  # Intro claims equal the actual ID sets (prose wraps are flattened
+  # gate-side; doc text stays free to wrap)
+  local claim exp para
   claim=$(head -20 docs/bindings/go.md | grep -oE 'GO-1\.\.GO-[0-9]+' | head -1)
   exp="GO-1..GO-$(printf '%s\n' "$go" | sed 's/GO-//' | sort -n | tail -1)"
   [ "$claim" = "$exp" ] || red $g "go.md intro claim '$claim' != actual '$exp'"
-  claim=$(head -30 docs/wire-format.md | grep -oE 'WF-1 through WF-[0-9]+' | head -1)
-  [ "$claim" = "WF-1 through WF-24" ] || red $g "wire-format intro claim '$claim' != WF-1..WF-24"
+  claim=$(head -30 docs/wire-format.md | tr '\n' ' ' | grep -oE 'WF-1 through WF-[0-9]+' | head -1)
+  exp="WF-1 through WF-$(printf '%s\n' "$wf" | sed 's/WF-//' | sort -n | tail -1)"
+  [ "$claim" = "$exp" ] || red $g "wire-format intro claim '$claim' != actual '$exp'"
+  # F1 canon sync: the README definition paragraph is byte-equal to
+  # the F1T pin (whitespace-normalized comparison both sides)
+  para=$(sed -n '7,9p' README.md | tr '\n' ' ' | awk '{$1=$1}1')
+  [ "$para" = "$F1T_PIN" ] || red $g "README definition paragraph != F1T pin"
 }
 
 spine_check() { # file, ordered keyword slots
@@ -209,6 +276,18 @@ gate_b() { # authorial vocabulary scan, full tracked content, byte locale
   out=$(LC_ALL=C.UTF-8 grep -riEn 'ns/op|MB/s|benchmark|faster' \
     docs/wire-format.md docs/foundations.md docs/bindings/go.md README.md 2>/dev/null && true)
   [ -n "$out" ] && { note "advisory measurable-pattern report:"; printf '%s\n' "$out" >&2; }
+  # Advisory bare-GBON report (SEO canon): GBON mentions outside the
+  # composite-context whitelist (SEO_WH, enumerated by the first run);
+  # prose is flattened per file so line wraps do not split contexts.
+  # Notes only — the strict flip is data-triggered and outside this
+  # phase; exit status is unaffected by design.
+  local sf bare
+  for sf in $MD_FILES; do
+    bare=$(awk 'FNR==1{f=0} /^```/{f=!f; next} !f{print}' "$sf" | strip_ticks \
+      | tr '\n' ' ' | sed 's/  */ /g' \
+      | grep -oP "\\bGBON\\b(?!\\s+((?i:${SEO_WH})\\b|—))(?:\\s\\S{0,20})?" || true)
+    [ -n "$bare" ] && { note "advisory bare-GBON report ($sf):"; printf '%s\n' "$bare" >&2; }
+  done
 }
 
 gate_c() { # residual tokens, cycle labels, dates; whitelist is per-line
@@ -225,7 +304,12 @@ gate_c() { # residual tokens, cycle labels, dates; whitelist is per-line
   fi
   out=$(grep -En '[Cc]ycle c[0-9]' $SCAN_FILES 2>/dev/null && true)
   [ -n "$out" ] && { red $g "cycle labels:"; printf '%s\n' "$out" >&2; }
-  out=$(grep -En '\b20[0-9]{2}-[0-9]{2}-[0-9]{2}\b' $MD_FILES 2>/dev/null && true)
+  # ISO-date leg over the prose contour minus the anchor map: the
+  # references rows carry pin-provenance dates by design (declared
+  # exemption — the anchor map is the date-bearing surface).
+  local DATE_FILES
+  DATE_FILES=$(printf '%s\n' $MD_FILES | grep -vxF 'docs/references.md' | tr '\n' ' ')
+  out=$(grep -En '\b20[0-9]{2}-[0-9]{2}-[0-9]{2}\b' $DATE_FILES 2>/dev/null && true)
   [ -n "$out" ] && { red $g "ISO dates outside the changelog exemption:"; printf '%s\n' "$out" >&2; }
 }
 
@@ -256,16 +340,24 @@ gate_f() { # conformance corpus integrity (jq required; LC_ALL pinned)
   for f in vectors/*.json; do
     case " $listed " in *" $f "*) ;; *) red $g "corpus file not listed in manifest: $f" ;; esac
   done
+  # Vector ids are monotonic inside each category block (the corpus
+  # order is category-blocked); global uniqueness stays carried by the
+  # inventory-diff leg below.
+  local cf cat vid num prev
+  while IFS= read -r cf; do
+    [ -n "$cf" ] || continue
+    cat=${cf#vectors/}; cat=${cat%.json}
+    prev=0
+    while IFS= read -r vid; do
+      [ -n "$vid" ] || continue
+      case $vid in V-[0-9]*) ;; *) red $g "bad vector id: $vid"; continue ;; esac
+      num=${vid#V-}
+      if [ "$num" -le "$prev" ]; then red $g "vector id not monotonic in $cat: $vid"; fi
+      prev=$num
+    done < <(jq -r --arg c "$cat" '.vectors[] | select(.category == $c) | .id' manifest.json)
+  done < <(jq -r '.categories[].file' manifest.json)
   # corpus vector inventory == manifest inventory (id+verdict+category)
-  local line vid num prev=0
-  while IFS= read -r vid; do
-    [ -n "$vid" ] || continue
-    case $vid in V-[0-9]*) ;; *) red $g "bad vector id: $vid"; continue ;; esac
-    num=${vid#V-}
-    if [ "$num" -le "$prev" ]; then red $g "vector id not monotonic: $vid"; fi
-    prev=$num
-  done < <(jq -r '.vectors[].id' manifest.json)
-  local mset fset cat_name
+  local mset fset
   mset=$(jq -r '.vectors[] | "\(.id) \(.verdict) \(.category)"' manifest.json | sort)
   fset=""
   while IFS= read -r f; do
@@ -276,17 +368,12 @@ gate_f() { # conformance corpus integrity (jq required; LC_ALL pinned)
   done < <(jq -r '.categories[].file' manifest.json)
   fset=$(printf '%s' "$fset" | sed '/^$/d' | sort)
   [ "$mset" = "$fset" ] || { red $g "manifest/file vector inventory mismatch:"; diff <(printf '%s\n' "$mset") <(printf '%s\n' "$fset") | head -20 >&2; }
-  # def sets for tag resolution (reuse gate_a machinery)
-  local wf go ko e
-  wf=$(id_defs docs/wire-format.md WF)
-  go=$(id_defs docs/bindings/go.md GO)
-  ko=$(grep -hoE '^\*\*KO-[0-9]+[ab]? ' docs/wire-format.md | tr -d '* ' | sort -u)
-  e=$(grep -hoE '^- \*\*E[0-9] ' docs/wire-format.md | grep -oE 'E[0-9]' | sort -u)
-  local S81="S81-view S81-dense S81-sliceu8 S81-esc S81-arg"
-  local S91="S91-depth S91-nodes S91-bytes S91-mappairs S91-slicelen S91-namedcycle"
-  # tags resolve into def sets or section anchors; verdict/direction vocab
-  local ALLOWED
-  ALLOWED=" $(printf '%s ' $wf $go $ko $e) $S81 $S91 "
+  # tags resolve into the rule-space defs or the binding_dimensions
+  # registries (dictionary constants; no legacy S81/S91 universe)
+  local wf ko e ALLOWED
+  wf=$DICT_WF; ko=$DICT_KO; e=$DICT_E
+  ALLOWED=" $(printf '%s ' $wf $ko $e)$BD_KEYS"
+  local line
   while IFS= read -r line; do
     [ -n "$line" ] || continue
     red $g "unresolvable tag: $line"
@@ -309,8 +396,7 @@ gate_f() { # conformance corpus integrity (jq required; LC_ALL pinned)
     vectors/*.json 2>/dev/null || true)
   [ -n "$out" ] && red $g "bad bytes hex: $out"
   # IR field vocabulary whitelist and kind enumeration (corpus contract)
-  local WH=" node kind value bits bytes real imag sort elements backing off len extent pairs key fields name type ref root nodes of"
-  local KINDS=" int uint bool float complex string blob nil array view map struct iface bigint descriptor cell"
+  local WH="$IR_WH" KINDS="$IR_KINDS"
   out=$(jq -r --arg wh "$WH" '
     .vectors[] | select(.verdict == "ok") | .ir | [.. | objects | keys[]] | unique
     | map(select(. as $k | ("\($wh) " | index(" \($k) ")) | not)) | if length > 0 then "x" else empty end' \
@@ -321,15 +407,23 @@ gate_f() { # conformance corpus integrity (jq required; LC_ALL pinned)
     | .kind | select(. as $k | ("\($kinds) " | index(" \($k) ")) | not)' \
     vectors/*.json 2>/dev/null | sort -u || true)
   [ -n "$out" ] && red $g "unknown IR kind: $(printf '%s ' $out)"
+  # FORM: allowed per-vector field set; narrow fields class-gated
+  local FORM_ALLOWED=' id desc tags verdict bytes class limits direction ir deriv consumers narrow_target narrow_offset '
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    red $g "FORM: $line"
+  done < <(for f in vectors/*.json; do
+    jq -r --arg a "$FORM_ALLOWED" '.vectors[] | . as $v |
+      (keys[] | select((" \(.) " | inside($a)) | not) | "\($v.id) extra field \(.)"),
+      (select((has("narrow_target") or has("narrow_offset")) and .class != "evolution_ref_unmaterialized") | "\($v.id) narrow field on class \(.class)")' "$f" 2>/dev/null || true
+  done)
   # coverage classes: covered + exempt == normative class universe
-  local UNIVERSE
-  UNIVERSE=$(for i in $(seq 1 24); do printf 'WF-%d ' $i; done; \
-    printf 'KO-1 KO-2 KO-2b KO-2a KO-3 KO-4 KO-5 KO-6 KO-7 KO-8 E1 E2 E3 E4 E5 '; \
-    printf '%s %s' "$S81" "$S91")
-  local cov exempt
+  # (dictionary constants: WF defs + KO defs + E defs)
+  local UNIVERSE cov exempt cls covset
+  UNIVERSE=$(printf '%s\n%s\n%s' "$DICT_WF" "$DICT_KO" "$DICT_E" | tr '\n' ' ')
   cov=$(jq -r '.coverage.covered | keys[]' manifest.json | tr '\n' ' ')
   exempt=$(jq -r '.coverage.exempt[].id' manifest.json | tr '\n' ' ')
-  local cls covset=" $cov $exempt "
+  covset=" $cov $exempt "
   for cls in $UNIVERSE; do
     case "$covset" in *" $cls "*) ;; *) red $g "coverage class neither covered nor exempt: $cls" ;; esac
   done
@@ -337,6 +431,39 @@ gate_f() { # conformance corpus integrity (jq required; LC_ALL pinned)
     [ -n "$cls" ] || continue
     case " $UNIVERSE " in *" $cls "*) ;; *) red $g "coverage class outside universe: $cls" ;; esac
   done
+  # binding_dimensions: id -> vectors mappings equal the per-tag
+  # vector sets, both directions (registry side and corpus side)
+  local bdk key mapped live_tags
+  while IFS= read -r key; do
+    [ -n "$key" ] || continue
+    mapped=$(jq -r --arg k "$key" '.coverage.binding_dimensions | ((.vs[$k] // .d[$k]) // []) | sort | join(",")' manifest.json)
+    live_tags=$(for f in vectors/*.json; do
+      jq -r --arg k "$key" '.vectors[] | select(.tags | index($k)) | .id' "$f" 2>/dev/null || true
+    done | sort | paste -sd, -)
+    [ "$mapped" = "$live_tags" ] || red $g "binding_dimensions mapping drift: $key"
+  done < <(jq -r '.coverage.binding_dimensions | (.vs | keys[]), (.d | keys[])' manifest.json)
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    red $g "binding-dimensions tag without registry entry: $line"
+  done < <(for f in vectors/*.json; do
+    jq -r --arg a "$BD_KEYS" '.vectors[] | . as $v | .tags[]
+      | select(test("^VS-[0-9]+$|^D[0-9]+$")) | select((" \(.) " | inside($a)) | not) | "\($v.id) \(.)"' "$f" 2>/dev/null || true
+  done)
+  # category covers == per-file tag unions, both directions; the
+  # census declaration contributes its classes' declared covers
+  # (census.json carries zero vectors)
+  local covers tags_union
+  while IFS= read -r cf; do
+    [ -n "$cf" ] || continue
+    covers=$(jq -r --arg f "$cf" '.categories[] | select(.file == $f) | .covers | sort | join(" ")' manifest.json)
+    tags_union=$(jq -r '.vectors[].tags[]' "$cf" 2>/dev/null | sort -u | paste -sd' ' -)
+    if [ -f "vectors/census.json" ] && [ "$cf" = "vectors/census.json" ]; then
+      tags_union=$(printf '%s\n%s' "$tags_union" \
+        "$(jq -r '.declaration.classes[].covers[]' vectors/census.json | grep -oE '(WF|KO|E)-[0-9]+[ab]?' | sort -u)" \
+        | sed '/^$/d' | paste -sd' ' -)
+    fi
+    [ "$covers" = "$tags_union" ] || red $g "category covers != tag union: $cf"
+  done < <(jq -r '.categories[].file' manifest.json)
   # corpus pointer: Appendix A paragraph + README line, no counters there
   grep -q 'Conformance vectors (non-normative)' docs/wire-format.md \
     || red $g "Appendix A corpus pointer missing"
@@ -383,7 +510,18 @@ gate_lint() {
   out=$(jq -r '[.ledger | group_by(.level + "|" + .claim + (if (.sub // "") == "" then "" else "/" + .sub end))[]
     | select(length > 1)] | length' "$mf" 2>&1) || red $g "L3: scan failed"
   [ "$out" = 0 ] || red $g "L3: duplicated (level, claim cell) groups: $out"
-  out=$(jq -r '[.ledger[] | select(.level == "F") | .test] - [.vectors[].id] | join(",")' "$mf" 2>&1) \
+  # L4 resolution domain: vector ids of the manifest, census fixture
+  # classes (census:<name> over vectors/census.json declaration), and
+  # live gate stages (spec-gate:<fn> against this script's function
+  # set, the gate_ prefix stripped)
+  local census_cls stages jallowed
+  census_cls=$(jq -r '.declaration.classes[].name' "$REPO/vectors/census.json" 2>/dev/null | sed 's/^/census:/')
+  stages=$(grep -hoE '^[a-z_]+\(\)' "$0" | tr -d '()' | sed 's/^gate_//' | sed 's/^/spec-gate:/')
+  jallowed=$(printf '%s\n%s\n%s' \
+    "$(jq -r '.vectors[].id' "$mf" 2>/dev/null)" "$census_cls" "$stages" \
+    | jq -Rsc 'split("\n") | map(select(length > 0))')
+  out=$(jq -r --argjson allowed "$jallowed" \
+    '[.ledger[] | select(.level == "F") | .test | select(. as $t | ($allowed | index($t)) | not)] | join(",")' "$mf" 2>&1) \
     || red $g "L4: scan failed"
   [ -z "$out" ] || red $g "L4: F rows citing unknown vectors: $out"
   if [ -n "$dir" ]; then
@@ -440,7 +578,7 @@ EOF
   dup=$(printf '%s\n' "$rows" | grep -oE '^\| [a-z0-9-]+' | sed 's/^| //' | sort | uniq -d)
   [ -n "$dup" ] && red $g "duplicate anchor keys: $dup"
   local docs_lines docs_flat keys
-  docs_lines=$(strip_fenced docs/wire-format.md docs/foundations.md docs/bindings/go.md README.md docs/meta/spec-conventions.md | strip_ticks)
+  docs_lines=$(strip_fenced docs/wire-format.md docs/foundations.md docs/bindings/go.md docs/bindings/java.md docs/bindings/rust.md README.md docs/meta/spec-conventions.md | strip_ticks)
   docs_flat=$(printf '%s\n' "$docs_lines" | tr '\n' ' ')
   keys=$(printf '%s\n' "$rows" | grep -oE '^\| [a-z0-9-]+' | sed 's/^| //')
   while IFS= read -r key; do
@@ -472,12 +610,11 @@ TMPD="$(mktemp -d)"; trap 'rm -rf "$TMPD"' EXIT
 
 self_test() { # adversarial fixtures on scratch copies; repo untouched
   local S="$TMPD/scratch" pass=0 failn=0 rc cc label expect
-  local A B C D NR1F NR2F NR3F NR4F NR5F F1T
+  local A B C D NR1F NR2F NR3F NR4F NR5F
   A='an'"yv"; B='Cy'"cle c"'7'; C='те'"ст"; D='F-'"401"
   NR1F='ori'"ginally"; NR2F='was '"consi""dered and rejected"; NR3F='could '"have been"
   NR4F='T'"ODO"; NR5F='cur'"rently"
-  F1T='GBON is a language-independent binary format for serializing object graphs under three hard contracts: bitwise-faithful round-trips, always-canonical encoding, and decoding under explicit resource budgets.'
-  export A B C D NR1F NR2F NR3F NR4F NR5F F1T
+  export A B C D NR1F NR2F NR3F NR4F NR5F
   mkdir -p "$S"
   run2() { # label expected-verdict [inject-command...]
     label="$1"; expect="$2"; shift 2
@@ -503,11 +640,20 @@ self_test() { # adversarial fixtures on scratch copies; repo untouched
   fi
   run2 fjson red    "printf '{broken' >> vectors/arg.json"
   run2 fdupid red   "jq '.vectors[1].id = \"V-1\"' vectors/arg.json > t && mv t vectors/arg.json"
-  run2 ftag red     "jq '.vectors[0].tags = [\"WF-25\"]' vectors/stream.json > t && mv t vectors/stream.json"
+  run2 ftag red     "jq '.vectors[0].tags = [\"WF-27\"]' vectors/arg.json > t && mv t vectors/arg.json"
   run2 fcov red     "jq 'del(.coverage.covered[\"KO-8\"])' manifest.json > t && mv t manifest.json"
   run2 funlisted red "cp vectors/arg.json vectors/ghost.json"
-  run2 fverdict red "jq '.vectors[0].verdict = \"error\"' vectors/stream.json > t && mv t vectors/stream.json"
-  run2 firfield red "jq '.vectors[0].ir.nodes[0].selector = 2' vectors/stream.json > t && mv t vectors/stream.json"
+  run2 fverdict red "jq '.vectors[0].verdict = \"error\"' vectors/arg.json > t && mv t vectors/arg.json"
+  run2 firfield red "jq '.vectors[0].ir.nodes[0].probe_field = 1' vectors/arg.json > t && mv t vectors/arg.json"
+  # Renovation probes: one red fixture per born/re-derived leg — the
+  # binding_dimensions mapping, the category covers union, the FORM
+  # field law, the F1T sync, and the coverage-universe containment.
+  run2 bd-drift red   "jq '.coverage.binding_dimensions.vs[\"VS-1\"] += [\"V-5\"]' manifest.json > t && mv t manifest.json"
+  run2 cat-drift red  "jq '(.categories[] | select(.file == \"vectors/binding.json\") | .covers) -= [\"WF-26\"]' manifest.json > t && mv t manifest.json"
+  run2 form-extra red "jq '.vectors[0].probe_extra = 1' vectors/arg.json > t && mv t vectors/arg.json"
+  run2 form-narrow-wrongclass red "jq '.vectors[0].narrow_target = \"desc\"' vectors/arg.json > t && mv t vectors/arg.json"
+  run2 f1t-drift red "sed -i '7s/language-independent/platform-neutral/' README.md"
+  run2 universe-drop red "jq '.coverage.covered[\"WF-99\"] = []' manifest.json > t && mv t manifest.json"
   run2 ancestor red  "printf '\nprobe %s token\n' \"\$A\" >> docs/foundations.md"
   run2 cycle red     "printf '\nprobe %s label\n' \"\$B\" >> docs/bindings/go.md"
   run2 cyrillic red  "printf '\nprobe %s line\n' \"\$C\" >> README.md"
@@ -528,7 +674,7 @@ self_test() { # adversarial fixtures on scratch copies; repo untouched
   run2 nr3could red     "printf '\nprobe %s\n' \"\$NR3F\" >> docs/bindings/go.md"
   run2 nr4mark red      "printf '\nprobe %s: extend\n' \"\$NR4F\" >> docs/wire-format.md"
   run2 nr5now red       "printf '\nprobe %s under\n' \"\$NR5F\" >> README.md"
-  run2 nr1f1 green      "printf '\n%s\n' \"\$F1T\" >> docs/wire-format.md"
+  run2 nr1f1 green      "printf '\n%s\n' \"\$F1T_PIN\" >> docs/wire-format.md"
   run2 nr1ex3 green     "printf '\nGBON specification probe\n' >> docs/foundations.md"
   run2 nr1ex4 green     "printf '\nprobe %s added\n' \"\$NR1F\" >> CHANGELOG.md"
   # Ledger-lint probes, end-to-end: each injection trips exactly the

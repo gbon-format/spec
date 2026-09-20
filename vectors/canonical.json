@@ -3,739 +3,573 @@
   "section": "8.1",
   "vectors": [
     {
-      "id": "V-60",
-      "desc": "non-minimal view form 2 with extent == len",
+      "id": "V-102",
+      "desc": "struct field order bytewise case-sensitive: 'A' sorts before 'a'",
       "tags": [
-        "WF-15",
-        "S81-view"
-      ],
-      "verdict": "format",
-      "bytes": "67626f6e0001d1675b5d696e743634d865696e7436340883032224269204000202",
-      "class": "bad_view"
-    },
-    {
-      "id": "V-61",
-      "desc": "view form 1 carrying the form-0 geometry",
-      "tags": [
-        "WF-15",
-        "S81-view"
-      ],
-      "verdict": "format",
-      "bytes": "67626f6e0001d1675b5d696e743634d865696e74363408830322242691040003",
-      "class": "bad_view"
-    },
-    {
-      "id": "V-62",
-      "desc": "non-minimal dense prefix: last dense element is zero",
-      "tags": [
-        "WF-14",
-        "S81-dense"
-      ],
-      "verdict": "format",
-      "bytes": "67626f6e0001d1675b5d696e743634d865696e7436340884032224209004",
-      "class": "malformed_op"
-    },
-    {
-      "id": "V-63",
-      "desc": "non-minimal blob dense prefix: zero tail byte visible",
-      "tags": [
-        "WF-11",
-        "S81-dense"
-      ],
-      "verdict": "format",
-      "bytes": "67626f6e0001dc0d665b5d627974657403aabb009002",
-      "class": "malformed_op"
-    },
-    {
-      "id": "V-64",
-      "desc": "SLICE of UINT-8 in a byte-slice position",
-      "tags": [
-        "WF-18",
-        "WF-20",
-        "S81-sliceu8"
-      ],
-      "verdict": "format",
-      "bytes": "67626f6e0001d1665b5d62797465d96575696e7438018101359004"
-    },
-    {
-      "id": "V-65",
-      "desc": "nonzero ESC reserved nibble",
-      "tags": [
-        "WF-19",
-        "S81-esc"
-      ],
-      "verdict": "format",
-      "bytes": "67626f6e0001d16c0e5b5d696e74657266616365207b7dd66c0c696e74657266616365207b7d8101e1009004"
-    },
-    {
-      "id": "V-66",
-      "desc": "non-minimal argument: u16 form for length 1",
-      "tags": [
-        "WF-4",
-        "S81-arg"
-      ],
-      "verdict": "format",
-      "bytes": "67626f6e0001dc0c66737472696e676d000178",
-      "class": "malformed_arg"
-    },
-    {
-      "id": "V-67",
-      "desc": "canonical map order: string keys sorted by skeleton",
-      "tags": [
-        "KO-1",
-        "KO-2",
-        "E3",
-        "WF-16",
-        "WF-20"
+        "WF-25",
+        "WF-22",
+        "VS-6"
       ],
       "verdict": "ok",
       "direction": "both",
-      "bytes": "67626f6e0001d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e74363408a3616124616222616326",
+      "bytes": "67626f6e0002e0d0026141e0d80a016161d2b02224",
       "ir": {
-        "root": "m1",
+        "root": "s1",
         "nodes": [
           {
-            "node": "m1",
-            "kind": "map",
-            "pairs": [
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n4"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "struct",
+            "fields": [
               {
-                "key": {
-                  "ref": "a"
-                },
-                "value": {
-                  "ref": "va"
-                }
+                "name": "A",
+                "type": "d2"
               },
               {
-                "key": {
-                  "ref": "b"
-                },
-                "value": {
-                  "ref": "vb"
-                }
-              },
-              {
-                "key": {
-                  "ref": "c"
-                },
-                "value": {
-                  "ref": "vc"
-                }
+                "name": "a",
+                "type": "d2"
               }
             ]
           },
           {
-            "node": "b",
-            "kind": "string",
-            "value": "b"
+            "node": "d2",
+            "kind": "desc",
+            "type": "int",
+            "width": 1
           },
           {
-            "node": "a",
-            "kind": "string",
-            "value": "a"
+            "node": "n4",
+            "kind": "struct",
+            "fields": [
+              {
+                "name": "A",
+                "value": "n5"
+              },
+              {
+                "name": "a",
+                "value": "n6"
+              }
+            ]
           },
           {
-            "node": "c",
-            "kind": "string",
-            "value": "c"
-          },
-          {
-            "node": "va",
-            "kind": "int",
-            "value": "2"
-          },
-          {
-            "node": "vb",
+            "node": "n5",
             "kind": "int",
             "value": "1"
           },
           {
-            "node": "vc",
+            "node": "n6",
+            "kind": "int",
+            "value": "2"
+          }
+        ]
+      },
+      "deriv": [
+        "the sort key is the raw field-name byte sequence, case-sensitive: 'A' (41) sorts before 'a' (61) — no locale, case, or collation folding; a declaration order of {a, A} never leaks into the table (WF-22 :668-674; VS-6)",
+        "value body follows the sorted table: A=1 (22), a=2 (24); canonicalization never reorders structure except maps (KO-6 :1086-1098)",
+        "c4 DD r2: repeat type-ref intern id corrected — DESC INT is id 2 (DFS: struct 0, 'A' 1, int 2, 'a' 3); REF d2, not d3 (WF-22)"
+      ]
+    },
+    {
+      "id": "V-103",
+      "desc": "KO-1 base order: string key skeletons compare bytewise, case-sensitive",
+      "tags": [
+        "KO-1",
+        "KO-6",
+        "VS-7"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d5e0d80de0d80a01a2614222616124",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "map",
+            "count": 2,
+            "pairs": [
+              {
+                "key": "n2",
+                "value": "n4"
+              },
+              {
+                "key": "n3",
+                "value": "n5"
+              }
+            ]
+          },
+          {
+            "node": "n2",
+            "kind": "string",
+            "value": "B"
+          },
+          {
+            "node": "n3",
+            "kind": "string",
+            "value": "a"
+          },
+          {
+            "node": "n4",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "n5",
+            "kind": "int",
+            "value": "2"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D5 (STRING id 1, INT-8 id 2) — root DESC MAP: E0 D5, key type-ref, elem type-ref, in this order (WF-22 :620)",
+        "keys 'B' and 'a': skeletons are length-prefixed STRING literals, never REF tokens — 01 42 < 01 61 bytewise; the pair sort precedes emission (KO-1 :1021-1029; KO-6 :1086-1090)",
+        "emission is independent of the in-memory map's iteration order; 'a' declared or inserted first never reorders the bytes (KO-2 :1032-1041)"
+      ]
+    },
+    {
+      "id": "V-104",
+      "desc": "KO-2b value-bytes tie-break: byte-equal pointer-key skeletons, distinct values",
+      "tags": [
+        "KO-2b",
+        "E2"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d7e0d80911d011e0d5d0e0d80a01a2d222d324",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "n1",
+              "n2",
+              "n3"
+            ]
+          },
+          {
+            "node": "n1",
+            "kind": "ptr",
+            "target": "n4"
+          },
+          {
+            "node": "n2",
+            "kind": "ptr",
+            "target": "n5"
+          },
+          {
+            "node": "n3",
+            "kind": "map",
+            "count": 2,
+            "pairs": [
+              {
+                "key": "n1",
+                "value": "n6"
+              },
+              {
+                "key": "n2",
+                "value": "n7"
+              }
+            ]
+          },
+          {
+            "node": "n4",
+            "kind": "bool",
+            "value": "true"
+          },
+          {
+            "node": "n5",
+            "kind": "bool",
+            "value": "true"
+          },
+          {
+            "node": "n6",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "n7",
+            "kind": "int",
+            "value": "2"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC per-value: value 1 = DESC POINTER over DESC BOOL (ids 0/1) + body — the cell opens as an addressable record (id 2); value 2 = type repeat REF d0 + body (cell id 3); value 3 = DESC MAP E0 D5, key type-ref REF d0 (the pointer desc), elem type-ref DESC INT-8 (id 4) — the ambient framing of SENSOR-2 item 3 is superseded (WF-22 :617, :620; WF-24 :745-753)",
+        "two distinct *bool cells open as values 1-2 (records 2/3) under DESC POINTER(BOOL), tag elided at grain equality, bodies 11 11; the map keys are REFs d2/d3 (WF-24 :840-846; derivA2 SENSOR-2 item 3)",
+        "skeletons collapse reference-kind components to the nil token — both keys skeleton to 00, byte-equal across distinct identity slots (E2 :1005-1008; KO-2 :1032-1041)",
+        "KO-2b orders the tied pairs by the canonical bytes of the pair VALUE: 22 < 24 — deterministic and value-derived, never consulting implementation-run identity (KO-2b :1042-1048)"
+      ]
+    },
+    {
+      "id": "V-105",
+      "desc": "T2 tied-pair fixture: byte-equal skeleton and value bytes, Go-declared order",
+      "tags": [
+        "KO-2a",
+        "E5",
+        "VS-28"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d7e0d80911d011e0d5d0e0d80a01a2d2280ed3280e",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "n1",
+              "n2",
+              "n3"
+            ]
+          },
+          {
+            "node": "n1",
+            "kind": "ptr",
+            "target": "n4"
+          },
+          {
+            "node": "n2",
+            "kind": "ptr",
+            "target": "n5"
+          },
+          {
+            "node": "n3",
+            "kind": "map",
+            "count": 2,
+            "pairs": [
+              {
+                "key": "n1",
+                "value": "n6"
+              },
+              {
+                "key": "n2",
+                "value": "n6"
+              }
+            ]
+          },
+          {
+            "node": "n4",
+            "kind": "bool",
+            "value": "true"
+          },
+          {
+            "node": "n5",
+            "kind": "bool",
+            "value": "true"
+          },
+          {
+            "node": "n6",
+            "kind": "int",
+            "value": "7"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC per-value: as V-104 — cells id 2/3, the map's key type-ref REF d0, elem DESC INT-8 id 4 (WF-22 :617, :620)",
+        "two distinct *bool slots, byte-equal key skeletons (E2 collapse) AND byte-equal value bytes 28 0E — the pair order is E5/KO-2a territory: an identity-sequence discriminator over the tie-break identity determinant that never enters the encoded bytes (KO-2a :1049-1061; E5 :1010-1013)",
+        "this fixture pins the go binding's declared tier-2 instantiation — registration order (d2 before d3) as the identity sequence (KO-2a)",
+        "the value is OUTSIDE the stable class — no map anywhere may apply the E5 tie-break — so cross-language byte equality is not claimed; within the declared scope the tier-2 encoding agrees across machines, and the decode-side canonicality rejects hold in every tier (tier ladder :940-960; stable class :1118-1124)"
+      ]
+    },
+    {
+      "id": "V-106",
+      "desc": "KO-4 interface keys: the dynamic-type tag is part of the key bytes",
+      "tags": [
+        "KO-4",
+        "WF-24"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d5e0d808e0d80a01a2e0d80a042222e0d80a08082224",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "map",
+            "count": 2,
+            "pairs": [
+              {
+                "key": "n2",
+                "value": "n4"
+              },
+              {
+                "key": "n3",
+                "value": "n5"
+              }
+            ]
+          },
+          {
+            "node": "n2",
+            "kind": "iface",
+            "dynamic": "d1",
+            "value": "n6"
+          },
+          {
+            "node": "n3",
+            "kind": "iface",
+            "dynamic": "d2",
+            "value": "n6"
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "int",
+            "width": 4
+          },
+          {
+            "node": "d2",
+            "kind": "desc",
+            "type": "int",
+            "width": 8
+          },
+          {
+            "node": "n4",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "n5",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "n6",
+            "kind": "int",
+            "value": "1"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D5 — MAP(INTERFACE, INT-8): key type-ref DESC INTERFACE E0 D8 08 (id 1), elem DESC INT-8 (id 2); the interface keys carry their dynamic-type DESC literals inside the map body (WF-22 :620, :623; KO-4)",
+        "a key encoding of an interface is (dynamic-type tag, canonical value): int32(1) and int64(1) are different keys — the DESC literals e0 d8 0a 04 and e0 d8 0a 08 differ in the width byte, and the skeleton compares the tag bytes bytewise: 04 < 08 (KO-4 :1072-1077)",
+        "a nil interface key and a typed-nil key are byte-distinct — the bare nil token against a dynamic descriptor plus nil body (KO-4 :1077-1079; V-94)",
+        "c4 DD r2: width-8 argument re-spelled on the WF-7 ladder — u8 rung 08 08 (inline caps at 7; the (01/02/04/08) parenthetical WF-22 :638 is a pre-rebalance residue; 16 remains 08 10)",
+        "c4 DD r2: pair bodies completed — key1=int32(1) desc+22, value1=22, key2=int64(1) desc+22, value2=24; the round-1 bytes dropped value1 and mislabeled key2's image (KO-4)"
+      ]
+    },
+    {
+      "id": "V-107",
+      "desc": "KO-8 skip path: byte-identical key token sequences rejected",
+      "tags": [
+        "KO-8",
+        "WF-18"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d402e0d80a0182022224e0d5e0d3d1e0d809a291020001119102000110",
+      "class": "map_duplicate_keys",
+      "deriv": [
+        "envelope (c4 DD r5): root DESC per-value: value 1 = DESC ARRAY[2] INT-8 (ids 0/1, backing id 2); value 2 = DESC MAP(SLICE INT-8, BOOL) — SLICE id 4 elem REF d1, BOOL id 5 — would-be prefix before the duplicate keys (WF-22 :618, :620)",
+        "one backing [1,2] (82 02 22 24, id 2); both keys spell the identical view token sequence 91 02 00 01 — off 0 len 1 extent 1 over the same record (WF-17 :484, :494-499)",
+        "the two windows materialize the same one-element slice: byte-equal skeletons of pointer-free key kinds are true duplicates — on the skip path byte-identical key token sequences are a decoder reject; a duplicate is always an attack or corruption (KO-8 :1104-1112; E1 :998-1001; WF-18 :517-519)"
+      ]
+    },
+    {
+      "id": "V-108",
+      "desc": "struct field table emitted out of name-sorted order rejected",
+      "tags": [
+        "WF-22",
+        "WF-25"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d0026162e0d80a016161",
+      "class": "field_table_unsorted",
+      "deriv": [
+        "field table [b, a]: the second field name 'a' (61 61) sorts before 'b' — the descriptor's field table is emitted in canonical name-sorted order and a table in any other order is a decoder reject of class field_table_unsorted; the prefix halts at the out-of-order name (WF-22 :668-676, c4 pin P2)",
+        "canonical spelling sorts the table [a, b] and the value body follows it"
+      ]
+    },
+    {
+      "id": "V-109",
+      "desc": "ESC reserved nibble nonzero rejected: one legal spelling per token",
+      "tags": [
+        "WF-23",
+        "WF-25"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002f1",
+      "class": "esc_nonzero_nibble",
+      "deriv": [
+        "token f1: the low nibble of an ESC first byte is reserved — an emitter MUST write zero (F0), a decoder MUST reject a nonzero nibble; a second legal spelling of one token would break the one-legal-byte-sequence contract the moment a subclass graduates (WF-23 :720-726)",
+        "the same reservation governs the argumentless class bytes 40/50/B0/E0; this reject is a canonicality class, tier-invariant (WF-23 :726-734; WF-25 :923-935)"
+      ]
+    },
+    {
+      "id": "V-110",
+      "desc": "KO-6 struct keys: blank fields neither encode nor compare",
+      "tags": [
+        "KO-6",
+        "WF-19"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d5e0d0016178e0d80a01d3a1b02622",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n3"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "struct",
+            "fields": [
+              {
+                "name": "x",
+                "type": "d2"
+              }
+            ]
+          },
+          {
+            "node": "d2",
+            "kind": "desc",
+            "type": "int",
+            "width": 1
+          },
+          {
+            "node": "n3",
+            "kind": "map",
+            "count": 1,
+            "pairs": [
+              {
+                "key": "n4",
+                "value": "n5"
+              }
+            ]
+          },
+          {
+            "node": "n4",
+            "kind": "struct",
+            "fields": [
+              {
+                "name": "x",
+                "value": "n6"
+              }
+            ]
+          },
+          {
+            "node": "n5",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "n6",
             "kind": "int",
             "value": "3"
           }
         ]
       },
       "deriv": [
-        "map{\"b\":1,\"a\":2,\"c\":3}: keys sorted bytewise over literal skeletons a<b<c regardless of insertion order (KO-1, E3)",
-        "A3; pairs (61 61, 24) (61 62, 22) (61 63, 26); values zz-encoded (WF-5)"
+        "envelope (c4 DD r5): the root DESC is the MAP — E0 D5, key type-ref = the struct DESC nested (E0 D0 01 'x' DESC INT-8, ids 1..3), elem type-ref REF d3 (INT-8, hash-consed); the framing desc folds into the root's descriptor (WF-22 :620, :654-660)",
+        "the MAP's key type-ref nests {_, x: INT-8} — a blank field declared — blank fields are not part of the descriptor and are not encoded: the table holds x only (WF-19 :541-546; WF-22 :674)",
+        "the key skeleton is the struct's canonical encoding with fields strictly in table order — b0 26; blank fields neither encode nor compare (KO-6 :1086-1098)"
       ]
     },
     {
-      "id": "V-68",
-      "desc": "canonical map order: integer keys by zigzag argument bytes",
-      "tags": [
-        "KO-6",
-        "WF-5",
-        "WF-20"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d36c106d61705b696e7436345d737472696e67d865696e74363408dc0c66737472696e67a5206162216164226165236161246163",
-      "ir": {
-        "root": "m1",
-        "nodes": [
-          {
-            "node": "m1",
-            "kind": "map",
-            "pairs": [
-              {
-                "key": {
-                  "ref": "k0"
-                },
-                "value": {
-                  "ref": "s0"
-                }
-              },
-              {
-                "key": {
-                  "ref": "km1"
-                },
-                "value": {
-                  "ref": "s1"
-                }
-              },
-              {
-                "key": {
-                  "ref": "k1"
-                },
-                "value": {
-                  "ref": "s2"
-                }
-              },
-              {
-                "key": {
-                  "ref": "km2"
-                },
-                "value": {
-                  "ref": "s3"
-                }
-              },
-              {
-                "key": {
-                  "ref": "k2"
-                },
-                "value": {
-                  "ref": "s4"
-                }
-              }
-            ]
-          },
-          {
-            "node": "k0",
-            "kind": "int",
-            "value": "0"
-          },
-          {
-            "node": "km1",
-            "kind": "int",
-            "value": "-1"
-          },
-          {
-            "node": "k1",
-            "kind": "int",
-            "value": "1"
-          },
-          {
-            "node": "km2",
-            "kind": "int",
-            "value": "-2"
-          },
-          {
-            "node": "k2",
-            "kind": "int",
-            "value": "2"
-          },
-          {
-            "node": "s0",
-            "kind": "string",
-            "value": "b"
-          },
-          {
-            "node": "s1",
-            "kind": "string",
-            "value": "d"
-          },
-          {
-            "node": "s2",
-            "kind": "string",
-            "value": "e"
-          },
-          {
-            "node": "s3",
-            "kind": "string",
-            "value": "a"
-          },
-          {
-            "node": "s4",
-            "kind": "string",
-            "value": "c"
-          }
-        ]
-      },
-      "deriv": [
-        "map[int64]string {-2:\"a\",0:\"b\",2:\"c\",-1:\"d\",1:\"e\"}: key order = bytewise over minimal zigzag arguments 0,1,2,3,4 -> keys 0,-1,1,-2,2 (KO-6, KO-1)",
-        "A5 then pairs (20,6162)(21,6164)(22,6165)(23,6161)(24,6163)"
-      ]
-    },
-    {
-      "id": "V-69",
-      "desc": "float key: stored sign of minus zero round-trips",
+      "id": "V-111",
+      "desc": "KO-3 float key: -0.0 encoded as-is, never normalized",
       "tags": [
         "KO-3",
         "E4"
       ],
       "verdict": "ok",
       "direction": "both",
-      "bytes": "67626f6e0001d36c126d61705b666c6f617436345d737472696e67da67666c6f6174363408dc0c66737472696e67a1418000000000000000636e6567",
+      "bytes": "67626f6e0002e0d5e0d80c04e0d80a01a1408000000022",
       "ir": {
-        "root": "m1",
+        "root": "s1",
         "nodes": [
           {
-            "node": "m1",
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n2"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "float",
+            "width": 4
+          },
+          {
+            "node": "n2",
             "kind": "map",
+            "count": 1,
             "pairs": [
               {
-                "key": {
-                  "ref": "k1"
-                },
-                "value": {
-                  "ref": "s1"
-                }
+                "key": "n3",
+                "value": "n4"
               }
             ]
           },
           {
-            "node": "k1",
+            "node": "n3",
             "kind": "float",
-            "bits": "8000000000000000"
+            "form": "binary32",
+            "bits": "80000000"
           },
           {
-            "node": "s1",
-            "kind": "string",
-            "value": "neg"
-          }
-        ]
-      },
-      "deriv": [
-        "map[float64]string {-0.0: \"neg\"}: raw bits BE 41 8000000000000000, not normalized (KO-3, E4: stored sign observable)"
-      ]
-    },
-    {
-      "id": "V-70",
-      "desc": "complex key: raw component bits pair",
-      "tags": [
-        "KO-6",
-        "WF-9"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d36c146d61705b636f6d706c657836345d737472696e67db69636f6d706c6578363404dc0c66737472696e67a1503f800000400000006161",
-      "ir": {
-        "root": "m1",
-        "nodes": [
-          {
-            "node": "m1",
-            "kind": "map",
-            "pairs": [
-              {
-                "key": {
-                  "ref": "k1"
-                },
-                "value": {
-                  "ref": "s1"
-                }
-              }
-            ]
-          },
-          {
-            "node": "k1",
-            "kind": "complex",
-            "real": "3f800000",
-            "imag": "40000000"
-          },
-          {
-            "node": "s1",
-            "kind": "string",
-            "value": "a"
-          }
-        ]
-      },
-      "deriv": [
-        "map[complex64]string {1+2i: \"a\"}: skeleton = pair of raw component bits (KO-6 complex rule)"
-      ]
-    },
-    {
-      "id": "V-71",
-      "desc": "interface keys: type tag distinguishes int64(1) from int32(1)",
-      "tags": [
-        "KO-4",
-        "KO-2"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d36c166d61705b696e74657266616365207b7d5d696e743634d66c0c696e74657266616365207b7dd865696e74363408a2d865696e743332042224c42222",
-      "ir": {
-        "root": "m1",
-        "nodes": [
-          {
-            "node": "i32",
-            "kind": "iface",
-            "type": "int32",
-            "value": {
-              "ref": "k1"
-            }
-          },
-          {
-            "node": "i64",
-            "kind": "iface",
-            "type": "int64",
-            "value": {
-              "ref": "k2"
-            }
-          },
-          {
-            "node": "m1",
-            "kind": "map",
-            "pairs": [
-              {
-                "key": {
-                  "ref": "i32"
-                },
-                "value": {
-                  "ref": "v2"
-                }
-              },
-              {
-                "key": {
-                  "ref": "i64"
-                },
-                "value": {
-                  "ref": "v1"
-                }
-              }
-            ]
-          },
-          {
-            "node": "k1",
-            "kind": "int",
-            "value": "1"
-          },
-          {
-            "node": "k2",
-            "kind": "int",
-            "value": "1"
-          },
-          {
-            "node": "v2",
-            "kind": "int",
-            "value": "2"
-          },
-          {
-            "node": "v1",
+            "node": "n4",
             "kind": "int",
             "value": "1"
           }
         ]
       },
       "deriv": [
-        "map[any]int64 {int64(1):1, int32(1):2}: key = (type tag, value) (KO-4)",
-        "skeleton order: int32 key skeleton vs int64 key skeleton compare as literal descriptors; names diverge at byte 4 (0x33 < 0x36) -> int32 pair first (KO-1)",
-        "wire: key1 = DESC int32 literal D8..04 + 22; key2 = REF C4 to the already-interned int64 descriptor + 22; 2 slots preserved (KO-2)"
+        "envelope (c4 DD r5): the root DESC is the MAP — E0 D5, key type-ref DESC FLOAT-32 (id 1), elem type-ref DESC INT-8 (id 2); the framing desc folds into the root's descriptor (WF-22 :620, :626-631)",
+        "key type FLOAT-32 as the MAP's nested type-ref E0 D8 0C 04 (WF-22 :610-616, :627-631); the key is the raw bits 80000000 big-endian at type width — the encoder never normalizes +-0 in any position; the stored representation is observable and round-trips bit-for-bit (KO-3 :1063-1069)",
+        "E4: at most one zero float key of a given type may occupy the map — this sole -0.0 slot is legal; which sign a collapsed zero slot stores is the zero-sign determinant, tier-2 instantiable and excluded from the tier-1 claim (E4 :1008-1010; tier ladder :940-960)"
       ]
     },
     {
-      "id": "V-72",
-      "desc": "nil-interface and typed-nil occupy distinct key slots",
-      "tags": [
-        "KO-4",
-        "GO-4"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d36c166d61705b696e74657266616365207b7d5d696e743634d66c0c696e74657266616365207b7dd865696e74363408a20324d5662a696e743634c40022",
-      "ir": {
-        "root": "m1",
-        "nodes": [
-          {
-            "node": "tn",
-            "kind": "iface",
-            "type": "*int64",
-            "value": {
-              "ref": "np"
-            }
-          },
-          {
-            "node": "np",
-            "kind": "nil",
-            "sort": "pointer"
-          },
-          {
-            "node": "m1",
-            "kind": "map",
-            "pairs": [
-              {
-                "key": {
-                  "ref": "ni"
-                },
-                "value": {
-                  "ref": "v2"
-                }
-              },
-              {
-                "key": {
-                  "ref": "tn"
-                },
-                "value": {
-                  "ref": "v1"
-                }
-              }
-            ]
-          },
-          {
-            "node": "ni",
-            "kind": "nil",
-            "sort": "interface"
-          },
-          {
-            "node": "v2",
-            "kind": "int",
-            "value": "2"
-          },
-          {
-            "node": "v1",
-            "kind": "int",
-            "value": "1"
-          }
-        ]
-      },
-      "deriv": [
-        "map[any]int64 {(*int64)(nil):1, nil:2}: nil-interface token 03 vs typed-nil (DESC *int64 + nil pointer body 00) (KO-4, GO-4)",
-        "skeleton order 03 < D5...: nil-interface pair first"
-      ]
-    },
-    {
-      "id": "V-73",
-      "desc": "pointer keys with equal skeletons ordered by value bytes",
-      "tags": [
-        "KO-2b",
-        "E5"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d36c116d61705b2a696e7436345d737472696e67d5662a696e743634d865696e74363408dc0c66737472696e67a22c0e61612c0e6162",
-      "ir": {
-        "root": "m1",
-        "nodes": [
-          {
-            "node": "p1",
-            "kind": "int",
-            "value": "7"
-          },
-          {
-            "node": "p2",
-            "kind": "int",
-            "value": "7"
-          },
-          {
-            "node": "m1",
-            "kind": "map",
-            "pairs": [
-              {
-                "key": {
-                  "ref": "p2"
-                },
-                "value": {
-                  "ref": "sa"
-                }
-              },
-              {
-                "key": {
-                  "ref": "p1"
-                },
-                "value": {
-                  "ref": "sb"
-                }
-              }
-            ],
-            "type": "map[*int64]string"
-          },
-          {
-            "node": "sa",
-            "kind": "string",
-            "value": "a"
-          },
-          {
-            "node": "sb",
-            "kind": "string",
-            "value": "b"
-          }
-        ]
-      },
-      "deriv": [
-        "map[*int64]string {p1:\"b\", p2:\"a\"}, *p1==*p2==7: distinct slots, byte-equal key skeletons -> order by canonical value bytes \"a\"<\"b\" (KO-2b, KO-2)",
-        "wire: two distinct pointer-target records 2C 0E each (distinct pointers = distinct records), values 6161/6162"
-      ]
-    },
-    {
-      "id": "V-74",
-      "desc": "full tie: KO-2a discriminator territory, decode-only",
-      "tags": [
-        "KO-2a",
-        "E5"
-      ],
-      "verdict": "ok",
-      "direction": "decode",
-      "bytes": "67626f6e0001d36c116d61705b2a696e7436345d737472696e67d5662a696e743634d865696e74363408dc0c66737472696e67a22c0e61782c0e6178",
-      "ir": {
-        "root": "m1",
-        "nodes": [
-          {
-            "node": "p1",
-            "kind": "int",
-            "value": "7"
-          },
-          {
-            "node": "p2",
-            "kind": "int",
-            "value": "7"
-          },
-          {
-            "node": "m1",
-            "kind": "map",
-            "pairs": [
-              {
-                "key": {
-                  "ref": "p1"
-                },
-                "value": {
-                  "ref": "sx"
-                }
-              },
-              {
-                "key": {
-                  "ref": "p2"
-                },
-                "value": {
-                  "ref": "sy"
-                }
-              }
-            ],
-            "type": "map[*int64]string"
-          },
-          {
-            "node": "sx",
-            "kind": "string",
-            "value": "x"
-          },
-          {
-            "node": "sy",
-            "kind": "string",
-            "value": "x"
-          }
-        ]
-      },
-      "deriv": [
-        "keys AND values byte-equal, distinct identity slots: legal, order fixed by the implementation-defined identity discriminator that never enters bytes (E5, KO-2a)",
-        "decode asserts slot count 2 and association pointer->\"x\" for both; re-encode order is discriminator-dependent -> direction decode"
-      ]
-    },
-    {
-      "id": "V-75",
-      "desc": "cyclic pointer key: skeleton never dereferences",
-      "tags": [
-        "KO-5",
-        "E2"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d36c136d61705b2a7665632e6e6f64655d696e743634d5692a7665632e6e6f6465d0687665632e6e6f646502644e657874c26156d865696e74363408c8a1b0cb222a",
-      "ir": {
-        "root": "m1",
-        "nodes": [
-          {
-            "node": "n1",
-            "kind": "struct",
-            "type": "vec.node",
-            "fields": [
-              {
-                "name": "Next",
-                "value": {
-                  "ref": "n1"
-                }
-              },
-              {
-                "name": "V",
-                "value": {
-                  "ref": "e1"
-                }
-              }
-            ]
-          },
-          {
-            "node": "e1",
-            "kind": "int",
-            "value": "1"
-          },
-          {
-            "node": "m1",
-            "kind": "map",
-            "pairs": [
-              {
-                "key": {
-                  "ref": "n1"
-                },
-                "value": {
-                  "ref": "v5"
-                }
-              }
-            ],
-            "type": "map[*vec.node]int64"
-          },
-          {
-            "node": "v5",
-            "kind": "int",
-            "value": "5"
-          }
-        ]
-      },
-      "deriv": [
-        "DESC chain: D3 map[*vec.node]int64 (0), name (1), D5 *vec.node (2), name (3), D0 vec.node (4), name (5), field Next (6) type-ref REF C2 -> the D5 pointer descriptor itself, field V (7), D_INT64 (8), name (9); map value type-ref C8",
-        "key = pointer-target struct record (id 11: the map object itself registers id 10 at header emission): B0 [Next CB -> itself] 22; value 2A (zz(5)=10)"
-      ]
-    },
-    {
-      "id": "V-76",
-      "desc": "duplicate string key slots rejected",
+      "id": "V-112",
+      "desc": "KO-8 materialized collapse: same identity slot twice, pair count != slot count",
       "tags": [
         "KO-8",
-        "WF-16"
+        "E1"
       ],
       "verdict": "format",
-      "bytes": "67626f6e0001d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e74363408a2616122616124",
-      "class": "duplicate_key"
+      "bytes": "67626f6e0002e0d80911e0d5e0d7d0e0d80a01a2d122d124",
+      "class": "map_duplicate_keys",
+      "deriv": [
+        "envelope (c4 DD r5): root DESC per-value: value 1 = DESC BOOL (id 0) + body — the cell (record id 1); value 2 = DESC MAP(POINTER(BOOL), INT-8): key type-ref DESC POINTER (id 3) target REF d0, elem DESC INT-8 (id 4) — would-be bytes (WF-22 :617, :620)",
+        "one bool cell (record id 1 behind DESC BOOL id 0, body 11); both map keys are REF d1 — the same identity slot named twice, not two byte-equal distinct slots (V-104/V-105) (WF-24 :768-782)",
+        "pointer-carrying keys collapse at value-model insertion: pair count 2 != final slot count 1 -> reject — key encodings equal including the identity layer are a decoder reject, always an attack or corruption (KO-8 :1104-1112)"
+      ]
     },
     {
-      "id": "V-77",
-      "desc": "NaN in key position is outside the key domain",
+      "id": "V-143",
+      "desc": "ESC F0 with subclass 7f: unknown subclass in version 2",
       "tags": [
-        "E1",
-        "KO-3"
+        "WF-23",
+        "WF-25"
       ],
       "verdict": "format",
-      "bytes": "67626f6e0001d36c116d61705b666c6f617436345d696e743634da67666c6f6174363408d865696e74363408a1417ff800000000000022",
-      "class": "malformed_op"
-    },
-    {
-      "id": "V-78",
-      "desc": "plus-zero and minus-zero cannot coexist as keys",
-      "tags": [
-        "E4",
-        "KO-8"
-      ],
-      "verdict": "format",
-      "bytes": "67626f6e0001d36c116d61705b666c6f617436345d696e743634da67666c6f6174363408d865696e74363408a24180000000000000002241000000000000000024",
-      "class": "malformed_op"
+      "bytes": "67626f6e0002e0d809f07f",
+      "class": "esc_unknown_subclass",
+      "deriv": [
+        "envelope: root DESC BOOL E0 D8 09 (WF-22 :628); the known value position carries ESC token f0 7f",
+        "the ESC low nibble is reserved zero — f0 (WF-23 :764-766); the second byte 7f sits in the experimental range 00..7f (:768-769) and version 00 02 assigns no subclass anywhere — an unknown subclass is a format error (:769-770)",
+        "complements V-109 (nonzero reserved nibble f1); the canonicality family is tier-invariant — the decode-side contract holds in every tier (WF-25 :995-996)"
+      ]
     }
   ]
 }

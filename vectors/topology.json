@@ -1,952 +1,417 @@
 {
   "category": "topology",
-  "section": "7",
+  "section": "7.1",
   "vectors": [
     {
-      "id": "V-54",
-      "desc": "interned string repeat becomes REF",
+      "id": "V-93",
+      "desc": "cycle: registration before children closes a self-referential struct through REF",
       "tags": [
-        "WF-13",
-        "WF-10"
+        "WF-24",
+        "WF-22"
       ],
       "verdict": "ok",
       "direction": "both",
-      "bytes": "67626f6e0001d1685b5d737472696e67dc0c66737472696e6782026178c59004",
+      "bytes": "67626f6e0002e0d0016170e0d7d0b0d3",
       "ir": {
-        "root": "v1",
-        "nodes": [
-          {
-            "node": "s1",
-            "kind": "string",
-            "value": "x"
-          },
-          {
-            "node": "a1",
-            "kind": "array",
-            "len": 2,
-            "elements": [
-              {
-                "ref": "s1"
-              },
-              {
-                "ref": "s1"
-              }
-            ]
-          },
-          {
-            "node": "v1",
-            "kind": "view",
-            "backing": {
-              "ref": "a1"
-            },
-            "off": 0,
-            "len": 2,
-            "extent": 2
-          }
-        ]
-      },
-      "deriv": [
-        "[]string {\"x\",\"x\"}: first encounter STRING literal 61 78 (id 5), repeat = REF C5 (WF-13 single id space, WF-10)",
-        "backing 82 02 + view 90 04 (backing id 4)"
-      ]
-    },
-    {
-      "id": "V-55",
-      "desc": "pointer sharing: one target, two REF edges",
-      "tags": [
-        "WF-13"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d56a2a7665632e7368617265d0697665632e736861726502625031d5662a696e743634d865696e74363408625032c5b02acb",
-      "ir": {
-        "root": {
-          "ref": "n1"
-        },
+        "root": "n1",
         "nodes": [
           {
             "node": "n1",
-            "kind": "struct",
-            "type": "vec.share",
-            "fields": [
-              {
-                "name": "P1",
-                "value": {
-                  "ref": "n2"
-                }
-              },
-              {
-                "name": "P2",
-                "value": {
-                  "ref": "n2"
-                }
-              }
-            ]
-          },
-          {
-            "node": "n2",
-            "kind": "int",
-            "value": "5"
-          }
-        ]
-      },
-      "deriv": [
-        "root DESC POINTER -> STRUCT vec.share {P1,P2 *int64}",
-        "field P1: pointer-target record INT 2A (zz(5)=10) registers id 11; field P2: REF CB -> same target (WF-13 registration before children, sharing never duplicated)"
-      ]
-    },
-    {
-      "id": "V-56",
-      "desc": "graph with cycles and sharing in one value",
-      "tags": [
-        "WF-13",
-        "WF-1"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d5692a7665632e72696e67d0687665632e72696e6703644e657874c06156d865696e743634086150d5662a696e743634c6b0b0cb242c1222cc0d",
-      "ir": {
-        "root": {
-          "ref": "n1"
-        },
-        "nodes": [
-          {
-            "node": "n1",
-            "kind": "struct",
-            "type": "vec.ring",
-            "fields": [
-              {
-                "name": "Next",
-                "value": {
-                  "ref": "n2"
-                }
-              },
-              {
-                "name": "V",
-                "value": {
-                  "ref": "e1"
-                }
-              },
-              {
-                "name": "P",
-                "value": {
-                  "ref": "n3"
-                }
-              }
-            ]
+            "kind": "ptr",
+            "target": "n2"
           },
           {
             "node": "n2",
             "kind": "struct",
-            "type": "vec.ring",
             "fields": [
               {
-                "name": "Next",
-                "value": {
-                  "ref": "n1"
-                }
+                "name": "p",
+                "value": "n2"
+              }
+            ]
+          }
+        ]
+      },
+      "deriv": [
+        "DESC struct{p: *S}: E0 D0, ARG 1, field name 'p' (61 70), type-ref DESC POINTER (E0 D7) whose own type-ref is REF d0 — the enclosing descriptor's id, assigned before its children, so the recursive type closes through a REF (WF-24 :762-766; WF-22 :606-616)",
+        "root *S non-nil, fresh target: the record opens at its canonical grain equal to the static target — grain tag elided, body follows directly (WF-24 :840-846); struct body b0, field p = pointer to the already-open record -> REF d3, an identity edge closing the cycle (WF-24 :768, :790-804)",
+        "intern ids DFS: S=0, 'p'=1, POINTER=2, object record=3 — deterministic in structure (WF-24 :745-749, :752-756)"
+      ]
+    },
+    {
+      "id": "V-94",
+      "desc": "typed nil in interface position: dynamic descriptor + nil body, sort derived",
+      "tags": [
+        "WF-24",
+        "WF-15",
+        "VS-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d7e0d80a080800",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "iface",
+            "dynamic": "d1",
+            "nil": true
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "pointer",
+            "base": "d2"
+          },
+          {
+            "node": "d2",
+            "kind": "desc",
+            "type": "int",
+            "width": 8
+          }
+        ]
+      },
+      "deriv": [
+        "interface position holding (*int64)(nil): the dynamic type's descriptor — first-encounter DESC POINTER over DESC INT-64 — followed by a nil body, the NIL token selector 0 (WF-24 :782-789)",
+        "the sort of the nil is derived from the dynamic descriptor (pointer), never read from the token; the descriptor's presence resolves the chain at its top level — no depth rule exists (VS-23; WF-24 :782-789)",
+        "byte-distinct from the nil interface — the bare nil token 00 without a descriptor (KO-4 :1072-1077)",
+        "c4 DD r2: width-8 argument re-spelled on the WF-7 ladder — u8 rung 08 08 (inline caps at 7; the (01/02/04/08) parenthetical WF-22 :638 is a pre-rebalance residue; 16 remains 08 10)"
+      ]
+    },
+    {
+      "id": "V-95",
+      "desc": "linked list a->b->nil: fresh openings elide the tag, nil terminal",
+      "tags": [
+        "WF-24"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d002646e657874e0d7d06176e0d80a01b0b0002422",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "ptr",
+            "target": "n2"
+          },
+          {
+            "node": "n2",
+            "kind": "struct",
+            "fields": [
+              {
+                "name": "next",
+                "value": "n3"
               },
               {
-                "name": "V",
-                "value": {
-                  "ref": "e2"
-                }
-              },
-              {
-                "name": "P",
-                "value": {
-                  "ref": "n3"
-                }
+                "name": "v",
+                "value": "n6"
               }
             ]
           },
           {
-            "node": "e1",
+            "node": "n3",
+            "kind": "ptr",
+            "target": "n4"
+          },
+          {
+            "node": "n4",
+            "kind": "struct",
+            "fields": [
+              {
+                "name": "next",
+                "value": "n5"
+              },
+              {
+                "name": "v",
+                "value": "n7"
+              }
+            ]
+          },
+          {
+            "node": "n5",
+            "kind": "nil"
+          },
+          {
+            "node": "n6",
             "kind": "int",
             "value": "1"
           },
           {
-            "node": "e2",
+            "node": "n7",
             "kind": "int",
             "value": "2"
+          }
+        ]
+      },
+      "deriv": [
+        "DESC Cell: fields sorted next < v; next: DESC POINTER whose type-ref REF d0 closes the recursion; v: INT-8 (WF-22 :668-674; WF-24 :762-766)",
+        "a opens (record id 5), field next reaches a fresh address: the encoder starts that body before emitting any REF to it — the opening at grain equality elides the tag, b's body follows inline (WF-24 :768-782, :840-846)",
+        "b's next is the nil state — leading NIL token selector 0 (00); values zz(2)=4, zz(1)=2 in field order per record (WF-15 :432-446; WF-8 :328-331)"
+      ]
+    },
+    {
+      "id": "V-96",
+      "desc": "cross-value backing join: later slice joins the closed array record",
+      "tags": [
+        "WF-24",
+        "WF-17"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d404e0d80a0184042224262808e0d3d191020002",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "n1",
+              "n2"
+            ]
+          },
+          {
+            "node": "n1",
+            "kind": "array",
+            "length": 4,
+            "dense": 4,
+            "elements": [
+              "n3",
+              "n4",
+              "n5",
+              "n6"
+            ]
+          },
+          {
+            "node": "n2",
+            "kind": "view",
+            "backing": "n1",
+            "off": 0,
+            "len": 2,
+            "extent": 2
           },
           {
             "node": "n3",
             "kind": "int",
-            "value": "9"
-          }
-        ]
-      },
-      "deriv": [
-        "DESC POINTER -> STRUCT vec.ring {Next *ring; V int64; P *int64}; Next type-ref = REF C0 to the pointer descriptor itself (recursive type closes through REF, WF-13/WF-18); P type-ref D5 \"*int64\" with pointee REF C6",
-        "value: n1 (id 11) B0, Next -> n2 (id 12) B0 [Next CB -> n1] [V 24] [P target 2C 12 (zz(9)=18) id 13], then n1 [V 22] [P CC 0D shared: id 13 > 11 rides the u8 form (WF-4)]"
-      ]
-    },
-    {
-      "id": "V-57",
-      "desc": "self-referential map: record-then-fill",
-      "tags": [
-        "WF-13",
-        "WF-16"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d36c176d61705b737472696e675d696e74657266616365207b7ddc0c66737472696e67d66c0c696e74657266616365207b7da16473656c66c0c6",
-      "ir": {
-        "root": "m1",
-        "nodes": [
-          {
-            "node": "k1",
-            "kind": "string",
-            "value": "self"
-          },
-          {
-            "node": "m1",
-            "kind": "map",
-            "pairs": [
-              {
-                "key": {
-                  "ref": "k1"
-                },
-                "value": {
-                  "ref": "i1"
-                }
-              }
-            ]
-          },
-          {
-            "node": "i1",
-            "kind": "iface",
-            "type": "map[string]interface {}",
-            "value": {
-              "ref": "m1"
-            }
-          }
-        ]
-      },
-      "deriv": [
-        "root DESC MAP \"map[string]interface {}\" + STRING + INTERFACE (WF-18)",
-        "map object registers its id at header emission (A1, id 6) before pairs; pair value = interface [type-tag REF C0 to the map descriptor] [REF C6 to the map object] -> cycle closes inside the pair (WF-13, WF-16 record-then-fill)"
-      ]
-    },
-    {
-      "id": "V-58",
-      "desc": "REF to an unregistered id",
-      "tags": [
-        "WF-13"
-      ],
-      "verdict": "format",
-      "bytes": "67626f6e0001d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e74363408a16161c9"
-    },
-    {
-      "id": "V-59",
-      "desc": "REF of the wrong sort: map position resolves to a string record",
-      "tags": [
-        "WF-13",
-        "WF-16"
-      ],
-      "verdict": "format",
-      "bytes": "67626f6e0001d5672a7665632e646dd0667665632e646d036141d36c106d61705b737472696e675d696e743634dc0c66737472696e67d865696e743634086142c56153c7b0a1616122cc0f6178"
-    },
-    {
-      "id": "V-97",
-      "desc": "self-referential pointer chain over an interface point: the chain cell is its own pointee",
-      "tags": [
-        "WF-12",
-        "WF-13"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dc0c4",
-      "ir": {
-        "root": {
-          "ref": "i1"
-        },
-        "nodes": [
-          {
-            "node": "i1",
-            "kind": "iface",
-            "type": "*interface {}",
-            "value": {
-              "ref": "i1"
-            }
-          }
-        ]
-      },
-      "deriv": [
-        "root DESC *interface {} (id 0) + DESC interface {} (id 2); pointer cell id 4 reserved ahead of the pointee DESC (0-based DFS, registration before children)",
-        "slot payload: REF C0 dynamic-type tag (desc id 0); cycle REF C4 (cell id 4) - a type-erased identity edge closes the ring inside the slot, the type living on the cell (WF-13)"
-      ]
-    },
-    {
-      "id": "V-98",
-      "desc": "pointer chain over an interface point with a nil-interface pointee",
-      "tags": [
-        "WF-12"
-      ],
-      "verdict": "ok",
-      "direction": "decode",
-      "bytes": "67626f6e0001d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7d03",
-      "ir": {
-        "root": {
-          "ref": "i1"
-        },
-        "nodes": [
-          {
-            "node": "i1",
-            "kind": "iface",
-            "type": "*interface {}",
-            "value": {
-              "ref": "n1"
-            }
-          },
-          {
-            "node": "n1",
-            "kind": "nil"
-          }
-        ]
-      },
-      "deriv": [
-        "root DESC *interface {} (id 0) + DESC interface {} (id 2); pointer cell id 4 reserved",
-        "pointee nil interface -> NIL selector 3 (WF-12); the root slot materializes its own *any level over the stream token, so the decode projection sits one level deeper - decode-only direction"
-      ]
-    },
-    {
-      "id": "V-99",
-      "desc": "pointer chain over an interface point with a typed-nil (*any)(nil) pointee",
-      "tags": [
-        "WF-12",
-        "WF-18"
-      ],
-      "verdict": "ok",
-      "direction": "decode",
-      "bytes": "67626f6e0001d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dc000",
-      "ir": {
-        "root": {
-          "ref": "i1"
-        },
-        "nodes": [
-          {
-            "node": "i1",
-            "kind": "iface",
-            "type": "*interface {}",
-            "value": {
-              "ref": "i2"
-            }
-          },
-          {
-            "node": "i2",
-            "kind": "iface",
-            "type": "interface {}",
-            "value": {
-              "ref": "n1"
-            }
-          },
-          {
-            "node": "n1",
-            "kind": "nil",
-            "sort": "pointer",
-            "type": "*interface {}"
-          }
-        ]
-      },
-      "deriv": [
-        "root DESC *interface {} (id 0) + DESC interface {} (id 2); pointer cell id 4 reserved",
-        "REF C0 dynamic-type tag; typed nil -> NIL selector 0 under the tag: the inner slot holds the (*any)(nil) payload and the root slot adds its own *any level (KO-4 typed-nil distinct from nil interface) - decode-only direction"
-      ]
-    },
-    {
-      "id": "V-100",
-      "desc": "named self-ring with a slot root: the whole-value REF names the slot cell at the container's leading field",
-      "tags": [
-        "WF-13",
-        "WF-18"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd0676d61696e2e533101624631c2b0d5682a6d61696e2e5331c4c7",
-      "ir": {
-        "root": {
-          "ref": "b1"
-        },
-        "nodes": [
-          {
-            "node": "b1",
-            "kind": "iface",
-            "type": "*main.S1",
-            "value": {
-              "ref": "n1"
-            }
-          },
-          {
-            "node": "n1",
-            "kind": "struct",
-            "type": "main.S1",
-            "fields": [
-              {
-                "name": "F1",
-                "value": {
-                  "ref": "b1"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "deriv": [
-        "root DESC *interface {} (id 0) + DESC interface {} (id 2); slot cell id 4 reserved before the content tag DESC *main.S1 (id 5, first occurrence as a literal)",
-        "cycle REF C4 (cell id 4) from the *main.S1 position: the record materializes at the container grain, the slot being the leading field's storage - the record serves the position through its leading subvalue (WF-13)"
-      ]
-    },
-    {
-      "id": "V-101",
-      "desc": "named self-ring with a double-pointer slot root: the closing REF names the slot cell one grain in",
-      "tags": [
-        "WF-13",
-        "WF-18"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d56c0e2a2a696e74657266616365207b7dd56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dc2d0676d61696e2e533101624631c4b0d5682a6d61696e2e5331c7ca",
-      "ir": {
-        "root": {
-          "ref": "p0"
-        },
-        "nodes": [
-          {
-            "node": "p0",
-            "kind": "iface",
-            "type": "**interface {}",
-            "value": {
-              "ref": "b1"
-            }
-          },
-          {
-            "node": "b1",
-            "kind": "iface",
-            "type": "*main.S1",
-            "value": {
-              "ref": "n1"
-            }
-          },
-          {
-            "node": "n1",
-            "kind": "struct",
-            "type": "main.S1",
-            "fields": [
-              {
-                "name": "F1",
-                "value": {
-                  "ref": "b1"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "deriv": [
-        "root DESC **interface {} (id 0) + DESC *interface {} (id 2) + DESC interface {} (id 4); cells id 6 and id 7 reserved level by level before the content tag DESC *main.S1 (id 8)",
-        "inner REF C4 tags the *interface {} level; cycle REF C7 (slot cell id 7) from the *main.S1 position: same container-grain materialization one level deeper (WF-13)"
-      ]
-    },
-    {
-      "id": "V-102",
-      "desc": "named DAG over a slot root: the slot content is a struct pointer with a nil field, no cycle",
-      "tags": [
-        "WF-13",
-        "WF-18"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd5682a6d61696e2e5331d0676d61696e2e533101624631c2b003",
-      "ir": {
-        "root": {
-          "ref": "b1"
-        },
-        "nodes": [
-          {
-            "node": "b1",
-            "kind": "iface",
-            "type": "*main.S1",
-            "value": {
-              "ref": "n2"
-            }
-          },
-          {
-            "node": "n2",
-            "kind": "struct",
-            "type": "main.S1",
-            "fields": [
-              {
-                "name": "F1",
-                "value": {
-                  "ref": "nl1"
-                }
-              }
-            ]
-          },
-          {
-            "node": "nl1",
-            "kind": "nil"
-          }
-        ]
-      },
-      "deriv": [
-        "slot cell id 4 reserved before the content tag DESC *main.S1 (id 5); the DAG node cell id 10 opens by a STRUCT token with a nil-interface field (selector 3)",
-        "no cycle: the slot and the node are distinct cells; the container-grain materialization stays unobservable on the wire"
-      ]
-    },
-    {
-      "id": "V-103",
-      "desc": "named self-ring rooted at the node: the cycle REF names the node cell directly",
-      "tags": [
-        "WF-13",
-        "WF-18"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d5682a6d61696e2e5331d0676d61696e2e533101624631d66c0c696e74657266616365207b7db0c0c7",
-      "ir": {
-        "root": {
-          "ref": "n1"
-        },
-        "nodes": [
-          {
-            "node": "n1",
-            "kind": "struct",
-            "type": "main.S1",
-            "fields": [
-              {
-                "name": "F1",
-                "value": {
-                  "ref": "b1"
-                }
-              }
-            ]
-          },
-          {
-            "node": "b1",
-            "kind": "iface",
-            "type": "*main.S1",
-            "value": {
-              "ref": "n1"
-            }
-          }
-        ]
-      },
-      "deriv": [
-        "root DESC *main.S1 (id 0) + DESC main.S1 (id 2) with the field type REF to the interface descriptor written later (id 5 after the node cell id 7 reservation)",
-        "cycle REF C7 (node cell id 7) from the F1 position: exact-branch resolution, the slot and the node are separate records (WF-13)"
-      ]
-    },
-    {
-      "id": "V-104",
-      "desc": "named ring entered through a slot storage outside the ring: slice-element and pointer-variable slot roots produce the identical stream",
-      "tags": [
-        "WF-13",
-        "WF-18"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd5682a6d61696e2e5331d0676d61696e2e533101624631c2b0c5ca",
-      "ir": {
-        "root": {
-          "ref": "b1"
-        },
-        "nodes": [
-          {
-            "node": "b1",
-            "kind": "iface",
-            "type": "*main.S1",
-            "value": {
-              "ref": "n2"
-            }
-          },
-          {
-            "node": "n2",
-            "kind": "struct",
-            "type": "main.S1",
-            "fields": [
-              {
-                "name": "F1",
-                "value": {
-                  "ref": "p3"
-                }
-              }
-            ]
-          },
-          {
-            "node": "p3",
-            "kind": "iface",
-            "type": "*main.S1",
-            "value": {
-              "ref": "n2"
-            }
-          }
-        ]
-      },
-      "deriv": [
-        "slot cell id 4 reserved before the content tag DESC *main.S1 (id 5); the node cell id 10 opens by a STRUCT token, its F1 payload tag REF C5 reusing the descriptor record",
-        "cycle REF CA (node cell id 10): the slot storage and the node are separate cells - the ring closes on the node itself while the slot only points into it (WF-13)"
-      ]
-    },
-    {
-      "id": "V-105",
-      "desc": "named two-ring entered through a field slot: the closing REF crosses back to the entry slot cell",
-      "tags": [
-        "WF-13",
-        "WF-18"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d56c0d2a696e74657266616365207b7dd66c0c696e74657266616365207b7dd0676d61696e2e533101624631c2b0d5682a6d61696e2e5331c4b0c8c7",
-      "ir": {
-        "root": {
-          "ref": "b1"
-        },
-        "nodes": [
-          {
-            "node": "b1",
-            "kind": "iface",
-            "type": "*main.S1",
-            "value": {
-              "ref": "n2"
-            }
-          },
-          {
-            "node": "n2",
-            "kind": "struct",
-            "type": "main.S1",
-            "fields": [
-              {
-                "name": "F1",
-                "value": {
-                  "ref": "p4"
-                }
-              }
-            ]
-          },
-          {
-            "node": "p4",
-            "kind": "iface",
-            "type": "*main.S1",
-            "value": {
-              "ref": "n1"
-            }
-          },
-          {
-            "node": "n1",
-            "kind": "struct",
-            "type": "main.S1",
-            "fields": [
-              {
-                "name": "F1",
-                "value": {
-                  "ref": "b1"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "deriv": [
-        "slot cell id 4 reserved before the content tag DESC *main.S1 (id 5); node cell id 10 completes the two-ring",
-        "closing REF C4 (slot cell id 4) from the second node's field position: the record materializes at the container grain and the ring crosses back through the entry slot (WF-13)"
-      ]
-    },
-
-    {
-      "id": "V-106",
-      "desc": "canonical grain of a shared address: the record opens at the coarsest grain, a differing-grain position carries the grain tag, an equal-grain position a plain REF",
-      "tags": [
-        "WF-13",
-        "WF-18"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d5692a6d61696e2e426f78d0686d61696e2e426f78026150d5662a696e743634d865696e743634086151d5672a6d61696e2e53d0666d61696e2e53016141c7b0cc0cb02acc10",
-      "ir": {
-        "root": {
-          "ref": "b1"
-        },
-        "nodes": [
-          {
-            "node": "b1",
-            "kind": "struct",
-            "type": "main.Box",
-            "fields": [
-              {
-                "name": "P",
-                "value": {
-                  "ref": "c1"
-                }
-              },
-              {
-                "name": "Q",
-                "value": {
-                  "ref": "n1"
-                }
-              }
-            ]
-          },
-          {
-            "node": "n1",
-            "kind": "struct",
-            "type": "main.S",
-            "fields": [
-              {
-                "name": "A",
-                "value": {
-                  "ref": "a1"
-                }
-              }
-            ]
-          },
-          {
-            "node": "a1",
-            "kind": "int",
-            "value": "5"
-          },
-          {
-            "node": "c1",
-            "kind": "cell",
-            "of": "n1",
-            "name": "A"
-          }
-        ]
-      },
-      "deriv": [
-        "DECL tree: *main.Box(id0)/main.Box(id2) ARG2; P *int64(id5)/int64(id7) width 8; Q *main.S(id10)/main.S(id12) ARG1; A -> REF7 type-ref; B0 opens the Box record(id15)",
-        "P: grain-tag REF12 (u8 cc0c) names the main.S descriptor - the canonical grain of the shared address, the coarsest of the tracked grains {int64, main.S} - then B0 opens the S record(id16) with INT 2A (zz(5)=10); Q: REF16 (cc10) - equal-grain repeat, a plain identity edge (WF-13)"
-      ]
-    },
-    {
-      "id": "V-107",
-      "desc": "zero-size pointee: a non-nil pointer to a zero-size struct carries the selector-4 marker, no record, no address",
-      "tags": [
-        "WF-12",
-        "WF-13"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d56a2a737472756374207b7dd069737472756374207b7d0004",
-      "ir": {
-        "root": {
-          "ref": "z1"
-        },
-        "nodes": [
-          {
-            "node": "z1",
-            "kind": "struct",
-            "type": "struct {}"
-          }
-        ]
-      },
-      "deriv": [
-        "root DESC POINTER *struct {}(id0) + DESC STRUCT struct {}(id2) with ARG0 fields",
-        "the root pointer position carries the NIL-class zero-size marker 04 (selector 4): no REF, no intern record, no address; decode materializes a fresh zero-size allocation with nil-ness preserved (WF-12)"
-      ]
-    },
-    {
-      "id": "V-108",
-      "desc": "layout-normal grain: two named conversions of one address share one record opened at the underlying struct",
-      "tags": [
-        "WF-13",
-        "WF-18"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d5672a6d61696e2e48d0666d61696e2e4802625041d5672a6d61696e2e41d0666d61696e2e41016158d865696e74363408625042d5672a6d61696e2e42d0666d61696e2e4201c9cab0d06c12737472756374207b205820696e743634207d01c9cab02acc14",
-      "ir": {
-        "root": {
-          "ref": "h1"
-        },
-        "nodes": [
-          {
-            "node": "h1",
-            "kind": "struct",
-            "type": "main.H",
-            "fields": [
-              {
-                "name": "PA",
-                "value": {
-                  "ref": "a1"
-                }
-              },
-              {
-                "name": "PB",
-                "value": {
-                  "ref": "a1",
-                  "type": "main.B"
-                }
-              }
-            ]
-          },
-          {
-            "node": "a1",
-            "kind": "struct",
-            "type": "main.A",
-            "fields": [
-              {
-                "name": "X",
-                "value": {
-                  "ref": "x1"
-                }
-              }
-            ]
-          },
-          {
-            "node": "x1",
-            "kind": "int",
-            "value": "5"
-          }
-        ]
-      },
-      "deriv": [
-        "DECL tree: *main.H(id0)/main.H(id2) ARG2; PA *main.A(id5)/main.A(id7) ARG1 X -> REF10; PB *main.B(id13)/main.B(id15) ARG1 X -> REF9 (the interned field-name string, a repeat, WF-10) with type REF10; B0 opens the H record(id17)",
-        "PA: the layout-normal grain tag as a first-encounter DESC literal - struct { X int64 }(id18, name id19), field X -> REF9/REF10 - then B0 opens the shared record(id20) with INT 2A; PB: REF20 (cc14) - equal-grain repeat of one record for both named grains of the address (WF-13)"
-      ]
-    },
-    {
-      "id": "V-109",
-      "desc": "non-derivable descent: a REF from a *int64 position against a bool-grain record leaves a format error at the cell",
-      "tags": [
-        "WF-13"
-      ],
-      "verdict": "format",
-      "bytes": "67626f6e0001d5672a6d61696e2e46d0666d61696e2e46026151d5652a626f6f6cd764626f6f6c6150d5662a696e743634d865696e74363408b011cc0f",
-      "deriv": [
-        "DECL tree: *main.F(id0)/main.F(id2) ARG2; Q *bool(id5)/bool(id7); P *int64(id10)/int64(id12) width 8; B0 opens the F record(id14)",
-        "Q: BOOL 11 opens the pointee record at the bool grain(id15); P: REF15 (cc0f) from the *int64 position - no offset-zero descent from bool to int64 exists, a format error at the cell (WF-13)"
-      ]
-    },
-    {
-      "id": "V-110",
-      "desc": "interior zero-size collision: the tracked int64 grain keeps the record, the zero-size alias of the same interior address carries the marker",
-      "tags": [
-        "WF-12",
-        "WF-13"
-      ],
-      "verdict": "ok",
-      "direction": "both",
-      "bytes": "67626f6e0001d5672a6d61696e2e57d0666d61696e2e570262504cd56a2a737472756374207b7dd069737472756374207b7d0062504dd5662a696e743634d865696e74363408b00424",
-      "ir": {
-        "root": {
-          "ref": "w1"
-        },
-        "nodes": [
-          {
-            "node": "w1",
-            "kind": "struct",
-            "type": "main.W",
-            "fields": [
-              {
-                "name": "PL",
-                "value": {
-                  "ref": "l1"
-                }
-              },
-              {
-                "name": "PM",
-                "value": {
-                  "ref": "m1"
-                }
-              }
-            ]
-          },
-          {
-            "node": "t1",
-            "kind": "struct",
-            "type": "main.T",
-            "fields": [
-              {
-                "name": "H",
-                "value": {
-                  "ref": "h1"
-                }
-              },
-              {
-                "name": "M",
-                "value": {
-                  "ref": "m2"
-                }
-              }
-            ]
-          },
-          {
-            "node": "h1",
-            "kind": "int",
             "value": "1"
           },
           {
-            "node": "m2",
+            "node": "n4",
             "kind": "int",
             "value": "2"
           },
           {
-            "node": "l1",
-            "kind": "cell",
-            "of": "t1",
-            "name": "L"
+            "node": "n5",
+            "kind": "int",
+            "value": "3"
           },
           {
-            "node": "m1",
-            "kind": "cell",
-            "of": "t1",
-            "name": "M"
+            "node": "n6",
+            "kind": "int",
+            "value": "4"
           }
         ]
       },
       "deriv": [
-        "DECL tree: *main.W(id0)/main.W(id2) ARG2; PL *struct {}(id5)/struct {}(id7) ARG0; PM *int64(id10)/int64(id12) width 8; B0 opens the W record(id14)",
-        "PL: marker 04 - the zero-size alias of the interior address tracks no record (WF-12 selector 4); PM: an equal-grain elided opening, INT 24 (zz(2)=4) opens the one tracked record(id15) of the address, no tag at grain equality (WF-13)"
+        "envelope (c4 DD r5): root DESC per-value: value 1 = DESC ARRAY[4] INT-8 (ids 0/1, backing id 2); value 2 = DESC SLICE (REF d1 elem) + the joining view (WF-22 :618)",
+        "value 1 (behind DESC ARRAY id 0, DESC INT id 1) closes the backing [1,2,3,4], record id 2 — 84 04, elements 22 24 26 28 08 (zz(4)=8 rides the u8 rung); the intern space is a property of the value sequence, records live for the whole stream (WF-24 :745-749, :758-761)",
+        "value 2 aliases that memory: extent-window [0,2) lies inside [0,4), and no len-window index reaches the record's implicit zero tail — both join conditions hold, so the slice joins the record and emits a view, never a silently new record (WF-24 :893-903)",
+        "view form 1 (91 02 00 02): off=0 len=2 extent=2 — the form-0 geometry fails (len != L); the join rule is normative and fully determined, a second implementation joins identically (WF-17 :484, :494-499; WF-25 :975-979)"
       ]
     },
     {
-      "id": "V-111",
-      "desc": "self-ring: the closing REF names the record with the started body; no id is reserved without a body",
+      "id": "V-97",
+      "desc": "REF to an unregistered id rejected",
       "tags": [
-        "WF-13"
+        "WF-24",
+        "WF-26"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002d0",
+      "class": "ref_resolution",
+      "deriv": [
+        "root position opens with a leading REF d0 — class D << 4 | inline id 0 — but no record has started: a REF to an unregistered id is a format error, and the stream is closed under reference topology (WF-24 :768-782; WF-26 :1242)"
+      ]
+    },
+    {
+      "id": "V-98",
+      "desc": "record body duplication: interned string respelled as a literal",
+      "tags": [
+        "WF-24",
+        "WF-26"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d80d626162d0626162",
+      "class": "ref_resolution",
+      "deriv": [
+        "envelope (c4 DD r5): root DESC per-value: value 1 = DESC STRING (id 0) + 'ab' (id 1); value 2 = type repeat REF d0 + the duplicated literal — the would-be bytes carry the body duplication (WF-22 :624; WF-24 :766-769)",
+        "value 1 'ab' (62 61 62) interns id 1 behind DESC STRING id 0; value 2 spells the same string as a literal again — a repeated encounter MUST be a REF (d0) or a view over an already-registered record; duplicating a record body in one stream is forbidden, the sole carve-out being the backing join (WF-24 :746-747, :766-769; WF-26 :1242)",
+        "canonical spelling of value 2's body is the REF d1; one family covers the intern-space resolution rejects (r2 adjudication)"
+      ]
+    },
+    {
+      "id": "V-99",
+      "desc": "REF sort mismatch: a string record named in a type-ref position",
+      "tags": [
+        "WF-24",
+        "WF-26"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d80d6165e0d201d1",
+      "class": "ref_resolution",
+      "deriv": [
+        "envelope (c4 DD r5): root DESC per-value: value 1 = DESC STRING (id 0) + 'e' (id 1); value 2 = DESC TUPLE E0 D2 01 whose type-ref REF d1 names the string record — the sort mismatch (WF-22 :612; WF-24 :804-815)",
+        "value 1 'e' (61 65) interns id 1 behind DESC STRING id 0 — sort string; value 2 DESC TUPLE arity 1 carries type-ref REF d1: resolution is by the sort of the named record, uniform across every position — a REF naming a record of any other sort than the position can serve is a format error at the cell, never a silent coercion (WF-24 :782-784, :804-815; WF-26 :1242)"
+      ]
+    },
+    {
+      "id": "V-100",
+      "desc": "zero-size target: non-nil pointer encodes the marker, no REF",
+      "tags": [
+        "WF-24",
+        "WF-15"
       ],
       "verdict": "ok",
       "direction": "both",
-      "bytes": "67626f6e0001d5672a6d61696e2e4ed0666d61696e2e4e026156d865696e74363408644e657874c0b022c8",
+      "bytes": "67626f6e0002e0d00004",
       "ir": {
-        "root": {
-          "ref": "n1"
-        },
+        "root": "n1",
         "nodes": [
           {
             "node": "n1",
-            "kind": "struct",
-            "type": "main.N",
-            "fields": [
-              {
-                "name": "V",
-                "value": {
-                  "ref": "v1"
-                }
-              },
-              {
-                "name": "Next",
-                "value": {
-                  "ref": "n1"
-                }
-              }
-            ]
+            "kind": "ptr",
+            "target": "n2"
           },
           {
-            "node": "v1",
-            "kind": "int",
-            "value": "1"
+            "node": "n2",
+            "kind": "zst"
           }
         ]
       },
       "deriv": [
-        "DECL tree: *main.N(id0)/main.N(id2) ARG2; V int64(id5,6) width 8; Next -> REF0 (inline c0, type-ref to *main.N); B0 opens the root record(id8) - the body starts",
-        "V: INT 22 (zz(1)=2); Next: REF8 (c8, inline) - the closing REF names the record whose body started, an identity edge; the stream holds no reserved-without-body id (WF-13)"
+        "the target type is the zero-field struct — DESC E0 D0 ARG 00, a zero-size type (WF-22 :610-616)",
+        "a non-nil pointer to a zero-size target tracks no record: it encodes as the zero-size marker — NIL-class selector 4 (04) — with no REF and no address; the marker and the nil token selector 0 stay byte-distinct, and decode preserves nil-ness into a fresh zero-size allocation (WF-24 :905-917; WF-15 :432-440)"
+      ]
+    },
+    {
+      "id": "V-101",
+      "desc": "dynamic-type tag: DESC literal then REF, one token serving both roles",
+      "tags": [
+        "WF-24",
+        "WF-26"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80a0808280ad024",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "n1",
+              "n2"
+            ]
+          },
+          {
+            "node": "n1",
+            "kind": "iface",
+            "dynamic": "d1",
+            "value": "n3"
+          },
+          {
+            "node": "n2",
+            "kind": "iface",
+            "dynamic_ref": 0,
+            "value": "n4"
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "int",
+            "width": 8
+          },
+          {
+            "node": "n3",
+            "kind": "int",
+            "value": "5"
+          },
+          {
+            "node": "n4",
+            "kind": "int",
+            "value": "2"
+          }
+        ]
+      },
+      "deriv": [
+        "value 1: interface position, dynamic type INT-64 first encountered — the DESC literal E0 D8 0A 08 writes the record and the tagged value body follows (WF-24 :782-790)",
+        "value 2: the same dynamic type repeats — REF d0 makes the descriptor the dynamic-type tag of the target with the value body following; descriptor and object records share the one id space, a single token serving both roles, resolution by the sort of the named record (WF-24 :782-815; WF-26 :1242-1244)",
+        "bodies zz(5)=10 -> 28 0A, zz(2)=4 -> 24 (WF-8 :328-331)",
+        "c4 DD r2: width-8 argument re-spelled on the WF-7 ladder — u8 rung 08 08 (inline caps at 7; the (01/02/04/08) parenthetical WF-22 :638 is a pre-rebalance residue; 16 remains 08 10)"
+      ]
+    },
+    {
+      "id": "V-147",
+      "desc": "narrowing carve-out: kept map-typed REF names a map record the skipped field left unmaterialized",
+      "tags": [
+        "WF-6",
+        "WF-18"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d66177e0d0026161e0d5e0d809d56162d4b0a0d7",
+      "class": "evolution_ref_unmaterialized",
+      "narrow_target": "e0d66177e0d0016162e0d5e0d809d5",
+      "narrow_offset": 26,
+      "deriv": [
+        "header 67 62 6F 6E 00 02 (WF-3 :188-199); root envelope: first-encounter DESC literal of the root type — NAMED w over its base (WF-22 :716-741; WF-23 :772); name STRING literal 'w' = 61 77 — the name position exists exactly for nominal kinds (WF-22 :655-658)",
+        "wide type: NAMED E0 D6 (id 0), base STRUCT E0 D0 02 (id 2), fields a < b bytewise-lexicographic (WF-22 :690-698); field names STRING literals 61 61 / 61 62 (WF-13 :433-437); field a type MAP E0 D5 (id 4), key BOOL E0 D8 09 (id 5), elem REF d5 — bool interned once by canonical structure, repeat a REF (WF-22 :634, :679-689); field b type REF d4 (WF-22 :676-678)",
+        "value body B0 (WF-23 :769, :786-789); field a: first-encounter map record A0 count 0 — an empty non-nil map is a record like any other, id 7 at header emission before its pairs (WF-18 :534-535, :546-552; WF-24 :817-820); ids DFS preorder: NAMED 0, w 1, STRUCT 2, a 3, MAP 4, BOOL 5, b 6, map 7 (WF-24 :800-808)",
+        "field b: REF d7 — a repeated encounter of one map object anywhere in the stream is a REF to that record (WF-18 :549-552); map-typed position: reference hygiene requires it resolve to a map record — it does, by sort (WF-18 :554-556)",
+        "narrow decode: stream name w = target name w — evolution pairing holds within one qualified name (WF-22 :660-662; WF-6 :263-266); field a skipped parse-only, exact boundary (WF-6 :254-258); map objects stay unmaterialized under the skip (WF-6 :266-269); the kept b resolves REF d7 against the unmaterialized map record — the aliased-map shape of the carve-out: format error class evolution_ref_unmaterialized at the kept REF, byte 26 (WF-6 :273-277)"
+      ]
+    },
+    {
+      "id": "V-148",
+      "desc": "narrowing carve-out: kept view token over a shared backing the skipped field left unmaterialized",
+      "tags": [
+        "WF-6",
+        "WF-17"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d66177e0d0026161e0d401e0d8096162e0d3d5b0810111900808",
+      "class": "evolution_ref_unmaterialized",
+      "narrow_target": "e0d66177e0d0016162e0d3e0d809",
+      "narrow_offset": 30,
+      "deriv": [
+        "header (WF-3 :188-199); root envelope: first-encounter DESC literal, NAMED w over base STRUCT (WF-22 :716-741; WF-23 :772); name 61 77 (WF-22 :655-658); base E0 D0 02, fields a < b (WF-22 :690-698); field names 61 61 / 61 62 (WF-13 :433-437)",
+        "field a type ARRAY E0 D4 01 — ARG N=1 (WF-22 :633, :646-647), elem BOOL E0 D8 09 (id 5); field b type SLICE E0 D3 (id 7), elem REF d5 — the bool descriptor repeated (WF-22 :632, :679-689); ids DFS: NAMED 0, w 1, STRUCT 2, a 3, ARRAY 4, BOOL 5, b 6, SLICE 7 (WF-24 :800-808)",
+        "value body B0 (WF-23 :769, :786-789); field a: array record 81 01 11 — L=1 fused into the class-byte rung, E=1 a bare ARG, element BOOL true 11 (WF-7 :294-303, :309-310; WF-23 :766; WF-10 :389); E minimal — dense element [0] nonzero (WF-16 :481-484); backing record id 8, registered before its elements (WF-16 :485-487; WF-24 :817-820)",
+        "field b: slice over memory already closed by the array record joins it — extent-window [0,1) inside [0,1), no len-window index reaches past E (WF-24 :948-958); geometry off=0, len=extent=L=1 → form 0, body the id alone: 90 08 08 — id 8 rides the u8 rung (WF-17 :492-503, :512-514; WF-7 :296-297; WF-23 :767)",
+        "narrow decode: name w pairs with target name w (WF-22 :660-662; WF-6 :263-266); field a skipped parse-only (WF-6 :254-258); backings stay unmaterialized under the skip (WF-6 :266-269); the kept b resolves the view token against the unmaterialized shared backing — the view shape of the carve-out: format error class evolution_ref_unmaterialized at the view token, byte 30 (WF-6 :273-279)"
+      ]
+    },
+    {
+      "id": "V-149",
+      "desc": "narrowing carve-out: kept REF targets a record opened inside the skipped region, cutting a pointer cycle across fields",
+      "tags": [
+        "WF-6",
+        "WF-24"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d66177e0d0026161e0d7d06162d4b0b0d600d7",
+      "class": "evolution_ref_unmaterialized",
+      "narrow_target": "e0d66177e0d0016162e0d7d0",
+      "narrow_offset": 25,
+      "deriv": [
+        "header (WF-3 :188-199); root envelope: first-encounter DESC literal, NAMED w (WF-22 :716-741; WF-23 :772); name 61 77 (WF-22 :655-658); base STRUCT E0 D0 02, fields a < b (WF-22 :690-698); field names 61 61 / 61 62 (WF-13 :433-437)",
+        "field a type POINTER E0 D7 (id 4), target type-ref REF d0 — the enclosing NAMED descriptor: a DESC record registers before its children, so the recursive type closes through a REF (WF-22 :612-614, :676-678; WF-24 :817-820); field b type REF d4 — the identical POINTER descriptor interns to one record (WF-22 :679-689); ids DFS: NAMED 0, w 1, STRUCT 2, a 3, POINTER 4, b 5 (WF-24 :800-808)",
+        "value body B0 — the root object O opens as an addressable pointer target of the cycle, record id 6 (WF-24 :800-808, :817-820)",
+        "field a: non-nil pointer over a fresh address — canonical grain w equals the position's static target and is not a pointer type: grain tag elided, P's body follows inline B0, record id 7 (WF-24 :905-913); P.a = REF d6 — a cycle closes by a REF naming an enclosing record from any depth and entry point (WF-24 :857-861); P.b = 00 — the nil state is the leading NIL token, selector 0 (WF-24 :834-837; WF-15 :455-459); O.b = REF d7 — the identity edge to P (WF-24 :821-825)",
+        "narrow decode: name w pairs with target name w (WF-22 :660-662; WF-6 :263-266); field a skipped parse-only — P's subtree and its back-REF step over by the one resolution rule, pointer targets stay unmaterialized (WF-6 :254-262, :266-269; WF-24 :882-885); the kept O.b REF d7 targets P, a record opened inside the skipped region — narrowing cut the pointer cycle across fields, the closed-cell shape of the carve-out: format error class evolution_ref_unmaterialized at the kept REF, byte 25 (WF-6 :273-281)"
       ]
     }
-  
   ]
 }

@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- docs/bindings/java.md: Java binding of the reworked core —
+  non-encodable categories, lifecycle and degradation notes, error
+  conformance, examples, grounding (JV-1..JV-7; JLS/JVMS SE 27 and
+  the SE 27 API docs, sha256-pinned docsets).
+- docs/bindings/rust.md: Rust binding of the reworked core — the
+  same five-section spine (RS-1..RS-7; the Rust Reference and std
+  docs of the pinned 1.98.1 docset; f16/f128 native forms per
+  IEEE 754-2008).
+- scripts/gate.sh: dictionary-derived gate constants over the final
+  rule space, per-category corpus ordering, the FORM corpus-field
+  law, binding_dimensions and coverage union legs, the F1 definition
+  sync leg, and the bare-GBON SEO advisory; renovated self-test
+  fixtures.
+
+### Changed
+
+- docs/wire-format.md: the tri-lingual rework of the core grammar —
+  format version 0.2 (major 0, minor 2), draft-era in-branch:
+  VARIANT/TUPLE kinds, name-sorted canonical order, structural
+  descriptor identity with the collision policy, unified
+  instantiation grammar, the key domain, nil selectors, opcode
+  re-layout; core sections re-anchored WF-1..WF-26; References is
+  Appendix B.
+- docs/foundations.md: value-model foundations reworked with the
+  grain axioms (G-1..G-6).
+- docs/bindings/go.md: re-grounded against the reworked core
+  (GO-1..GO-7) — the four-tier source hierarchy with the pinned Go
+  specification, the stable-class projection, the broad-recover
+  taxonomy.
+- docs/meta/claims.md + docs/meta/spec-conventions.md: the stability
+  ladder re-derived — three tiers, the binding-declared identity
+  layer, claims CLM-1..CLM-7 + H-1 with the ledger laws; conventions
+  SC-1..SC-11.
+- vectors/ + manifest.json: conformance corpus rebase — 17 category
+  files, 149 vectors (98 ok + 51 format), manifest v3
+  (binding_dimensions registries, census declarations, the 10-row
+  verification ledger); the v0.1.1 delta folded natively (the
+  evolution carve-out with its closed cell, per-value budget scope,
+  one-chain-one-name; V-147..V-149 of class
+  evolution_ref_unmaterialized).
+- docs/references.md: the Java/Rust source hierarchies join the
+  anchor map; ieee-754-2008 anchor row.
+
 ## [0.1.1] - 2026-09-19
 
 ### Added
@@ -172,5 +217,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/gbon-format/spec/compare/v0.1.1...HEAD
 [0.1.1]: https://github.com/gbon-format/spec/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/gbon-format/spec/compare/v0.0.5...v0.1.0
+[0.0.5]: https://github.com/gbon-format/spec/compare/v0.0.4...v0.0.5
+[0.0.4]: https://github.com/gbon-format/spec/compare/v0.0.3...v0.0.4
+[0.0.3]: https://github.com/gbon-format/spec/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/gbon-format/spec/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/gbon-format/spec/releases/tag/v0.0.1

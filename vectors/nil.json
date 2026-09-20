@@ -1,0 +1,194 @@
+{
+  "category": "nil",
+  "section": "6.8",
+  "vectors": [
+    {
+      "id": "V-45",
+      "desc": "nil selector 0: the one nil state, absent",
+      "tags": [
+        "WF-15",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80800",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "nil",
+            "selector": 0
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD closure): header + root DESC + value - root DESC E0 D8 08 INTERFACE, the minimal empty-body descriptor; nil roots are enveloped, the nil token rides after the DESC (WF-22 :623, :702-706)",
+        "the nil sort is derived from the static type of the position, never read from the token (WF-15); NIL-class token 00: selector 0 = absent - the one nil state, no selector encodes a nil sort (WF-15; WF-23)"
+      ]
+    },
+    {
+      "id": "V-46",
+      "desc": "nil selector 4: zero-size marker — non-nil pointer to a zero-size target",
+      "tags": [
+        "WF-15",
+        "WF-24"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d7e0d20004",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "zst_marker"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD closure): header + root DESC + value - root DESC E0 D7 POINTER, type-ref DESC TUPLE(0) E0 D2 00 - a zero-size target, distinct carrier from V-51's empty-struct target (WF-22 :612, :617, :683-685)",
+        "NIL token 04: selector 4 = the zero-size marker of section 7.1 - a non-nil pointer to a zero-size target, no REF and no address; the marker and nil selector 0 stay byte-distinct (WF-15; WF-24 :789-790, :826-827)"
+      ]
+    },
+    {
+      "id": "V-47",
+      "desc": "nil selector 7 rejected: reserved band",
+      "tags": [
+        "WF-15"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d80807",
+      "class": "nil_reserved_selector",
+      "deriv": [
+        "envelope (c4 DD closure): would-be canonical prefix - root DESC E0 D8 08 INTERFACE rides, the stream halts at the first offending byte (WF-22 :623, :702-706)",
+        "NIL token 07: selector 7 is neither 0 nor 4 - reserved band, a decoder rejects it (WF-15); class nil_reserved_selector"
+      ]
+    },
+    {
+      "id": "V-48",
+      "desc": "nil slice vs empty slice: nil token vs VIEW len 0 over a zero-length blob backing",
+      "tags": [
+        "WF-15",
+        "WF-17",
+        "WF-14",
+        "WF-24"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d3e0d80e0070009002",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "slice",
+            "nil": true
+          },
+          {
+            "node": "n2",
+            "kind": "slice",
+            "len": 0,
+            "backing": "blob[0]",
+            "form": 0
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC SLICE kind 3 = E0 D3, one elem type-ref DESC BLOB E0 D8 0E (WF-22)",
+        "value 1: NIL token 00 - a nil slice is the nil token of WF-15, not a view (WF-17; WF-15)",
+        "value 2: backing BLOB L=0 E=0 = token 70 00 (WF-14), interns id 2 after DESC ids 0,1 (WF-24); view form 0: off=0, len=extent=L=0, id-only body 90 02 (WF-17)",
+        "nil is never confused with empty: the VIEW len 0 is a non-nil empty slice (WF-15)"
+      ]
+    },
+    {
+      "id": "V-49",
+      "desc": "nil map vs empty map: nil token vs MAP count 0",
+      "tags": [
+        "WF-15",
+        "WF-18"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d5e0d80de0d80900a0",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "map",
+            "nil": true
+          },
+          {
+            "node": "n2",
+            "kind": "map",
+            "pairs": 0,
+            "keys": "string",
+            "elems": "bool"
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC MAP kind 5 = E0 D5, two type-refs: key DESC STRING, elem DESC BOOL (WF-22)",
+        "value 1: NIL token 00 - a nil map is the nil token of WF-15 and never interns (WF-18; WF-15)",
+        "value 2: token A0 = class A, fused inline pair count 0 - an empty non-nil map is a record like any other; nil is never confused with empty (WF-18; WF-15)"
+      ]
+    },
+    {
+      "id": "V-50",
+      "desc": "typed nil via descriptor: pointer position carries the dynamic type's DESC then the nil body",
+      "tags": [
+        "WF-15",
+        "WF-24",
+        "WF-22"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d808e0d80a0400",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "nil",
+            "selector": 0,
+            "type": "int32",
+            "pos": "interface"
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC INTERFACE = E0 D8 08, empty body - the reference position's static grain (WF-22)",
+        "typed nil in an interface position: the pointer position carries the dynamic type's DESC - INT width 4 inline 04 - then the nil body 00 (WF-24; WF-22)",
+        "the descriptor that is present resolves the chain at its top level; the nil sort is derived, never read from the token (WF-15)"
+      ]
+    },
+    {
+      "id": "V-51",
+      "desc": "ZST marker in a typed pointer position: non-nil pointer to the empty struct",
+      "tags": [
+        "WF-15",
+        "WF-24",
+        "WF-22"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d7e0d00004",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "zst_marker",
+            "target": "struct{}"
+          }
+        ]
+      },
+      "deriv": [
+        "root DESC POINTER kind 7 = E0 D7, one type-ref: DESC STRUCT kind 0 = E0 D0, body ARG n=0 inline 00 - the empty struct, a zero-size target (WF-22)",
+        "value: NIL token 04 - the zero-size marker in a typed pointer position: a non-nil pointer to the empty struct, no REF and no address (WF-15; WF-24)",
+        "reference identity of zero-size targets is neither preserved nor observable; the marker and nil selector 0 stay byte-distinct (WF-24)"
+      ]
+    }
+  ]
+}

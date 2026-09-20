@@ -1,0 +1,234 @@
+{
+  "category": "decimal",
+  "section": "6.4",
+  "vectors": [
+    {
+      "id": "V-124",
+      "desc": "std.decimal zero: unscaled 0, scale 0 — the composed unit",
+      "tags": [
+        "WF-11",
+        "WF-22",
+        "VS-17"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d6680b7374642e646563696d616ce0d002657363616c65e0d80a046808756e7363616c6564e0d80a00b02020",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "named",
+            "name": "std.decimal",
+            "base": "d2"
+          },
+          {
+            "node": "d2",
+            "kind": "desc",
+            "type": "tuple",
+            "args": [
+              "d3",
+              "d4"
+            ]
+          },
+          {
+            "node": "d3",
+            "kind": "desc",
+            "type": "int",
+            "width": "arb"
+          },
+          {
+            "node": "d4",
+            "kind": "desc",
+            "type": "int",
+            "width": 4
+          },
+          {
+            "node": "n1",
+            "kind": "tuple",
+            "children": [
+              "n2",
+              "n3"
+            ]
+          },
+          {
+            "node": "n2",
+            "kind": "int",
+            "value": "0"
+          },
+          {
+            "node": "n3",
+            "kind": "int",
+            "value": "0"
+          }
+        ]
+      },
+      "deriv": [
+        "the decimal interchange is a structural composition, not a FLOAT form: NAMED std.decimal over STRUCT{scale: INT-32, unscaled: INT-arb} — DESC E0 D6, name STRING len 11 on the u8 rung 68 0B, base the first-encounter DESC literal E0 D0 02: field 'scale' on the inline name rung 65 with INT-32 E0 D8 0A 04, field 'unscaled' on the u8 name rung 68 08 with INT-arb E0 D8 0A 00, fields in canonical name-sorted order (:713-722; WF-11 :398-404; WF-22 :608-616, :651-653)",
+        "value = the struct body b0, field values in DESC field order: scale INT 0 (20), unscaled INT 0 (20) — the NAMED wrapper is transparent on the value side; ids: NAMED 0, name 1, STRUCT 2, 'scale' 3, INT-32 4, 'unscaled' 5, INT-arb 6 (DFS, WF-24 :745-747)",
+        "zero is an INT value body, distinct from any nil token (WF-8 :356-358); BigDecimal/rust_decimal map onto this name by default name-binding, lossless — no degradation row (WF-11 :400-404; java.md 1.4 :155-158)"
+      ]
+    },
+    {
+      "id": "V-125",
+      "desc": "negative scale: 1e40 = (unscaled 1, scale -40)",
+      "tags": [
+        "WF-11",
+        "WF-8",
+        "VS-32"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d6680b7374642e646563696d616ce0d002657363616c65e0d80a046808756e7363616c6564e0d80a00b0284f22",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "tuple",
+            "children": [
+              "n2",
+              "n3"
+            ]
+          },
+          {
+            "node": "n2",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "n3",
+            "kind": "int",
+            "value": "-40"
+          }
+        ]
+      },
+      "deriv": [
+        "value 1e40 rides the negative-scale rung: scale -40 (zz(-40)=79, u8 rung 28 4F), unscaled 1 (zz=2, inline 22) — the struct body b0 emits the field values in DESC field order, scale first (:713-715); the scale is a signed INT-32 body over the whole zigzag domain, negative scales included (WF-11 :399-404; WF-8 :328-339)",
+        "the composition introduces no new primitive: scale stays on the INT-32 machine section even at negative values — the minimal rung of the zigzag image (WF-7 :306-311)",
+        "desc block identical to V-124 within its own stream; per-stream intern spaces are independent (WF-24 :745)"
+      ]
+    },
+    {
+      "id": "V-126",
+      "desc": "unscaled 10^40, 41 digits: the INT-arb ext rung under std.decimal",
+      "tags": [
+        "WF-11",
+        "WF-8",
+        "WF-7"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d6680b7374642e646563696d616ce0d002657363616c65e0d80a046808756e7363616c6564e0d80a00b0202d08113ac653e386b9497f5773eac20000000000",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "tuple",
+            "children": [
+              "n2",
+              "n3"
+            ]
+          },
+          {
+            "node": "n2",
+            "kind": "int",
+            "value": "10000000000000000000000000000000000000000"
+          },
+          {
+            "node": "n3",
+            "kind": "int",
+            "value": "0"
+          }
+        ]
+      },
+      "deriv": [
+        "unscaled 10^40 (41 decimal digits, beyond every fixed width): zigzag image 2x10^40 = 0x3AC653E386B9497F5773EAC20000000000, 17 bytes — one byte past the u128 rung, the least legal ext payload (WF-8 :352-355)",
+        "the interchange is the normative NAMED std.decimal over STRUCT{scale: INT-32, unscaled: INT-arb} envelope (:714-724) — desc block identical to V-124 within its own stream (WF-24 :745); the struct body b0 emits the field values in DESC field order, scale first: scale 0 (20), then the unscaled body",
+        "token 2D (INT + ext rung, the rung nibble riding the class byte) — the ext length is an ARG: n=17 on the u8 rung 08 11, then the payload big-endian with nonzero leading byte (WF-7 :292, :315-321; WF-23 :700-703); the tier-1 claim covers the whole integer domain, the arb rung and its ext argument included (WF-25 :957-959)"
+      ]
+    },
+    {
+      "id": "V-127",
+      "desc": "lossless roundtrip: unscaled -12345678901234567890123456789, scale 7",
+      "tags": [
+        "WF-11",
+        "WF-8",
+        "VS-17"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d6680b7374642e646563696d616ce0d002657363616c65e0d80a046808756e7363616c6564e0d80a00b0280e2c000000004fc836648d7d9362dc730229",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "tuple",
+            "children": [
+              "n2",
+              "n3"
+            ]
+          },
+          {
+            "node": "n2",
+            "kind": "int",
+            "value": "-12345678901234567890123456789"
+          },
+          {
+            "node": "n3",
+            "kind": "int",
+            "value": "7"
+          }
+        ]
+      },
+      "deriv": [
+        "scale 7: zz(7)=14, u8 rung 28 0E — the struct body b0 leads with the scale field, values in DESC field order (:713-715) (WF-19)",
+        "unscaled -12345678901234567890123456789 (29 digits): zz = 2n-1 = 0x4FC836648D7D9362DC730229, 12 bytes — inside the u128 rung: token 2C with the fixed 16-byte payload zero-padded to 000000004FC836648D7D9362DC730229 (WF-7 :312-314); decode reconstructs (scale, unscaled) exactly — the composition is lossless, no degradation row exists for the interchange (WF-11 :400-404)",
+        "direction both asserts decode-equality of the ir against the bytes: the value -12345678901234567890.1234567 round-trips through BigDecimal/rust_decimal name-binding without loss (WF-11)"
+      ]
+    },
+    {
+      "id": "V-128",
+      "desc": "scale INT-32 negative boundary: scale -2147483648 fills the u32 rung",
+      "tags": [
+        "WF-11",
+        "WF-8",
+        "WF-7"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d6680b7374642e646563696d616ce0d002657363616c65e0d80a046808756e7363616c6564e0d80a00b02affffffff22",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "tuple",
+            "children": [
+              "n2",
+              "n3"
+            ]
+          },
+          {
+            "node": "n2",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "n3",
+            "kind": "int",
+            "value": "-2147483648"
+          }
+        ]
+      },
+      "deriv": [
+        "scale at the INT-32 domain floor: -2^31, zz = 2^32-1 = 0xFFFFFFFF — exactly fills the u32 rung, token 2A FF FF FF FF, one count wider would leave the width-4 section (WF-7 :310-311; WF-8 :344-346)",
+        "unscaled 1 (22); the struct body b0 emits the field values in DESC field order — scale first, then unscaled (:713-715); the value 1e2147483648 is the extreme scale the composition carries — the descriptor's width argument fixes the section, the value body's minimality the rung (WF-22 :627-631)",
+        "minimality is the only legal form: a zero-padded wider rung for either component is a decoder reject of the arg_nonminimal_width class (WF-7 :306-309; tier-invariant, WF-25 :926-932)"
+      ]
+    }
+  ]
+}

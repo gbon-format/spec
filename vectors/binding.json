@@ -1,0 +1,792 @@
+{
+  "category": "binding",
+  "section": "6.15",
+  "vectors": [
+    {
+      "id": "V-129",
+      "desc": "Go identity-pointer keys: map[*T]V with struct cells; the record denotation rides the cells",
+      "tags": [
+        "WF-24",
+        "KO-2",
+        "KO-2b",
+        "VS-3"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d5e0d7e0d001626964e0d80a01d4d2b022d2b024d0a2d522d624",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n5",
+              "n6",
+              "n8"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "map",
+            "key": "d2",
+            "elem": "d4"
+          },
+          {
+            "node": "d2",
+            "kind": "desc",
+            "type": "pointer",
+            "target": "d3"
+          },
+          {
+            "node": "d3",
+            "kind": "desc",
+            "type": "struct",
+            "fields": [
+              {
+                "name": "id",
+                "type": "d4"
+              }
+            ]
+          },
+          {
+            "node": "d4",
+            "kind": "desc",
+            "type": "int",
+            "width": 1
+          },
+          {
+            "node": "n5",
+            "kind": "struct",
+            "fields": [
+              {
+                "name": "id",
+                "value": "n7"
+              }
+            ]
+          },
+          {
+            "node": "n6",
+            "kind": "struct",
+            "fields": [
+              {
+                "name": "id",
+                "value": "n9"
+              }
+            ]
+          },
+          {
+            "node": "n7",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "n9",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "n8",
+            "kind": "map",
+            "count": 2,
+            "pairs": [
+              {
+                "key": "n5",
+                "value": "n10"
+              },
+              {
+                "key": "n6",
+                "value": "n11"
+              }
+            ]
+          },
+          {
+            "node": "n10",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "n11",
+            "kind": "int",
+            "value": "2"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): per-value — value 1 stays the map DESC chain (ids 0..4); the cells (values 2-3, records 5/6) gain the type repeat REF d2 (the struct desc); the map value gains REF d0 (the map desc) (WF-22 :620; WF-24 :745-753)",
+        "Go map[*T]V: pointer keys are identity keys — E2/KO-2a territory (go.md 5.2 pointers row :616); descriptor chain MAP E0 D5, key POINTER E0 D7 over STRUCT{id: INT-8} (ids: map-desc 0, pointer 1, struct 2, 'id' 3, int 4; the elem type-ref is REF d4, hash-consed)",
+        "the struct cells are addressable records: they open before the referencing map under REF d2, bodies B0 22 (id 1) and B0 24 (id 2), registering ids 5/6 (WF-24 :745-753, :768-782) — the cells also carry the record denotation: struct fields in canonical name-sorted order, no per-field tags (WF-19 :543-547; java.md 5.2 record row, go.md 5.2 structs row)",
+        "both key skeletons collapse the pointer to the nil token (E2 :997-1003) — byte-equal; the pair values differ (22 < 24), so KO-2b orders by the canonical value bytes BEFORE any identity discriminator: deterministic, value-derived, inside the stable class (:1120-1123)"
+      ]
+    },
+    {
+      "id": "V-130",
+      "desc": "enum singleton REF graph: one shared cell, two referencing positions",
+      "tags": [
+        "WF-24",
+        "VS-3"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d202e0d16553746174650166416374697665e0d200d150c050d5",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n6"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "tuple",
+            "args": [
+              "d2",
+              "d2"
+            ]
+          },
+          {
+            "node": "d2",
+            "kind": "desc",
+            "type": "variant",
+            "name": "State",
+            "alts": [
+              {
+                "name": "Active",
+                "type": "d4"
+              }
+            ]
+          },
+          {
+            "node": "d4",
+            "kind": "desc",
+            "type": "tuple",
+            "args": []
+          },
+          {
+            "node": "n6",
+            "kind": "tuple",
+            "children": [
+              "n5",
+              "n5"
+            ]
+          },
+          {
+            "node": "n5",
+            "kind": "variant",
+            "tag": 0,
+            "alt": "Active"
+          }
+        ]
+      },
+      "deriv": [
+        "an enum constant is an interned singleton (jls:8.9): the binding convention is REF for enum singletons, never a VARIANT value duplicated — the singleton graph survives the round-trip as sharing (java.md 1.3 :107-112) (WF-24)",
+        "TUPLE(State, State): the second type-ref is REF d1 — structural hash-consing of the same variant descriptor (WF-22 :654-660); VARIANT E0 D1, name 'State', one alternative 'Active' over the empty TUPLE(0) (WF-22 :610-611)",
+        "value: the cell opens once — C0 50 (tag 0, empty-tuple payload, WF-21 :563-574) — the second position is the identity edge D5: one cell per intern id, sharing preserved exactly (WF-24 :791-802)"
+      ]
+    },
+    {
+      "id": "V-131",
+      "desc": "sealed hierarchy (closed permits): VARIANT with named-field alternatives",
+      "tags": [
+        "WF-21",
+        "WF-22",
+        "VS-3"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d16553686170650366436972636c65e0d201e0d80c0465456d707479e0d20066537175617265d3c2504040000000",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "variant",
+            "name": "Shape",
+            "alts": [
+              {
+                "name": "Circle",
+                "type": "d3"
+              },
+              {
+                "name": "Empty",
+                "type": "d4"
+              },
+              {
+                "name": "Square",
+                "type": "d3"
+              }
+            ]
+          },
+          {
+            "node": "d3",
+            "kind": "desc",
+            "type": "tuple",
+            "args": [
+              "d5"
+            ]
+          },
+          {
+            "node": "d4",
+            "kind": "desc",
+            "type": "tuple",
+            "args": []
+          },
+          {
+            "node": "d5",
+            "kind": "desc",
+            "type": "float",
+            "width": 4
+          },
+          {
+            "node": "n1",
+            "kind": "variant",
+            "tag": 2,
+            "alt": "Square",
+            "payload": "n2"
+          },
+          {
+            "node": "n2",
+            "kind": "tuple",
+            "children": [
+              "n3"
+            ]
+          },
+          {
+            "node": "n3",
+            "kind": "float",
+            "form": "binary32",
+            "bits": "40000000"
+          }
+        ]
+      },
+      "deriv": [
+        "a fully closed permits set is a VARIANT (java.md 5.2 sealed row; AM-2): table sorted Circle < Empty < Square under the STRUCT sort key (WF-22 :677-679)",
+        "payloads: Circle and Square carry positional TUPLE(FLOAT-32) — structurally identical, so Square's type-ref is REF d3, one intern record per structure (WF-22 :654-660); Empty carries the empty TUPLE(0) (WF-21 :572-574)",
+        "value Square(2.0): tag 2 = index into the sorted table (C2), payload 50 40 40000000 — the tag is ARG-minimal and self-describing against the in-stream table (WF-21 :563-568)"
+      ]
+    },
+    {
+      "id": "V-132",
+      "desc": "Optional denotation: java Optional / rust Option as the library-level two-variant sum",
+      "tags": [
+        "WF-21",
+        "WF-22",
+        "VS-3"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d16818636f72653a3a6f7074696f6e3a3a4f7074696f6e5b69385d02644e6f6e65e0d20064536f6d65e0d201e0d80a01c150280a",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "variant",
+            "name": "core::option::Option[i8]",
+            "alts": [
+              {
+                "name": "None",
+                "type": "d3"
+              },
+              {
+                "name": "Some",
+                "type": "d5"
+              }
+            ]
+          },
+          {
+            "node": "d3",
+            "kind": "desc",
+            "type": "tuple",
+            "args": []
+          },
+          {
+            "node": "d5",
+            "kind": "desc",
+            "type": "tuple",
+            "args": [
+              "d6"
+            ]
+          },
+          {
+            "node": "d6",
+            "kind": "desc",
+            "type": "int",
+            "width": 1
+          },
+          {
+            "node": "n1",
+            "kind": "variant",
+            "tag": 1,
+            "alt": "Some",
+            "payload": "n2"
+          },
+          {
+            "node": "n2",
+            "kind": "tuple",
+            "children": [
+              "n3"
+            ]
+          },
+          {
+            "node": "n3",
+            "kind": "int",
+            "value": "5"
+          }
+        ]
+      },
+      "deriv": [
+        "Optional<T>/Option<T> denote as the library-level two-variant sum (java.md 5.2 Optional row; rust.md 5.2 Option row :549): table sorted None < Some, None carries the empty TUPLE(0), Some a positional TUPLE(1) — empty is a variant, never the nil token (WF-22)",
+        "the nominal name is the instantiation's wire name under Name[args]: core::option::Option[i8], the constructor plus the bracketed argument list, args being canonical structural names (WF-22 :641-643; rust.md 1.4 :127-130) — STRING len 24 rides the u8 rung 68 18",
+        "value Some(5): tag 1 (C1), payload 50 28 0A — zz(5)=10 on the u8 rung (WF-7 :286-288); nesting resolves through payload positions (WF-21 :586-588, V-133)"
+      ]
+    },
+    {
+      "id": "V-133",
+      "desc": "Some(None): Option[Option[u8]] nesting through the payload position",
+      "tags": [
+        "WF-21",
+        "WF-22",
+        "VS-3"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d1682e636f72653a3a6f7074696f6e3a3a4f7074696f6e5b636f72653a3a6f7074696f6e3a3a4f7074696f6e5b75385d5d02644e6f6e65e0d20064536f6d65e0d201e0d16818636f72653a3a6f7074696f6e3a3a4f7074696f6e5b75385d02d2d3d4e0d201e0d80b01c150c050",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "variant",
+            "name": "core::option::Option[core::option::Option[u8]]",
+            "alts": [
+              {
+                "name": "None",
+                "type": "d3"
+              },
+              {
+                "name": "Some",
+                "type": "d5"
+              }
+            ]
+          },
+          {
+            "node": "d3",
+            "kind": "desc",
+            "type": "tuple",
+            "args": []
+          },
+          {
+            "node": "d5",
+            "kind": "desc",
+            "type": "tuple",
+            "args": [
+              "d7"
+            ]
+          },
+          {
+            "node": "d7",
+            "kind": "desc",
+            "type": "variant",
+            "name": "core::option::Option[u8]",
+            "alts": [
+              {
+                "name": "None",
+                "type": "d3"
+              },
+              {
+                "name": "Some",
+                "type": "d8"
+              }
+            ]
+          },
+          {
+            "node": "d8",
+            "kind": "desc",
+            "type": "tuple",
+            "args": [
+              "d9"
+            ]
+          },
+          {
+            "node": "d9",
+            "kind": "desc",
+            "type": "uint",
+            "width": 1
+          },
+          {
+            "node": "n1",
+            "kind": "variant",
+            "tag": 1,
+            "alt": "Some",
+            "payload": "n2"
+          },
+          {
+            "node": "n2",
+            "kind": "tuple",
+            "children": [
+              "n3"
+            ]
+          },
+          {
+            "node": "n3",
+            "kind": "variant",
+            "tag": 0,
+            "alt": "None"
+          }
+        ]
+      },
+      "deriv": [
+        "two distinct instantiations, two wire names: the outer Option[Option[u8]] and the inner Option[u8] — instantiation identity is naming-only, monomorphization erased to the name (rust.md 1.4 :127-133; WF-22 :641-643)",
+        "the inner table reuses interned strings and structures: alt names are REFs d2/d4 ('None'/'Some'), the empty TUPLE(0) is REF d3 — one intern record per structure, strings included (WF-22 :654-660; WF-24 :745-753)",
+        "value Some(None): C1 (outer Some) 50 (payload tuple) C0 50 (inner None with its empty-tuple body) — two levels of presence, the pinned doctest shape (rust.md 5.2 :549; WF-21 :586-588)"
+      ]
+    },
+    {
+      "id": "V-134",
+      "desc": "newtype denotation: NAMED wrapper over a one-element TUPLE payload",
+      "tags": [
+        "WF-22",
+        "VS-3"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d6664d6574657273e0d201e0d80c080850404059000000000000",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "named",
+            "name": "Meters",
+            "base": "d2"
+          },
+          {
+            "node": "d2",
+            "kind": "desc",
+            "type": "tuple",
+            "args": [
+              "d3"
+            ]
+          },
+          {
+            "node": "d3",
+            "kind": "desc",
+            "type": "float",
+            "width": 8
+          },
+          {
+            "node": "n1",
+            "kind": "tuple",
+            "children": [
+              "n2"
+            ]
+          },
+          {
+            "node": "n2",
+            "kind": "float",
+            "form": "binary64",
+            "bits": "4059000000000000"
+          }
+        ]
+      },
+      "deriv": [
+        "a rust newtype (struct Meters(f64)) denotes as a NAMED wrapper over a TUPLE payload (rust.md 5.2 :545): DESC E0 D6, name 'Meters', base TUPLE(1)[FLOAT-64] — the nominal wrapper and its base intern independently (WF-22 :633-636, :660-663)",
+        "value Meters(100.0): the wrapper is transparent on the value side — 50 (tuple token) 40 4059000000000000 (raw binary64 bits, WF-11 :389-392)",
+        "value equality runs through the payload under the nominal name; name resolution is the decode environment (rust.md 5.2 :545) (WF-22)",
+        "c4 DD r2: width-8 argument re-spelled on the WF-7 ladder — u8 rung 08 08 (inline caps at 7; the (01/02/04/08) parenthetical WF-22 :638 is a pre-rebalance residue; 16 remains 08 10)"
+      ]
+    },
+    {
+      "id": "V-135",
+      "desc": "tuple struct denotation: NAMED over a positional TUPLE of arity two",
+      "tags": [
+        "WF-22",
+        "WF-20",
+        "VS-3"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d66450616972e0d202e0d80a04d3502224",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "named",
+            "name": "Pair",
+            "base": "d2"
+          },
+          {
+            "node": "d2",
+            "kind": "desc",
+            "type": "tuple",
+            "args": [
+              "d3",
+              "d3"
+            ]
+          },
+          {
+            "node": "d3",
+            "kind": "desc",
+            "type": "int",
+            "width": 4
+          },
+          {
+            "node": "n1",
+            "kind": "tuple",
+            "children": [
+              "n2",
+              "n3"
+            ]
+          },
+          {
+            "node": "n2",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "n3",
+            "kind": "int",
+            "value": "2"
+          }
+        ]
+      },
+      "deriv": [
+        "struct Pair(i32, i32): NAMED 'Pair' over TUPLE(2)[INT-32, INT-32] (rust.md 5.2 :545) — the second element type-ref is REF d3, hash-consed (WF-22 :654-660)",
+        "value Pair(1, 2): 50 22 24 — positional order, never reordered: canonical name-sorted order governs named tables, not positional products (WF-20 :552-558)",
+        "arity is part of the structure: a body of any other element count is a format error (WF-20 :555-556, class tuple_arity_mismatch)"
+      ]
+    },
+    {
+      "id": "V-136",
+      "desc": "Go embedding: the embedded field encodes under its type name as the field name",
+      "tags": [
+        "WF-19",
+        "WF-22",
+        "VS-3"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d0026442617365e0d80a01616ed2b02224",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n4"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "struct",
+            "fields": [
+              {
+                "name": "Base",
+                "type": "d3"
+              },
+              {
+                "name": "n",
+                "type": "d3"
+              }
+            ]
+          },
+          {
+            "node": "d3",
+            "kind": "desc",
+            "type": "int",
+            "width": 1
+          },
+          {
+            "node": "n4",
+            "kind": "struct",
+            "fields": [
+              {
+                "name": "Base",
+                "value": "n5"
+              },
+              {
+                "name": "n",
+                "value": "n6"
+              }
+            ]
+          },
+          {
+            "node": "n5",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "n6",
+            "kind": "int",
+            "value": "2"
+          }
+        ]
+      },
+      "deriv": [
+        "struct { Base; n int }: the embedded field's name is its type name — the field list of the descriptor is {Base, n}, sorted 'B' (42) before 'n' (6E), case-sensitive bytewise (WF-22 :668-674); grounding is the spec family row's CR binding convention plus gspec:Struct types (embedded field name = type name)",
+        "one INT-8 descriptor serves both fields — the second type-ref is REF d2 (hash-consing, WF-22 :654-660); value body B0 22 24 follows the table order (WF-19 :543-547)",
+        "promotion is a method-resolution concern of the host, not a wire fact: only the named field set crosses (go.md 5.2 structs row :613) (WF-22)"
+      ]
+    },
+    {
+      "id": "V-137",
+      "desc": "Java field-inheritance flattening: one sorted field list across the hierarchy",
+      "tags": [
+        "WF-19",
+        "WF-22",
+        "VS-3"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d0026163e0d80a016170d2b02224",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "d1",
+              "n4"
+            ]
+          },
+          {
+            "node": "d1",
+            "kind": "desc",
+            "type": "struct",
+            "fields": [
+              {
+                "name": "c",
+                "type": "d3"
+              },
+              {
+                "name": "p",
+                "type": "d3"
+              }
+            ]
+          },
+          {
+            "node": "d3",
+            "kind": "desc",
+            "type": "int",
+            "width": 1
+          },
+          {
+            "node": "n4",
+            "kind": "struct",
+            "fields": [
+              {
+                "name": "c",
+                "value": "n5"
+              },
+              {
+                "name": "p",
+                "value": "n6"
+              }
+            ]
+          },
+          {
+            "node": "n5",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "n6",
+            "kind": "int",
+            "value": "2"
+          }
+        ]
+      },
+      "deriv": [
+        "class Child {int c} extends Parent {int p}: fields flatten across the class hierarchy into one sorted field list — a field visible through inheritance encodes like a declared field (java.md 2.2 :240-242; jls:8.2); table [c, p], 'c' (63) before 'p' (70) (WF-22)",
+        "the flattened set carries no declaring-class distinction: observables are the field set by name; declaration position is not a wire observable (java.md 5.2 inherited-fields row :548) (WF-22)",
+        "shadowing is the collision case — V-138; the second INT-8 type-ref is REF d2 (WF-22 :654-660)"
+      ]
+    },
+    {
+      "id": "V-138",
+      "desc": "Java shadowed-field collision: one name bound to two declaring classes rejected",
+      "tags": [
+        "WF-22",
+        "VS-3"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d0026178e0d80a016178",
+      "class": "name_binding_conflict",
+      "deriv": [
+        "the flattened list would carry 'x' twice — same name, distinct declaring classes, here with distinct types INT-8 and STRING: a loud error at descriptor build, never a silently resolved shadow (java.md 2.2 :243-244; 5.2 :548)",
+        "bytes are the would-be table through the second field name; the prefix halts where the second 'x' names one field twice — a name bound to two different types is rejected with an unsupported-type error, the decode-side class name_binding_conflict (WF-22 :694-698; reject-classes 26)",
+        "the resolution is explicit name binding — rename or bind, never disambiguation suffixes (WF-22 :644-650)"
+      ]
+    },
+    {
+      "id": "V-139",
+      "desc": "chan in a value position: no opcode in any class, halt at the field's type-ref",
+      "tags": [
+        "KO-7",
+        "WF-23",
+        "VS-6"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d0026161e0d80a016163",
+      "class": "chan_position",
+      "deriv": [
+        "struct {a int8; c chan bool}: the descriptor builds field 'a' (INT-8 literal, REF-d2 type for a second INT use would follow), then field 'c' — and the chan position cannot start: chan, func, and unsafe.Pointer have no opcodes in any class, the category has no wire image (go.md 1.1 :40-44; KO-7 :1099-1102)",
+        "bytes are the halt prefix: header, the descriptor through field 'c' — no stream can exist past this point; the encoder reports an unsupported-type error with the path to the offending field (GO-1)",
+        "rejected in every position including keys — the key-position leg rides V-140; the reject is a typed error, never a runtime panic (go.md 1.1 :46-50)"
+      ]
+    },
+    {
+      "id": "V-140",
+      "desc": "chan in a map key position: the MAP descriptor's key type-ref cannot start",
+      "tags": [
+        "KO-7",
+        "WF-22",
+        "VS-6"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d5",
+      "class": "chan_position",
+      "deriv": [
+        "map[chan int]bool: the MAP descriptor E0 D5 opens its key type-ref position and halts — the same no-opcode category in the key position; live resources are not data (KO-7 :1099-1102)",
+        "key-position admission is E1's domain (KO-7 :1101-1102): sequence and VARIANT keys inside, NaN and key-reachable cycles core-rejected, map-in-key per binding — chan is rejected in every position regardless (go.md 5.2 channels row :622)",
+        "halt prefix = header + E0 D5: no legal stream contains a chan key; the classified typed error names the path (G1-style determinism, GO-1)"
+      ]
+    },
+    {
+      "id": "V-146",
+      "desc": "NAMED wrapper whose base type-ref is a REF to itself: degenerate cycle",
+      "tags": [
+        "WF-26",
+        "WF-22",
+        "WF-24",
+        "VS-6"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d6616dd0",
+      "class": "named_degenerate_cycle",
+      "deriv": [
+        "envelope: root DESC NAMED E0 D6, name 'm' 61 6d (id 1), base type-ref REF d0 — a crafted REF back to the wrapper record itself (id 0); a DESC registers in the intern space before its children, so recursive types close through REF (WF-22 :602-604; registration before children WF-24 :803-806)",
+        "a degenerate NAMED cycle — a wrapper chain closing onto itself through a crafted REF, at the root or in an element-descriptor position — is a format error, never a hang and never a budget overdraft: no limit value can legalize a self-referential wrapper (WF-26 :1311-1314; the security section doubles the rule, :1354)",
+        "not CONTEXTUAL: the cycle is closed in-stream by the self-REF, no prior registry state needed — the shortest stream exhibiting the cycle"
+      ]
+    }
+  ]
+}

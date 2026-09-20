@@ -1,0 +1,232 @@
+{
+  "category": "string-blob-bool",
+  "section": "6",
+  "vectors": [
+    {
+      "id": "V-36",
+      "desc": "STRING \"hi\": fused token, inline length, raw bytes",
+      "tags": [
+        "WF-13",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80d626869",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "string",
+            "value": "hi"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0D — STRING kind 13, empty body (WF-22 :610-616, :624)",
+        "header 67626f6e 0002 (WF-3 :194-198)",
+        "token 62 = class 6 << 4 | inline length 2, then raw bytes 6869: byte length argument followed by that many raw bytes (WF-23 :703, :711; WF-13 :419-420)"
+      ]
+    },
+    {
+      "id": "V-37",
+      "desc": "STRING FF FE: non-UTF-8 byte sequence is legal — no validity gate",
+      "tags": [
+        "WF-13",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80d62fffe",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "string",
+            "bytes": "fffe"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0D — STRING, empty body (WF-22 :624)",
+        "header (WF-3 :194-198); token 62 + raw bytes FF FE (WF-23 :711)",
+        "FF FE is not valid UTF-8: any byte sequence is legal — a string is a byte sequence, not mandated text; the UTF-8 gates are binding projection content, not core (WF-13 :420-421)"
+      ]
+    },
+    {
+      "id": "V-38",
+      "desc": "interned string repeat: first occurrence literal (id 0), second a REF token",
+      "tags": [
+        "WF-13",
+        "WF-24",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80d626162d1",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "n1",
+              "n2"
+            ]
+          },
+          {
+            "node": "n1",
+            "kind": "string",
+            "value": "ab"
+          },
+          {
+            "node": "n2",
+            "kind": "ref",
+            "target": "n1"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0D — STRING kinds the stream (id 0); the literal behind it interns id 1; value 2 is the identity REF d1 (WF-22 :624; WF-24 :745-753)",
+        "value 1: token 62 + 6162 — the STRING literal registers intern id 1 (after the DESC, id 0); ids are ARG-encoded, DFS preorder from 0, interned strings share the one per-stream id space (WF-24 :745-753, :762-765)",
+        "value 2: repeat is a REF token D1 = class D << 4 | inline id 1; a repeated encounter MUST be a REF, duplicating a record body in one stream is forbidden (WF-23 :718; WF-24 :766-769; WF-13 :421-423)"
+      ]
+    },
+    {
+      "id": "V-39",
+      "desc": "BOOL false, true: selector pair 0/1",
+      "tags": [
+        "WF-10",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d8091011",
+      "ir": {
+        "root": "s1",
+        "nodes": [
+          {
+            "node": "s1",
+            "kind": "stream",
+            "children": [
+              "n1",
+              "n2"
+            ]
+          },
+          {
+            "node": "n1",
+            "kind": "bool",
+            "value": false
+          },
+          {
+            "node": "n2",
+            "kind": "bool",
+            "value": true
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 09 — one BOOL descriptor types both values of the two-value stream; a type repeat carries no second body (WF-22 :623-625; WF-24 :766-769)",
+        "header (WF-3 :194-198); tokens 10 = selector 0 false, 11 = selector 1 true — class 1 << 4 | selector (WF-10 :379-380; WF-23 :703, :706)"
+      ]
+    },
+    {
+      "id": "V-40",
+      "desc": "BOOL selector 2 rejected: reserved",
+      "tags": [
+        "WF-10"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d80912",
+      "class": "bool_reserved_selector",
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 09 (BOOL) — would-be canonical prefix before the reserved selector (WF-22 :623)",
+        "selector 2 of class 1: all selectors but 0/1 are reserved and a decoder MUST reject them (WF-10 :379-380; class bool_reserved_selector)"
+      ]
+    },
+    {
+      "id": "V-41",
+      "desc": "BLOB L=4 E=2: dense prefix + implicit zero tail",
+      "tags": [
+        "WF-14",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80e74025a51",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "blob",
+            "length": 4,
+            "dense": "5a51"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0E — BLOB kind 14, empty body; the blob record registers behind it (id 1) (WF-22 :625)",
+        "header (WF-3 :194-198); token 74 = class 7 << 4 | inline L 4, ARG E = 02, then E raw bytes 5A 51 (WF-23 :703, :712; WF-14 :428-430)",
+        "bytes at [2,4) are implicit zeros — trailing-zero elision; byte at E−1 = 51 nonzero, E minimal (WF-14 :430-431)"
+      ]
+    },
+    {
+      "id": "V-42",
+      "desc": "BLOB L=4 E=0: full elision, all-zero backing",
+      "tags": [
+        "WF-14",
+        "WF-23"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80e7400",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "blob",
+            "length": 4,
+            "dense": ""
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0E — BLOB, empty body (WF-22 :625)",
+        "token 74 (inline L 4), ARG E = 0: empty dense prefix, all four backing bytes implicit zeros (WF-14 :429-430)",
+        "E minimality at E=0 is vacuous — the byte-at-E−1 rule bounds only a nonempty dense prefix; one legal spelling (WF-14 :430-431)"
+      ]
+    },
+    {
+      "id": "V-43",
+      "desc": "BLOB E=3 > L=2 rejected",
+      "tags": [
+        "WF-14"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d80e7203",
+      "class": "blob_E_gt_L",
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0E (BLOB) — would-be canonical prefix before the E/L violation (WF-22 :625)",
+        "token 72 (inline L 2), ARG E = 3: E MUST NOT exceed L — halt prefix at the E byte (WF-14 :430; class blob_E_gt_L)"
+      ]
+    },
+    {
+      "id": "V-44",
+      "desc": "BLOB zero dense tail byte rejected: non-minimal E",
+      "tags": [
+        "WF-14"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002e0d80e74025a00",
+      "class": "blob_zero_dense_tail",
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0E (BLOB) — would-be canonical prefix (WF-22 :625)",
+        "L=4, E=2, dense bytes 5A 00: the byte at E−1 is zero — E is not minimal, a zero dense tail byte is non-canonical and a decoder reject (checked on materialized and skipped blobs alike) (WF-14 :430-433; class blob_zero_dense_tail)"
+      ]
+    }
+  ]
+}

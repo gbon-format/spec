@@ -5,18 +5,17 @@ syntax of the GBON value model (the model itself is specified by
 docs/foundations.md).
 
 This document defines the format contract: the core grammar plus the
-CODER descriptor extension (kind 14) and the BIGINT descriptor
-extension (kind 15). A change to an opcode or a descriptor rule of the
-core requires a new major version of the format; additive extensions
-enter through minor versions only (WF-21); a change to a canonical rule
-of the core requires a new major version after finalization and rides a
-minor version while the format is in its draft era (WF-21). Sections
-carry stable IDs — core sections WF-1 through WF-24 — that are the
-reference keys of the repository (WF-24); the displayed section numbers
-are reader cosmetics.
+CODER descriptor extension (WF-22). A change to an opcode or a descriptor
+rule of the core requires a new major version of the format; additive
+extensions enter through minor versions from major 1 (WF-5); a change to
+a canonical rule of the core requires a new major version after
+finalization and rides a minor version while the format is in its draft
+era (WF-5). Sections carry stable IDs — core sections WF-1 through
+WF-26 — that are the reference keys of the repository (WF-1); the
+displayed section numbers are reader cosmetics.
 
 ```
-Format version: 0.1 (major 0, minor 1)
+Format version: 0.2 (major 0, minor 2)
 Document scope: token-level grammar, topology, canonical rules
 ```
 
@@ -35,42 +34,43 @@ heading: `(core)` or `(core+annotation)`.
 - [2. Conventions](#2-conventions)
   - [2.1 Requirements Language](#21-requirements-language)
   - [2.2 Layer Tags](#22-layer-tags)
-  - [2.3 Section IDs and References [WF-24]](#23-section-ids-and-references-wf-24)
+  - [2.3 Section IDs and References [WF-1]](#23-section-ids-and-references-wf-1)
 - [3. Conformance](#3-conformance)
 - [4. Stream Structure and Versioning](#4-stream-structure-and-versioning)
-  - [4.1 Overview (core) [WF-1]](#41-overview-core-wf-1)
-  - [4.2 Stream Header (core) [WF-2]](#42-stream-header-core-wf-2)
-  - [4.3 Value Stream Grammar (core) [WF-3]](#43-value-stream-grammar-core-wf-3)
-  - [4.4 Versioning (core) [WF-21]](#44-versioning-core-wf-21)
-  - [4.5 Decoder Evolution Contract (core) [WF-23]](#45-decoder-evolution-contract-core-wf-23)
+  - [4.1 Overview (core) [WF-2]](#41-overview-core-wf-2)
+  - [4.2 Stream Header (core) [WF-3]](#42-stream-header-core-wf-3)
+  - [4.3 Value Stream Grammar (core) [WF-4]](#43-value-stream-grammar-core-wf-4)
+  - [4.4 Versioning (core) [WF-5]](#44-versioning-core-wf-5)
+  - [4.5 Decoder Evolution Contract (core) [WF-6]](#45-decoder-evolution-contract-core-wf-6)
 - [5. Primitive Field Formats](#5-primitive-field-formats)
-  - [5.1 Integer Arguments — ARG (core) [WF-4]](#51-integer-arguments--arg-core-wf-4)
+  - [5.1 Integer Arguments — ARG (core) [WF-7]](#51-integer-arguments--arg-core-wf-7)
 - [6. Value Encodings by Kind](#6-value-encodings-by-kind)
-  - [6.1 Signed Integers — INT (core+annotation) [WF-5]](#61-signed-integers--int-coreannotation-wf-5)
-  - [6.2 Unsigned Integers — UINT (core+annotation) [WF-6]](#62-unsigned-integers--uint-coreannotation-wf-6)
-  - [6.3 Booleans (core) [WF-7]](#63-booleans-core-wf-7)
-  - [6.4 Floats (core+annotation) [WF-8]](#64-floats-coreannotation-wf-8)
-  - [6.5 Complex (core+annotation) [WF-9]](#65-complex-coreannotation-wf-9)
-  - [6.6 Strings (core) [WF-10]](#66-strings-core-wf-10)
-  - [6.7 Blobs (core) [WF-11]](#67-blobs-core-wf-11)
-  - [6.8 Nil Tokens (core) [WF-12]](#68-nil-tokens-core-wf-12)
-  - [6.9 Arrays and Trailing-Zero Elision (core+annotation) [WF-14]](#69-arrays-and-trailing-zero-elision-coreannotation-wf-14)
-  - [6.10 Slice Views (core) [WF-15]](#610-slice-views-core-wf-15)
-  - [6.11 Maps (core) [WF-16]](#611-maps-core-wf-16)
-  - [6.12 Structs (core+annotation) [WF-17]](#612-structs-coreannotation-wf-17)
-  - [6.13 Type Descriptors (core) [WF-18]](#613-type-descriptors-core-wf-18)
-  - [6.14 Opcode Table and Partitioning (core) [WF-19]](#614-opcode-table-and-partitioning-core-wf-19)
+  - [6.1 Signed Integers — INT (core+annotation) [WF-8]](#61-signed-integers--int-coreannotation-wf-8)
+  - [6.2 Unsigned Integers — UINT (core+annotation) [WF-9]](#62-unsigned-integers--uint-coreannotation-wf-9)
+  - [6.3 Booleans (core) [WF-10]](#63-booleans-core-wf-10)
+  - [6.4 Floats (core+annotation) [WF-11]](#64-floats-coreannotation-wf-11)
+  - [6.5 Complex Numbers (core+annotation) [WF-12]](#65-complex-numbers-coreannotation-wf-12)
+  - [6.6 Strings (core) [WF-13]](#66-strings-core-wf-13)
+  - [6.7 Blobs (core) [WF-14]](#67-blobs-core-wf-14)
+  - [6.8 Nil Layer (core) [WF-15]](#68-nil-layer-core-wf-15)
+  - [6.9 Arrays and Trailing-Zero Elision (core+annotation) [WF-16]](#69-arrays-and-trailing-zero-elision-coreannotation-wf-16)
+  - [6.10 Slice Views (core) [WF-17]](#610-slice-views-core-wf-17)
+  - [6.11 Maps (core) [WF-18]](#611-maps-core-wf-18)
+  - [6.12 Structs (core+annotation) [WF-19]](#612-structs-coreannotation-wf-19)
+  - [6.13 Tuples (core) [WF-20]](#613-tuples-core-wf-20)
+  - [6.14 Variants (core) [WF-21]](#614-variants-core-wf-21)
+  - [6.15 Type Descriptors (core) [WF-22]](#615-type-descriptors-core-wf-22)
+  - [6.16 Opcode Table and Partitioning (core) [WF-23]](#616-opcode-table-and-partitioning-core-wf-23)
 - [7. Graph Encodings: Identity, Sharing, and Cycles](#7-graph-encodings-identity-sharing-and-cycles)
-  - [7.1 Topology: Intern Space and References (core) [WF-13]](#71-topology-intern-space-and-references-core-wf-13)
+  - [7.1 Topology: Intern Space and References (core) [WF-24]](#71-topology-intern-space-and-references-core-wf-24)
 - [8. Canonical and Portable Profiles](#8-canonical-and-portable-profiles)
-  - [8.1 Canonical Encoding (core) [WF-20]](#81-canonical-encoding-core-wf-20)
+  - [8.1 Canonical Encoding (core) [WF-25]](#81-canonical-encoding-core-wf-25)
   - [8.2 Portable Profile (Frame)](#82-portable-profile-frame)
 - [9. Limits and Budgeted Decode](#9-limits-and-budgeted-decode)
-  - [9.1 Decoder Hygiene (core) [WF-22]](#91-decoder-hygiene-core-wf-22)
+  - [9.1 Decoder Hygiene (core) [WF-26]](#91-decoder-hygiene-core-wf-26)
 - [10. Security Considerations](#10-security-considerations)
 - [Appendix A. Examples](#appendix-a-examples)
-- [Appendix B. Declared Origins](#appendix-b-declared-origins)
-- [Appendix C. References](#appendix-c-references)
+- [Appendix B. References](#appendix-b-references)
 
 ## 1. Scope and Layering
 
@@ -104,11 +104,11 @@ layer model in the introduction: core rules bind every implementation;
 annotations record, inside a core rule, a degradation a projection may
 take without lying.
 
-### 2.3 Section IDs and References [WF-24]
+### 2.3 Section IDs and References [WF-1]
 
 
 Every section of this specification and of its binding documents carries
-a stable section ID in its heading: core sections WF-1 through WF-24,
+a stable section ID in its heading: core sections WF-1 through WF-26,
 binding sections GO-1 and up (docs/bindings/go.md). The ID is the
 reference key of the repository; the displayed section number is reader
 cosmetics.
@@ -135,55 +135,56 @@ cosmetics.
 it satisfies the grammar of this document (definite lengths, known
 opcodes, known argument forms); it is valid when, in addition, its
 records satisfy the semantic rules the grammar routes to them —
-reference resolution (WF-13), view geometry (WF-15), duplicate-key
-rejection (WF-16, KO-8), and canonical minimality (WF-4, WF-20). A
+reference resolution (WF-24), view geometry (WF-17), duplicate-key
+rejection (WF-18, KO-8), and canonical minimality (WF-7, WF-25). A
 decoder MUST reject ill-formed and invalid input with a format error;
-it MUST NOT repair, skip silently, or guess (WF-19: an unknown value
+it MUST NOT repair, skip silently, or guess (WF-23: an unknown value
 never decodes as success).
 
 **Encoder obligations.** An encoder produces canonical bytes or fails:
-minimal arguments (WF-4), minimal view forms (WF-15), minimal dense
-prefixes (WF-11, WF-14), registration before children in the intern
-order (WF-13). A second implementation of this specification produces
-identical bytes or fails (WF-20).
+minimal arguments (WF-7), minimal view forms (WF-17), minimal dense
+prefixes (WF-14, WF-16), registration before children in the intern
+order (WF-24). A second implementation of this specification produces
+identical bytes or fails (WF-25).
 
 **Decoder obligations.** A decoder validates geometry, widths, and
 lengths before any type-introspection or allocation; budgets every
 derived allocation at its production point; and answers crafted input
 with exactly one of format error, budget error, or a correct value —
-never a panic and never a hang (WF-22, clause 9). Truncated input is a
-format error; no partial values are returned (WF-3).
+never a panic and never a hang (WF-26, clause 9). Truncated input is a
+format error; no partial values are returned (WF-4).
 
 **Budgeted decode.** Decoding runs under explicit resource budgets on
 every implementation — as a conformance requirement, not a quality
 mark: the budget families and their default values are normative
 (clause 9.1).
 
-**Unsupported material.** What a decoder cannot represent — an
-unknown major version (WF-2), a reserved descriptor kind (WF-18), a
-dynamically uncomparable map key (KO-4), an unskippable coder body
-(WF-23) — is a loud rejection, never a lossy default:
-unsupported-reject is the evolution discipline of the format (WF-21,
-WF-23).
+**Unsupported material.** What a decoder cannot represent — an unknown
+version component, major always and minor in the draft era (WF-3), a
+reserved descriptor kind (WF-22), a NaN map key or a key-reachable cycle
+(KO-3, KO-5), an unskippable coder body (WF-6) — is a loud rejection,
+never a
+lossy default: unsupported-reject is the evolution discipline of the
+format (WF-5, WF-6).
 
 The normative rules of this document are enforced by an executable
-suite — magic-collision absence (WF-2), canonical map ordering (WF-16,
-WF-20), decoder hygiene under crafted input (WF-22), and the
+suite — magic-collision absence (WF-3), canonical map ordering (WF-18,
+WF-25), decoder hygiene under crafted input (WF-26), and the
 opcode-table absences of GO-1.
 
 ## 4. Stream Structure and Versioning
 
-### 4.1 Overview (core) [WF-1]
+### 4.1 Overview (core) [WF-2]
 
 A stream is a self-describing sequence of values. The format is byte-oriented
 and prefix-free: the encoding of each value is self-delimiting, and the whole
 stream resolves left to right without lookahead past a token boundary.
 Canonical form is always on — there is exactly one legal byte sequence for
-every value (see WF-20). The format carries the observable value semantics of
+every value (see WF-25). The format carries the observable value semantics of
 its projections: nil versus empty containers, slice windows with their
 observable extent, shared identity, NaN payloads, and non-UTF-8 strings all
 survive a round trip.
-### 4.2 Stream Header (core) [WF-2]
+### 4.2 Stream Header (core) [WF-3]
 Every stream begins with a 6-byte header:
 
 ```
@@ -192,22 +193,21 @@ magic(4B) ‖ major(u8) ‖ minor(u8)
 
 - `magic` MUST be the four bytes `67 62 6F 6E` (ASCII "gbon").
 - `major` is the major version; this document specifies major `00`,
-  the draft era of the format (WF-21). Finalization — the first
-  stability commitment of the format — is major 1 (WF-21).
-- `minor` is the minor version; this document specifies minor `01`.
-  Minors are additive within a major: an encoder emits the minor it
-  implements.
+  the draft era of the format (WF-5). Finalization — the first
+  stability commitment of the format — is major 1 (WF-5).
+- `minor` is the minor version; this document specifies minor `02`.
+  An encoder emits the minor it implements.
 A decoder MUST reject with a format error any stream whose magic does not
-match or whose major version is unknown. A stream with an unknown minor
-version (minor greater than the decoder knows) MUST be read normally:
-minor-version changes are additive-only.
+match, whose major version is unknown, or — while the major is 0 — whose
+minor version is unknown (WF-5): the draft era carries no cross-minor
+compatibility promises.
 
 The magic shares no prefix with known offset-0 file signatures (PNG, GIF,
 ZIP, ELF, PDF, JPEG, RIFF, BMP, gzip, bzip2, xz, 7z, RAR, SQLite, XML, UTF
 BOMs, JSON `{`/`[`). Formats with no offset-0 magic (gob, CBOR,
 protobuf) are not sniffable and cannot collide by construction.
 
-### 4.3 Value Stream Grammar (core) [WF-3]
+### 4.3 Value Stream Grammar (core) [WF-4]
 
 
 The value grammar is prefix-free: every record uses definite lengths and no
@@ -216,46 +216,39 @@ decoder consumes exactly the bytes of one value per step. A strict prefix of
 any well-formed stream is never itself well-formed at a value boundary that
 expects more input — truncation is a format error, never a hang.
 
-"Bare" argument bytes (0x00..0x10) occur only inside record bodies where
+"Bare" argument bytes (0x00..0x0D) occur only inside record bodies where
 grammar fixes the position; a value position always begins with a class
-byte (WF-19). The byte-level coincidence between a NIL token and an inline
+byte (WF-23). The byte-level coincidence between a NIL token and an inline
 argument is not a conflict: the positions are distinct.
 
-### 4.4 Versioning (core) [WF-21]
+### 4.4 Versioning (core) [WF-5]
 
 
-The version ladder: major 0 is the draft era — minors are additive
-within it, and a decoder reads every stream of a known major. Major 1
-is finalization, the first stability commitment of the format; within
-the draft era a decoder rejects only unknown majors. The ladder carries
-no content history for token grammar: every descriptor kind, token
-class, and argument form specified in this document is a start
-condition of 0.0, not an addition attributed to a minor.
+The version ladder: major 0 is the draft era; major 1 is finalization,
+the first stability commitment of the format.
 
+- In major 0 a decoder rejects unknown minors: the draft era carries
+  no cross-minor compatibility promises, so a canonical-rule revision
+  rides a minor bump without stranding older decoders — they reject
+  the unknown minor outright (WF-3).
+- From major 1 on, minors are additive only: new escape subclasses and
+  new descriptor kinds enter through a minor bump, and an older
+  decoder either knows the extension or fails on the specific token
+  (WF-23).
 - Major version changes may break decoding; a decoder rejects unknown
-  majors outright (WF-2).
-- Canonical-rule revisions ride minor versions while the major is 0,
-  each noted in this ladder; after finalization a canonical-rule change
-  requires a new major. Minor 1 carries the canonical grain rule set of
-  section 7.1: the coarsest-grain record with the derivable descent,
-  grain tags on differing-grain openings with elision at grain equality
-  for non-pointer grains and self-tags for pointer grains, layout-normal
-  grains for named conversions, and the zero-size target marker
-  (selector 4, WF-12). A decoder that implements minor 1 reads streams
-  of minors 0 and 1 alike: a 0.0 stream remains valid input.
-- Minor version changes are additive: new escape subclasses and new
-  descriptor kinds appear only through a minor bump; an older decoder
-  either knows the extension or fails on the specific token (WF-19).
-- The 16 first-byte nibble classes (0x0..0xF) are fully allocated: no new
-  value class can enter through a minor bump directly. New value classes
-  appear only through ESC graduation — an experimental 0xE subclass
-  (itself a minor-version addition) promoted to core semantics by a subsequent
-  minor bump; private 0xF subclasses never graduate.
-- The reserved-kind space (descriptor kinds 16..255, WF-18) is the refusal
-  surface of this rule: a decoder that does not know a reserved kind fails
-  on the token exactly as WF-18 demands.
+  majors outright (WF-3). After finalization a canonical-rule change
+  requires a new major.
+- The 16 first-byte nibble classes (0x0..0xF) are fully allocated: no
+  new value class can enter through a minor bump directly. New value
+  classes appear only through ESC graduation — an experimental
+  subclass of the escape class, itself a minor-version addition,
+  promoted to core semantics by a subsequent minor bump; private
+  subclasses never graduate (WF-23).
+- The reserved-kind space (descriptor kinds 16..255, WF-22) is the
+  refusal surface of this rule: a decoder that does not know a
+  reserved kind fails on the token exactly as WF-22 demands.
 
-### 4.5 Decoder Evolution Contract (core) [WF-23]
+### 4.5 Decoder Evolution Contract (core) [WF-6]
 
 
 Decoding targets a descriptor that may differ from the stream's encoder-side
@@ -268,43 +261,34 @@ encoder may legitimately emit for that position (built-in coder bodies skip by
 grammar; custom coder bodies reject with an unsupported-type error): nil selectors, intern REFs,
 view tokens over already-consumed backings, and full records. The stream's
 type name must match the target's type name (strict name+structure match,
-see WF-18) — names of non-stdlib types carry their package path (WF-18); a
+see WF-22) — names of non-stdlib types carry their package path (WF-22); a
 cross-package evolution pair binds both versions to a common wire name
-through the name-binding mechanism (WF-18). Skipped values mirror the intern space of WF-13
+through the name-binding mechanism (WF-22). The gate is nominal outright:
+a nameless stream root — structural kinds carry no name (WF-22) — matches
+no target, and a chain without a name cannot serve as the target of a kept
+reference (WF-22). Skipped values mirror the intern space of WF-24
 exactly as the writer allocated it: string and descriptor literals intern
 (a subsequent REF from a kept position resolves), while backings, map objects,
 and pointer targets stay unmaterialized (GO-3). Adding fields to a struct
 is therefore wire-compatible in
 both directions (new encoder → old target: skip; old encoder → new target:
-zero), matching the Avro/protobuf evolution discipline. An evolution
-pair whose kept position resolves a REF naming a map record, or a view
-over a shared backing, at a record position the narrower target skipped
-rejects loud (the bad_ref class): the skipped record or backing stays
-unmaterialized, so the kept reference cannot be served — the carve-out
-is bounded to these aliased map and backing shapes, and adding fields
-stays wire-compatible for non-aliased narrowing. Narrowing that cuts a
-pointer cycle across fields — a kept position whose reference targets a
-record opened inside the skipped region — is a known-open cell: such
-streams reject with a mis-parse or grain-mismatch class outside this
-carve-out, and a subsequent minor version may open a typed reject form
-through the change process (WF-21).
-A change of canonical form for an existing value class follows the same
-discipline through migration by rewrite: streams encoded under the
-earlier spelling stay readable forever (the kind-14 "big.Int" spelling,
-WF-18), while every re-encode emits the canonical form (kind 15) — a
-stream rewritten once through a decode and encode pair carries only the
-canonical form. Skipped coder bodies of user-registered coders stay
-unskippable. The skip semantics of the kind-14 big-integer spelling are
-fixed as unsupported-reject: a decoder that encounters a skipped
-kind-14 big-integer field rejects it loudly, exactly like any
-unskippable coder body — what the format cannot express on the skip
-path is a loud error, never a lossy default (§8.2). A subsequent minor
-version may open a skip form through the change process (WF-21); until
-then the loud reject is the norm.
+zero), matching the Avro/protobuf evolution discipline. The
+compatibility has one carve-out: an evolution pair whose kept position
+resolves a reference — a REF token or a view token — whose target
+stayed unmaterialized under narrowing rejects loudly, a format error
+of class `evolution_ref_unmaterialized` firing at the kept reference.
+The affected shapes are the aliased ones: a REF naming an aliased map
+record opened by a skipped field, a view over a shared backing a
+skipped field left unmaterialized, and a reference to a record opened
+inside the skipped region — narrowing that cuts a pointer cycle across
+fields. Non-aliased narrowing stays wire-compatible: skip and zero,
+the Avro/protobuf discipline above. Skipped coder
+bodies of user-registered coders stay unskippable: what the format cannot
+express on the skip path is a loud error, never a lossy default (§8.2).
 
 ## 5. Primitive Field Formats
 
-### 5.1 Integer Arguments — ARG (core) [WF-4]
+### 5.1 Integer Arguments — ARG (core) [WF-7]
 
 
 An integer argument is a selector byte, optionally followed by big-endian
@@ -312,143 +296,208 @@ payload bytes:
 
 | Selector | Form | Payload |
 |---|---|---|
-| 0x00..0x0B | inline | none — the value is the selector |
-| 0x0C | u8 | 1 byte, big-endian |
-| 0x0D | u16 | 2 bytes, big-endian |
-| 0x0E | u32 | 4 bytes, big-endian |
-| 0x0F | u64 | 8 bytes, big-endian |
-| 0x10 | ext | ARG n (n ≥ 9); n bytes, big-endian |
+| 0x0..0x7 | inline | none — the value is the selector |
+| 0x8 | u8 | 1 byte, big-endian |
+| 0x9 | u16 | 2 bytes, big-endian |
+| 0xA | u32 | 4 bytes, big-endian |
+| 0xB | u64 | 8 bytes, big-endian |
+| 0xC | u128 | 16 bytes, big-endian |
+| 0xD | ext | ARG n (n ≥ 9); n bytes, big-endian |
+| 0xE, 0xF | reserved | unknown argument form — a decoder rejects it |
 
 Rules:
 
-- ARG is the single mechanism for all nested integer fields of records
-  (lengths, counts, ids, offsets, widths).
+- Every argument position of every record — lengths, counts, tags, ids,
+  offsets, widths — encodes through this one ladder.
+- One ladder, both positions: the rung nibble is the low nibble of a
+  bare argument byte and of a fused value token's first byte (WF-23)
+  alike — a rung spells identically in both. Selectors 0xE/0xF are
+  reserved in both positions; a decoder rejects them as unknown
+  argument forms.
 - Big-endian: bytewise comparison of equal-width arguments agrees with
   numeric comparison.
-- Minimal length is the only legal form: an encoder MUST emit the
-  narrowest form that carries the value; a decoder MUST reject, with a
-  format error, any width form whose value fits a narrower form (leading
-  zeros of a wider width). Boundaries: 11 → inline, 12 → u8; 255 → u8,
-  256 → u16; 65535 → u16, 65536 → u32; 2^32−1 → u32, 2^32 → u64; and
-  2^64−1 → u64, 2^64 → ext.
-- The ext form serves the BIGINT value body (WF-18). Its selector is legal only
-  where the grammar routes it — the BIGINT value body (WF-18). In every
-  token position the low nibble of the first byte cannot exceed 0xF, so
-  the selector is unreachable there by construction; in every other bare
-  position it is an unknown argument form and a decoder rejects it at the
-  token. The ext form inherits minimality twice over: n ≥ 9 (nine bytes
-  are the least that carries a value ≥ 2^64) and a nonzero leading byte
-  (leading zeros of the payload are non-canonical).
+- Minimal rung is the only legal form: an encoder MUST emit the
+  narrowest rung that carries the value; a decoder MUST reject, with a
+  format error, any rung whose value fits a narrower rung (leading
+  zeros of a wider rung). Boundaries: 7 → inline, 8 → u8; 255 → u8,
+  256 → u16; 65535 → u16, 65536 → u32; 2^32−1 → u32, 2^32 → u64;
+  2^64−1 → u64, 2^64 → u128; 2^128−1 → u128, 2^128 → ext (17 bytes).
+- The u128 rung (0xC) is the 128-bit rung: one fixed 16-byte payload
+  carries every value from 2^64 to 2^128−1 (the width-16 INT/UINT
+  value bodies, WF-8, WF-9). The ext form (0xD) is the continuation
+  beyond: one selector serves every value from 2^128 up — payloads of
+  17 bytes and up, the arbitrary-precision rung of INT (WF-8). The
+  ext form keeps the length floor n ≥ 9; a payload of 9..16 bytes
+  carries a value the u128 rung spans, so under minimality the least
+  legal ext payload is 17 bytes. The ext form inherits minimality
+  twice over: the payload floor just stated and a nonzero leading
+  byte (leading zeros of the payload are non-canonical).
 
 ## 6. Value Encodings by Kind
 
-### 6.1 Signed Integers — INT (core+annotation) [WF-5]
+### 6.1 Signed Integers — INT (core+annotation) [WF-8]
 
 
-Class 0x2. The argument carries `zz(n)` where `zz` is the zigzag bijection
+Class 0x2. The value body is one argument (WF-7) carrying `zz(n)`, where
+`zz` is the zigzag bijection
 
 ```
 zz(n) = (n << 1) XOR (n >> 63)      (arithmetic shift)
 ```
 
-mapping 0→0, −1→1, 1→2, −2→3, MinInt64→0xFFFFFFFFFFFFFFFF, encoded per WF-4.
-Signed values up to the full int64 range use this class.
-
-The zigzag bijection itself is defined over the whole integer domain —
+mapping 0→0, −1→1, 1→2, −2→3, MinInt64→0xFFFFFFFFFFFFFFFF. The zigzag
+bijection itself is defined over the whole integer domain —
 n ≥ 0 → 2n, n < 0 → −2n−1 — of which the 64-bit formula above is the
-int64 section. Values outside the int64 range travel as the BIGINT
-descriptor kind (WF-18), whose value body carries the zigzag image as a
-bare argument (WF-4): inline and width forms below 2^64, the ext form at
-and above.
+int64 section; every INT value body, at every width, carries the image
+of this one bijection under WF-7 minimality.
 
-### 6.2 Unsigned Integers — UINT (core+annotation) [WF-6]
+INT is one ladder of descriptor widths — ARG width (1/2/4/8/16/arb)
+(WF-22):
+
+- Widths 1, 2, 4, 8 are the machine sections: width w carries the
+  w-byte signed domain, and the value body is the minimal argument of
+  the zigzag image.
+- Width 16 is the 128-bit section: it carries the i128 domain, whose
+  zigzag image is exactly 0..2^128−1 (zz(−2^127) = 2^128−1,
+  zz(2^127−1) = 2^128−2). The value body uses the width rungs of
+  WF-7 — from 2^64 up the u128 rung (0xC), one fixed 16-byte
+  payload; the boundary is minimality itself (WF-7).
+- Width arb is the arbitrary-precision rung: every value beyond the
+  width-16 domain. The value body is one minimal argument (WF-7) of
+  the zigzag image — the ext rung (0xD), payloads of 17 bytes and
+  up, riding the token's low nibble like every rung (WF-23).
+  There is no separate unbounded kind: arb is a rung of this ladder,
+  and nil and zero are distinct tokens (nil is the selector 0 of
+  WF-15; zero is an INT value body).
+
+### 6.2 Unsigned Integers — UINT (core+annotation) [WF-9]
 
 
-Class 0x3. The argument carries the value directly. UINT exists for values
-above MaxInt64, whose zigzag image needs 65 bits; such values have no INT
-form. UINT tops out at 2^64−1: everything wider — of either sign — is the
-BIGINT kind's domain (WF-5, WF-18).
+Class 0x3. The value body is one argument (WF-7) carrying the value
+directly — no zigzag. UINT is the machine ladder, ARG width (1/2/4/8/16)
+(WF-22): width w carries the w-byte unsigned domain;
+width 16 tops out at 2^128−1 (u128), its body using the width rungs
+of WF-7 — from 2^64 up the u128 rung (0xC) — direct values, not
+zigzag images. There is no unbounded unsigned rung: every value beyond
+2^128−1 — of either sign — is the INT arb rung's domain (WF-8).
 
-### 6.3 Booleans (core) [WF-7]
+(Annotation) The core defines no character kind: a character-typed
+value is a UINT under the binding's range rule — Rust `char` is a
+Unicode scalar value (≤ 0x10FFFF), Java `char` a UTF-16 code unit;
+the range rules are binding content (docs/bindings).
+
+### 6.3 Booleans (core) [WF-10]
 
 
 Class 0x1. Selector 0 encodes false, 1 encodes true. All other selectors of
 this class are reserved; a decoder MUST reject them.
 
-### 6.4 Floats (core+annotation) [WF-8]
+### 6.4 Floats (core+annotation) [WF-11]
 
 
-Class 0x4. Form 0 carries a float32 as 4 raw IEEE 754-2019 bits, form 1
-carries a float64 as 8 raw bits, both big-endian. Form 2 (width 16)
-carries a decimal128 as 16 raw IEEE 754-2019 bits; the width-16
-FLOAT descriptor and form 2 are a fixed pair, as width 4 ↔ form 0 and
-width 8 ↔ form 1. Width equals the type: no narrowing or widening exists
-(no float16). NaN payloads, ±0, subnormals, and infinities of the binary
-forms are preserved bit-for-bit; equality after a round trip is bitwise.
+Class 0x4. FLOAT carries the binary IEEE 754-2019 forms and only them:
+binary16, binary32, binary64, binary128 — widths 2, 4, 8, 16 bytes.
+Width equals the form, bijectively: the descriptor width argument
+selects the form (WF-22), no two forms share a width, and no form
+index exists; no narrowing or widening exists. The value body is the
+raw big-endian bits of the form's width. NaN payloads, ±0,
+subnormals, and infinities of every form are preserved bit-for-bit;
+equality after a round trip is bitwise.
 
-### 6.5 Complex (core+annotation) [WF-9]
+(Annotation) A projection without a native binary16 or binary128
+degrades with blame on receive; the per-binding degradation tables
+are binding content (docs/bindings).
 
-Class 0x5. Form 0 carries complex64, form 1 complex128: the raw bits of the
-real part followed by the raw bits of the imaginary part, each per WF-8.
-A complex is not synthesized as a struct.
+(Annotation) The canonical decimal interchange is not a FLOAT form.
+It is the structural composition (unscaled: INT-arb, scale: INT-32)
+under the reserved interchange name `std.decimal`; bindings map
+their decimal types onto it by default name-binding (BigDecimal,
+rust_decimal). The composition is lossless — no degradation row —
+and introduces no new primitive: the unscaled value rides the INT
+arb rung (WF-8), the scale the INT-32 machine section.
 
-### 6.6 Strings (core) [WF-10]
+### 6.5 Complex Numbers (core+annotation) [WF-12]
 
 
-Class 0x6. The argument is the byte length, followed by that many raw
-bytes. Any byte sequence is legal — there is no UTF-8 validity gate: a
+The core defines no complex kind and allocates no class row for one: a
+complex value decomposes as TUPLE(re, im) — a positional pair whose
+components are FLOAT forms (WF-11) — under the tuple grammar (WF-20).
+Bindings project their complex types onto that composition; a nominal
+wrapper where the language needs one is binding content
+(docs/bindings). A complex number's components are FLOAT values at
+descriptor-borne width (WF-11): the component width is carried by the
+descriptor, there is no implicit default, and a binding declares the
+width it writes — a complex64 and a complex128 of the same value are
+distinct descriptors, never distinct spellings of one default.
+
+### 6.6 Strings (core) [WF-13]
+
+
+Class 0x6. The argument is the byte length — one ARG of the WF-7
+ladder — followed by that many raw bytes. Any byte sequence is legal — there is no UTF-8 validity gate: a
 string is a byte sequence, not mandated text. Strings participate in the intern
-space (WF-13): the first occurrence is a STRING literal, subsequent occurrences
+space (WF-24): the first occurrence is a STRING literal, subsequent occurrences
 are REF tokens.
 
-### 6.7 Blobs (core) [WF-11]
+### 6.7 Blobs (core) [WF-14]
 
 
-Class 0x7. A blob is a byte-slice backing record: `ARG L` (backing length),
-`ARG E` (dense prefix length), then E raw bytes. Bytes at [E, L) are
-implicit zeros (trailing-zero elision, WF-14). E MUST NOT exceed L, and E
+Class 0x7. A blob is a byte-slice backing record: `ARG L` (backing
+length), `ARG E` (dense prefix length) — each an ARG per WF-7 — then E
+raw bytes. Bytes at [E, L) are
+implicit zeros (trailing-zero elision, WF-16). E MUST NOT exceed L, and E
 MUST be minimal — the byte at position E−1 MUST be nonzero: a zero dense
 tail byte is non-canonical and a decoder reject (checked on materialized
 and skipped blobs alike; the skipped payload is byte-visible). A blob is
 an intern-space record: slices of bytes are VIEW tokens over the blob id,
-with the same mechanics as any other slice (WF-15).
+with the same mechanics as any other slice (WF-17).
 
-### 6.8 Nil Tokens (core) [WF-12]
-
-Class 0x0 carries a nil-kind selector. The taxonomy of nil kinds — which
-nil sorts a projection distinguishes and which selector each occupies —
-is defined by the binding (GO-4 for the Go value model). Selector 4 is
-the zero-size target marker of section 7.1 — a non-nil pointer to a
-zero-size target, distinct from the nil pointer of selector 0;
-selectors 5..11 are reserved. nil is never confused with empty: an empty
-non-nil slice is a VIEW with len 0 (WF-15); an empty non-nil map is a
-MAP with count 0 (WF-16).
-
-### 6.9 Arrays and Trailing-Zero Elision (core+annotation) [WF-14]
+### 6.8 Nil Layer (core) [WF-15]
 
 
-Class 0x8. An array record is `ARG L; ARG E;` followed by E element tokens.
+Class 0x0 carries a nil selector: 0=absent; 4=zero-size marker; all
+other selectors reserved.
+Selector 4 is the zero-size target marker of section 7.1
+(WF-24) — a non-nil pointer to a zero-size target. Selector 0 is the
+one nil state, and no selector encodes a nil sort: the sort of a nil
+is derived, never read from the token — from the static type of the
+position or, for a typed nil in an interface or reference position,
+from the dynamic descriptor carried with the nil body (WF-24); the
+descriptor that is present resolves the chain, and no depth rule
+exists. Which nil sorts a projection distinguishes is binding
+content (docs/bindings).
+
+nil is never confused with empty: an empty non-nil slice is a VIEW
+with len 0 (WF-17); an empty non-nil map is a MAP with count 0
+(WF-18).
+
+### 6.9 Arrays and Trailing-Zero Elision (core+annotation) [WF-16]
+
+
+Class 0x8. An array record is `ARG L; ARG E;` — each an ARG per WF-7 —
+followed by E element tokens.
 L is the backing length; E is the dense prefix; elements at [E, L) are
 implicit zeros and E ≤ L. The elision predicate is bit-level: an element is
 elision fodder only when its bit pattern is zero — for floats,
 `Float64bits(x) == 0` — so −0.0 is never elided and materializes as a dense
-element (±0 survive a round trip bit-for-bit in every position, WF-1/WF-8);
+element (±0 survive a round trip bit-for-bit in every position, WF-2/WF-11);
 aggregates (structs, arrays) recurse over their components. E MUST be
 minimal: element [E−1] MUST NOT be bitwise zero — a materialized record
 whose last dense element is zero-valued (nil pointers, empty strings,
 +0.0) is non-canonical and a decoder reject. The decoder materializes L
 elements (zero-filled) and fills [0, E). An array is an intern-space
 record registered before its elements. The element type is not part of the
-array record — it comes from the type descriptor context (WF-18).
+array record — it comes from the type descriptor context (WF-22).
 
-### 6.10 Slice Views (core) [WF-15]
+### 6.10 Slice Views (core) [WF-17]
 
 
 Class 0x9. A slice value is always a view token over a registered backing
 record (array or blob). The geometry of a view is {off, len, extent}:
 the window [off, off+len) of visible elements and the addressable extent
 window [off, off+extent) with len ≤ extent — the reserved reach beyond the
-length that the token carries:
+length that the token carries. Every field of a view body — id, off,
+len, extent — encodes as an ARG per WF-7:
 
 | Form | Body | Implied fields |
 |---|---|---|
@@ -459,7 +508,7 @@ length that the token carries:
 Record invariant: `0 ≤ off ≤ off+len ≤ off+extent ≤ L`, where L is
 `max(offᵢ+extentᵢ)` over all views of the backing — the encoder truncates the
 backing to L, which is semantically transparent (no view can extend a
-window past extent). A nil slice is the nil token of WF-12, not a view. Form 0 is
+window past extent). A nil slice is the nil token of WF-15, not a view. Form 0 is
 a compaction of fields, not a branching of the model. A view is not itself
 an intern-space record: a repeated slice header re-emits the token.
 
@@ -472,7 +521,7 @@ reject: there is exactly one legal byte sequence per view.
 
 A view may reference its own backing record while that record's element
 list is still being decoded: the backing registers before its elements
-(record-then-fill, mirroring WF-13), so a slice reachable from its own
+(record-then-fill, mirroring WF-24), so a slice reachable from its own
 elements — a slice stored as its own element through an interface —
 resolves against the mid-fill backing.
 
@@ -482,169 +531,278 @@ before any type-introspection or allocation: a malformed view is a format error,
 backing length above the slice budget is a budget error, and a decoder MUST
 NEVER panic on crafted input.
 
-### 6.11 Maps (core) [WF-16]
+### 6.11 Maps (core) [WF-18]
 
 
-Class 0xA. The argument is the pair count, followed by that many
-key/value pairs. Keys are encoded in canonical order per WF-20 (KO contract);
+Class 0xA. The argument is the pair count — one ARG of the WF-7
+ladder — followed by that many key/value pairs. Keys are encoded in canonical order per WF-25 (KO contract);
 duplicate key slots — key encodings equal including the identity layer
 (KO-8) — are a decoder reject. On materialized maps the check is
 value-level: pointer-free keys reject equal skeleton bytes, pointer-carrying
 keys collapse at value-model insertion (pair count ≠ final slot count →
 reject). On the
-skip path (WF-23) the check is byte-level: byte-identical key token
+skip path (WF-6) the check is byte-level: byte-identical key token
 sequences for pointer-free key types are a reject; pointer-carrying keys
 carry no skip-path duplicate check (distinct pointers may share byte
 identical encodings, KO-2a, and values are not materialized there).
 
-A map literal is an intern-space record (WF-13): it receives its id at the
+A map literal is an intern-space record (WF-24): it receives its id at the
 moment its header is emitted — before its pairs (record-then-fill) — so a
 value position inside the pairs may close a cycle through a REF to the map
 itself. A repeated encounter of one map object, anywhere else in the
 stream, is a REF to that record; duplicating a map body in one stream is
 forbidden. An empty non-nil map is a record like any other (count 0); a
-nil map is the nil token of WF-12 and never interns.
+nil map is the nil token of WF-15 and never interns.
 
 **Reference hygiene.** A REF in a map-typed position must resolve to a map
 record; a REF to any other record sort is a format error, never a type
 confusion.
 
-### 6.12 Structs (core+annotation) [WF-17]
+### 6.12 Structs (core+annotation) [WF-19]
 
 
 Class 0xB. A struct value carries only the field values, strictly in
-descriptor order (WF-18) — no per-field tags. Blank fields (`_`) are not part
+canonical name-sorted order — the descriptor's field table order (WF-22) —
+no per-field tags. Blank fields (`_`) are not part
 of the descriptor and are not encoded. Unexported fields are a codec-policy
 matter, not a format matter.
 
-### 6.13 Type Descriptors (core) [WF-18]
+### 6.13 Tuples (core) [WF-20]
 
 
-Class 0xD. A DESC record defines a type; it is self-delimiting and
+Class 0x5. A tuple is a positional product: its arity and positional
+element types are part of the descriptor's structure (WF-22), and the
+value body carries exactly arity element values in positional order —
+no tags, no names. A body whose element count differs from the
+descriptor's arity is a format error. Positions are never reordered:
+canonical name-sorted order governs named tables (struct fields,
+variants), not positional products (WF-19, WF-21).
+
+### 6.14 Variants (core) [WF-21]
+
+
+Class 0xC. A variant value carries its alternative as a leading tag
+argument — one ARG per WF-7 — followed by the payload body: `ARG tag;
+payload`. The tag is
+an index into the variant table of the value's own in-stream
+descriptor (WF-22) — self-describing, with no cross-stream index
+stability — and is subject to ARG minimality (WF-7): a tag argument
+wider than its minimal form is non-canonical and a decoder reject.
+The payload is the value of the alternative's type-ref — an anonymous
+STRUCT or TUPLE where the alternative carries named or positional
+fields: the sum composes over the product kinds, never inside them.
+An alternative with no payload fields carries the empty TUPLE(0) —
+the unit of positional payload composition, a zero-element payload
+body.
+
+The variant table is canonically sorted by variant name, under the
+sort key of WF-22; a table emitted in any other order is
+non-canonical. A decoder matches alternatives by name: it resolves
+the tag through the stream descriptor's table, then binds the named
+alternative to its local type. A stream variant whose name is absent
+from the decoding descriptor's table is a format error for that
+value — evolution is by-name (WF-6), never by position.
+
+A sum with no alternatives cannot be instantiated: a VARIANT
+descriptor whose variant table is empty is ill-formed, and a decoder
+rejects it. Option and Result are library-level two-variant sums
+under this grammar; nesting (Some(None)) resolves naturally through
+the payload positions.
+
+### 6.15 Type Descriptors (core) [WF-22]
+
+
+Class 0xE. A DESC record defines a type; it is self-delimiting and
 participates in the intern space (registered before its children, so
 recursive types close through REF). Layout:
 
 ```
-DESC-record := 0xD‖ARG(kind) ‖ name ‖ body(kind)
+DESC-record := 0xE ‖ kind-selector ‖ [name] ‖ body(kind)
+kind-selector := `D0`..`D7` | `D8` u8
 ```
 
 - **kind** — 16 kinds; kinds 16..255 are reserved (unknown → format error).
-  Kinds 0..11 ride inline in the first byte (`D0`..`DB`); kinds 12..15 use
-  the u8 form (`DC 0C`, `DC 0D`, `DC 0E`, `DC 0F`). The kind argument is
-  subject to minimality (WF-4): kind 12 is only `DC 0C`.
+  Kinds 0..7 ride one inline selector byte (`D0`..`D7`); kinds 8..15 use
+  the u8 form (`D8 08` .. `D8 0F`). The kind selector is subject to
+  minimality (WF-7): kind 8 is only `D8 08`, and no kind that fits the
+  inline rung rides the u8 form.
 
-| kind | Selector | Type | Body after name |
+| kind | Selector | Type | Body |
 |---|---|---|---|
 | 0 | `D0` | STRUCT | ARG n; n × {field name, type-ref} |
-| 1 | `D1` | SLICE | 1 × type-ref (elem) |
-| 2 | `D2` | ARRAY ([N]T) | ARG N; 1 × type-ref (elem) |
-| 3 | `D3` | MAP | 2 × type-ref (key, elem — in this order) |
-| 4 | `D4` | NAMED (defined type) | 1 × type-ref (base) |
-| 5 | `D5` | POINTER | 1 × type-ref (target) |
-| 6 | `D6` | INTERFACE | empty (an opaque, interface-like wrapper; method sets are a binding concern and are not encodable) |
-| 7 | `D7` | BOOL | empty |
-| 8 | `D8` | INT | ARG width (1/2/4/8) |
-| 9 | `D9` | UINT | ARG width (1/2/4/8) |
-| 10 | `DA` | FLOAT | ARG width (4/8/16; 16 ↔ form 2) |
-| 11 | `DB` | COMPLEX | ARG width (4/8, per component) |
-| 12 | `DC 0C` | STRING | empty |
-| 13 | `DC 0D` | BLOB | empty (canonical []byte/[]uint8; a SLICE of UINT-8 is non-canonical, WF-20) |
-| 14 | `DC 0E` | CODER | ARG coderTag — the body is defined by the coder registered for the type name under per-Encoder/per-Decoder registration; the tag binds 1:1 to the name per stream (a tag rebound to another name or a name rebound to another tag is a format error); kind 14 is a start condition of 0.0 (WF-21) |
-| 15 | `DC 0F` | BIGINT | empty — the value body is one bare argument (WF-4): inline/width forms for a zigzag image (WF-5) below 2^64, the ext form (n ≥ 9, nonzero leading byte) at and above; a nil value is the nil selector 0 (WF-12), byte-identical to the inline zero it coincides with (WF-3). Kind 15 — and the BIGINT grammar — is a start condition of 0.0 (WF-21) |
+| 1 | `D1` | VARIANT | ARG n; n × {variant name, type-ref} |
+| 2 | `D2` | TUPLE | ARG n; n × type-ref (positional) |
+| 3 | `D3` | SLICE | 1 × type-ref (elem) |
+| 4 | `D4` | ARRAY ([N]T) | ARG N; 1 × type-ref (elem) |
+| 5 | `D5` | MAP | 2 × type-ref (key, elem — in this order) |
+| 6 | `D6` | NAMED (defined type) | 1 × type-ref (base) |
+| 7 | `D7` | POINTER | 1 × type-ref (target) |
+| 8 | `D8 08` | INTERFACE | empty |
+| 9 | `D8 09` | BOOL | empty |
+| 10 | `D8 0A` | INT | ARG width (1/2/4/8/16/arb) |
+| 11 | `D8 0B` | UINT | ARG width (1/2/4/8/16) |
+| 12 | `D8 0C` | FLOAT | ARG width (2/4/8/16) |
+| 13 | `D8 0D` | STRING | empty |
+| 14 | `D8 0E` | BLOB | empty |
+| 15 | `D8 0F` | CODER | ARG coderTag |
 
-- **name** — a string position of the unified intern space (WF-13): STRING
-  literal on first encounter of the string, REF on repeat. Named types
-  carry the full name; unnamed composites carry the canonical type string
-  ("[]T", "[N]T", "map[K]V", "*T"); []byte/[]uint8 is the name "[]byte"
-  with kind BLOB. The name is the descriptor-intern key (WF-13): names
-  are qualified by namespace — the short form (pkg.Type) for a type
-  inside the implementation platform's own namespace (its standard
-  library, and the program's main package), the import-path-qualified
-  form (import/path/pkg.Type) for a type outside it. The short form
-  alone collides across same-named namespaces and would collapse
-  distinct types into one descriptor REF. Evolution pairs (WF-23)
-  therefore hold only within one namespace path. Origin of the split:
-  the reference implementation's platform (Go) introduced the
-  standard-library/main-package short form; the rule above states the
-  same observable behavior as a namespace rule, with that platform
-  convention declared as its origin, not as the norm itself.
-- **built-in BIGINT name** — the wire name of kind 15 is the platform
-  integer name "big.Int": the bytes are frozen and renaming is
-  impossible — the name is reserved and cannot be bound. Origin: the
-  name is the reference platform's standard-library short form, as with
-  time in kind 14 — a declared origin fact, not a normative preference
-  for that platform. The kind-14 coder form under this name is
-  readable forever, never emitted again — the canonical encoding of a
-  big integer is kind 15 (WF-23). A stream mixing the two forms under
-  the one name cannot leave an encoder: the descriptor name claim is
-  structural, so a writer that has committed one form under the name
-  rejects the other as a rebinding.
-  A decoder holds no such claim — each position dispatches by its own
-  descriptor kind, so a crafted mixed stream decodes (each element through
-  its own form) exactly as the same bytes would decode apart.
+Every `ARG n` of a descriptor body — kind counts, array lengths, coder
+tags — is one argument of the WF-7 ladder.
+
+- **width argument** — the numeric kinds' width (INT 1/2/4/8/16/arb,
+  UINT 1/2/4/8/16, FLOAT 2/4/8/16) is one WF-7 argument: 0 = arb (the
+  INT rung only — no fixed width), widths 1, 2, 4 the machine widths
+  as inline selectors (`01`/`02`/`04`), widths 8 and 16 via the u8
+  rung (`08 08`/`08 10` — the inline rung caps at 7, WF-7).
+
+- **name** — a string position of the unified intern space (WF-24): STRING
+  literal on first encounter of the string, REF on repeat. The name
+  position exists exactly for the nominal kinds — VARIANT, NAMED, CODER;
+  structural kinds omit it (no empty-name sentinel exists). A nominal name
+  is qualified by the binding's namespace grammar (binding content,
+  docs/bindings) and is injective within one stream: one qualified name
+  maps to exactly one descriptor, and name matching — including evolution
+  pairing (WF-6) — holds within one qualified name. Instantiation is
+  unified under the grammar `Name[args]`: a type expression's wire name
+  is the constructor name followed by its bracketed argument list, the
+  arguments being canonical structural names.
+- **collision** — the name policy is hybrid. Derived qualified names stay
+  clean: no renaming and no disambiguation suffixes. If two distinct
+  nominal types derive one qualified name within one stream
+  (crate-version duplicates, same-named namespaces), the encoder rejects
+  at registry start with an unsupported-type error naming both origins —
+  the decode-side counterpart is a format error at the colliding
+  descriptor — and the resolution is explicit name binding (below). The
+  reserved standard namespace `std.` cannot collide with a
+  language-derived name: `std.decimal` names the decimal interchange
+  composition (WF-11) and is reserved — a binding may not rebind it.
 - **type-ref** — a type position: DESC literal (first encounter of the
   type) or REF to a descriptor id (repeat). NAMED, POINTER, and INTERFACE
   wrappers each occupy exactly one type-ref position.
-- **STRUCT body** — ARG n, then n pairs {field name (string position),
-  type-ref}; field order is the owning type's declaration order
-  (deterministic); blank
-  fields do not appear in the descriptor.
-- **id order** — the children of a DESC record (name strings, nested
+- **identity** — descriptors intern by canonical structure (hash-consing).
+  Two structural descriptors with the same kind, the same arguments, and
+  the same child type-refs, recursively, are one intern record; the second
+  occurrence in a stream is a REF. Nominal names do not participate in the
+  structural key: a nominal wrapper and its base intern independently —
+  one structural record per structure, one wrapper per name, the body
+  structure shared. A FLOAT descriptor's width argument is part of its
+  structure: structurally identical FLOATs of different forms are
+  distinct. The children of a DESC record (name strings, nested
   descriptors) receive ids in DFS encounter order, deterministic in the
   structure of the type.
+- **STRUCT body** — ARG n, then n pairs {field name (string position),
+  type-ref}. Field order is canonical name-sorted order — the
+  bytewise-lexicographic ascending order of the field-name byte
+  sequences; the descriptor's field table is emitted in that order and
+  value bodies follow it. The sort key is the raw byte sequence,
+  case-sensitive ("A" sorts before "a"); no locale, case, or collation
+  folding applies. Blank fields do not appear in the descriptor. A
+field table emitted in any other order is a decoder reject of class
+`field_table_unsorted`.
+- **VARIANT body** — ARG n, then n pairs {variant name (string position),
+  type-ref}; the table is emitted sorted by variant name under the STRUCT
+  sort key, and a table with zero alternatives is ill-formed (WF-21).
+- **TUPLE body** — ARG n, then n type-refs, positional. Arity is part of
+  the structure; positions are never sorted or reordered (WF-20).
+- **CODER** — the body is defined by the coder registered for the type
+  name under per-Encoder/per-Decoder registration; the tag binds 1:1 to
+  the name per stream — a tag rebound to another name, or a name rebound
+  to another tag, is a format error.
+- **INTERFACE** — an opaque position type: method sets are a binding
+  concern and are not encodable.
+- **BLOB** — the canonical byte-sequence kind: a byte slice encoded as a
+  SLICE of UINT-8 is non-canonical (WF-25).
 - The element type is never duplicated inside an ARRAY record: the
   descriptor context fixes it; self-describing positions carry a descriptor
   REF plus the value body.
 
+**Envelope spellings (normative).** A structural descriptor is
+nameless: its DESC record is `E0 ‖ kind selector ‖ body` — no name
+position exists for a structural kind (the name bullet above); a
+nominal descriptor alone carries the name-ARG between the kind
+selector and the body. Two canonical root envelopes, each the stream
+header `67 62 6F 6E 00 02` (WF-3) followed by bytes derived from the
+tables above. The anonymous INT-8 root descriptor:
 
+    E0 D8 0A 08 08
+
+— `E0` the DESC token (WF-23), `D8 0A` kind 10 INT, `08 08` the width
+argument: width 8 rides the u8 rung (the width bullet, WF-7). The
+nominal root `std.decimal` (WF-11) — NAMED over its structural
+composition, fields in canonical name-sorted order:
+
+    E0 D6 68 0B 73 74 64 2E 64 65 63 69 6D 61 6C
+    E0 D0 02 65 73 63 61 6C 65 E0 D8 0A 04
+    68 08 75 6E 73 63 61 6C 65 64 E0 D8 0A 00
+
+— `E0 D6` kind 6 NAMED, `68 0B …` the name STRING literal
+"std.decimal", then the base type-ref as a first-encounter DESC
+literal: `E0 D0 02 …` STRUCT of scale: INT-32 (`E0 D8 0A 04`) and
+unscaled: INT-arb (`E0 D8 0A 00`). Nested type-refs inside a DESC
+body are DESC literals (first encounter) or REF (repeat); the intern
+key is the canonical structure (identity above), and name-ARGs appear
+only at nominal positions.
 
 A decoder or encoder may bind a wire name to a local type through name
 binding: the binding overrides the derived name on both sides of the wire
-without changing the encoding of types that use their derived name. A
+without changing the encoding of types that use their derived name. One
+chain carries one name: a wire name bound into a pointer chain covers the
+whole chain — a second binding touching an existing binding's chain under
+a different name rejects with the `name_binding_conflict` class, and
+re-binding the same name at another level of the chain is a no-op. A
 name bound to two different types, or a binding that conflicts with a
-built-in name, is rejected with an unsupported-type error.
+reserved standard name, is rejected with an unsupported-type error.
 
-### 6.14 Opcode Table and Partitioning (core) [WF-19]
+### 6.16 Opcode Table and Partitioning (core) [WF-23]
 
 
 The first byte of every token is `class << 4 | arg-form`:
 
-| 0x0 | NIL | selector: 0=nil-ptr, 1=nil-slice, 2=nil-map, 3=nil-iface; 4..11 reserved |
+| 0x0 | NIL | selector: 0=absent; 4=zero-size marker; all others reserved |
 | 0x1 | BOOL | selector: 0=false, 1=true |
-| 0x2 | INT | ARG = zigzag(n) (WF-5); the whole integer domain beyond int64 is the BIGINT kind (WF-18) |
-| 0x3 | UINT | ARG (WF-6) |
-| 0x4 | FLOAT | form 0: f32 (4B); form 1: f64 (8B); form 2: decimal128 (16B) (WF-8) |
-| 0x5 | COMPLEX | form 0: c64; form 1: c128 (WF-9) |
-| 0x6 | STRING | ARG = byte length; raw bytes; interned (WF-10) |
-| 0x7 | BLOB | ARG L; ARG E; E bytes (WF-11) |
-| 0x8 | ARRAY | ARG L; ARG E; E elements (WF-14) |
-| 0x9 | VIEW | form 0: {id}; form 1: {id,off,len}; form 2: {id,off,len,extent} (WF-15) |
-| 0xA | MAP | ARG = pair count (WF-16) |
-| 0xB | STRUCT | field values in descriptor order (WF-17) |
-| 0xC | REF | ARG = intern id (WF-13) |
-| 0xD | DESC | type descriptor record (WF-18) |
-| 0xE | ESC-EXP | second byte = experimental subclass |
-| 0xF | ESC-PRIV | second byte = private subclass |
+| 0x2 | INT | ARG = zigzag(n); width from descriptor; arb rung via ext |
+| 0x3 | UINT | ARG; width from descriptor |
+| 0x4 | FLOAT | width per descriptor (2/4/8/16); raw IEEE bits |
+| 0x5 | TUPLE | element values in positional order |
+| 0x6 | STRING | ARG = byte length; raw bytes; interned |
+| 0x7 | BLOB | ARG L; ARG E; E bytes |
+| 0x8 | ARRAY | ARG L; ARG E; E elements |
+| 0x9 | VIEW | form 0/1/2 geometry |
+| 0xA | MAP | ARG = pair count |
+| 0xB | STRUCT | field values in canonical name-sorted order |
+| 0xC | VARIANT | ARG tag; payload body (tag = index into variant table) |
+| 0xD | REF | ARG = intern id |
+| 0xE | DESC | type descriptor record |
+| 0xF | ESC | second byte = subclass (experimental/private ranges) |
 
-Partitioning: classes 0x0..0xD are core; 0xE is the experimental escape
-range; 0xF is the private escape range for embedders. For classes 0xE/0xF
-the low nibble of the first byte is reserved: an emitter MUST write zero
-(bytes `E0`/`F0`); a decoder MUST reject a nonzero nibble — a second legal
-spelling of one token would break the one-legal-byte-sequence contract the
-moment a subclass graduates. The second byte selects the subclass; an
-unknown experimental or private subclass is a format error.
+Every `ARG` of this table is one argument of the WF-7 ladder.
+
+Partitioning: classes 0x0..0xE are core; 0xF is the escape class. For an
+ESC token the low nibble of the first byte is reserved: an emitter MUST
+write zero (byte `F0`); a decoder MUST reject a nonzero nibble — a second
+legal spelling of one token would break the one-legal-byte-sequence
+contract the moment a subclass graduates. The second byte selects the
+subclass and splits the escape space: 0x00..0x7F is the experimental
+range, 0x80..0xFF the private range for embedders. An unknown subclass
+is a format error.
+
+The same reservation governs class bytes that carry no argument
+selector: for the FLOAT, TUPLE, STRUCT, and DESC value tokens (`40`,
+`50`, `B0`, `E0`) the low nibble of the first byte is reserved — an
+emitter MUST write zero; a decoder MUST reject a nonzero nibble.
 
 An unknown opcode — any selector or form not defined for its class and
 position — in a known position is a format error. Silent skipping is
-forbidden : an unknown value never decodes as success.
+forbidden: an unknown value never decodes as success.
 
 ## 7. Graph Encodings: Identity, Sharing, and Cycles
 
-### 7.1 Topology: Intern Space and References (core) [WF-13]
+### 7.1 Topology: Intern Space and References (core) [WF-24]
 
 
 All first-encounter records of reference nature share one per-stream id
-space; ids are ARG-encoded and assigned in depth-first preorder:
+space; ids are ARG-encoded per WF-7 and assigned in depth-first preorder from
+0 — the first record in the preorder receives id 0:
 
 - backing arrays (including blobs),
 - map objects,
@@ -654,7 +812,7 @@ space; ids are ARG-encoded and assigned in depth-first preorder:
 
 Every record — backing records included — lives for the whole stream: the
 intern space is a property of the value sequence, not of one value. A
-a value's repeated encounter of memory already closed by an earlier
+value's repeated encounter of memory already closed by an earlier
 backing record is a view over that record, never a silently new record.
 
 Rules:
@@ -663,7 +821,7 @@ Rules:
   its own encoding begins — before any child is encoded. Cyclic structures
   therefore encode: a reference to an enclosing record closes through a REF
   token.
-- **REF token** (class 0xC): the argument is the id of a registered
+- **REF token** (class 0xD): the argument is the id of a registered
   record. A repeated encounter MUST be a REF or a view over an
   already-registered record; duplicating a record body in one stream is
   forbidden, with one carve-out for backing records (the join rule below).
@@ -679,9 +837,16 @@ Rules:
 - **Reference positions (type on the cell).** A value position holding
   a pointer — to an interface, to a concrete value, or to a map object
   — encodes the pointer's own state through one leading token of the
-  body. A leading NIL token: selector 0 is the nil pointer; selector 3
-  is a non-nil pointer whose target holds a nil interface; any other
-  selector is a format error (WF-12). A leading REF is a type-erased
+  body. A leading NIL token: selector 0 is the nil state — absent —
+  and the sort of the nil is derived, never read from the token: from
+  the static type of the position or, for a typed nil in an interface
+  or reference position, from the dynamic descriptor carried with the
+  nil body (WF-15). A typed nil in an interface position is the
+  dynamic type's descriptor followed by a nil body: the descriptor
+  that is present resolves the chain at its top level, and no depth
+  rule exists. Selector 4 is the zero-size marker of the zero-size
+  target rule below; any other selector is a format error (WF-15).
+  A leading REF is a type-erased
   handle: the argument names one intern record, and the record itself
   carries the type — its sort, and for object records the descriptor
   under which the cell was opened. Descriptor and object records share
@@ -737,7 +902,9 @@ Rules:
   the layout-normal form, and a position of a named grain
   materializes through the legal value conversion of the projection.
   The scope of normalization is the intern key and the record's grain
-  alone; the type descriptors of positions (WF-18) keep their names.
+  alone; the type descriptors of positions (WF-22) keep their names —
+  the nominal overlay over the structural identity of WF-22, not a
+  name-keyed intern.
 - **Grain tags, elision, self-tags.** Where a pointer position is the
   opening — the first encounter — of a record whose canonical grain
   differs from the position's static target type, the opening carries
@@ -787,7 +954,7 @@ Rules:
   inside the record's region [origin, origin+L·es); and (b) every element
   of its len-window at record index ≥ E (the record's implicit zero tail
   [E, L)) is bitwise zero in the live memory. The extent of a view is the
-  width of its addressable window — the geometry field of WF-15, with
+  width of its addressable window — the geometry field of WF-17, with
   len ≤ extent. A repeat that fails either condition is unrepresentable
   over the closed record and MUST open a fresh record — the sole
   body-duplication carve-out. Candidate records are considered in
@@ -799,9 +966,9 @@ Rules:
   are within one value.
 - **Zero-size target rule.** A target type of zero size tracks no
   record. A non-nil pointer to a zero-size target encodes as the
-  zero-size marker — the NIL-class token of selector 4 (WF-12) — with
+  zero-size marker — the NIL-class token of selector 4 (WF-15) — with
   no REF and no address, and decodes into a fresh zero-size allocation
-  whose nil-ness is preserved: the marker and the nil pointer of
+  whose nil-ness is preserved: the marker and the nil token of
   selector 0 stay byte-distinct. Reference identity of zero-size
   targets is neither preserved nor observable. Where a zero-size grain
   and a non-zero-size tracked grain share an interior address, the
@@ -811,75 +978,112 @@ Rules:
 
 ## 8. Canonical and Portable Profiles
 
-### 8.1 Canonical Encoding (core) [WF-20]
+### 8.1 Canonical Encoding (core) [WF-25]
 
 
 Canonical mode is always on, and it is a decode-side contract: the
 non-canonical byte classes defined normatively above — non-minimal view
-forms (WF-15); non-minimal dense prefixes E — checked on materialization
-for arrays and slices (WF-14) and on both paths for blobs (WF-11); a SLICE
-of UINT-8 in a byte-slice position (WF-18); a nonzero ESC reserved nibble
-(WF-19); and non-minimal arguments (WF-4) — are decoder rejects, not encoder
+forms (WF-17); non-minimal dense prefixes E — checked on materialization
+for arrays and slices (WF-16) and on both paths for blobs (WF-14); a SLICE
+of UINT-8 in a byte-slice position (WF-22) — the canonical-grain position
+classes are checked at descriptor parse, the descriptor spelling alone
+decides them, no value materialization required; a nonzero ESC reserved nibble
+(WF-23); and non-minimal arguments (WF-7) — are decoder rejects, not encoder
 conventions.
-A second implementation of this specification produces identical bytes or
-fails — the claim extends over the whole integer domain (the BIGINT kind
-and its ext argument, WF-18/WF-4) and over the decimal128 form (WF-8) —
-with two scoped qualifications. (i) *Extent agreement:* the claim
-holds between implementations that bind the same value to the view extent
-(WF-13); two projections may differ on join boundaries only through their
-extent binding, and that difference is a documented projection annotation,
-not a core divergence. (ii) *±0 map keys:* the stored sign of a zero
-float key is a projection concern (axiom E4 below; GO-2) and is excluded
-from the cross-implementation claim. The byte sequence of a stream is a
-deterministic function of the value sequence, including the memory-encounter
-history across values: the backing join rule of WF-13 is normative — fully
+
+**Stability tiers.** Byte determinism of the canonical encoding is a
+three-rung ladder, monotone by construction: a higher tier only fixes
+what lower tiers leave unspecified, never alters fixed bytes. The
+grounding dichotomy: value determinants are fixed by the core; identity
+determinants are instantiated by binding declaration.
+
+- **Stability tier T1 (cross-language).** Over the stable class — the
+  decidable predicate defined below — the encoding is a function of the
+  value alone: any process, any construction order, any conforming
+  implementation produces identical bytes.
+- **Stability tier T2 (cross-machine, one language).** Where a binding
+  declares an instantiation of the identity determinants — the E5
+  tie-break and the E4 zero-sign — and their determinism conditions,
+  encodings agree across machines of that language within the declared
+  conditions. Tier-2 governs only decoder-unverifiable determinants:
+  no canonicality rule forks between tiers.
+- **Stability tier T3 (intra-process).** Re-encoding a value within one
+  process reproduces the bytes bit-for-bit: the E5 discriminator is
+  deterministic within one encoding.
+
+The decode-side contract is tier-invariant: the canonicality rejects
+of this section hold in every tier. A binding's tier-2 declaration
+states, per determinant: the determinant form, its determinism scope,
+and its verification hook. The tier-1 claim covers the whole integer
+domain (the arb rung of the INT ladder and its ext argument, WF-8/WF-7)
+and every FLOAT form (WF-11), with two scoped qualifications. (i)
+*Extent agreement:* the tier-1 claim holds between implementations
+that bind the same value to the view extent (WF-24); two projections
+may differ on join boundaries only through their extent binding, and
+that difference is a documented projection annotation, not a core
+divergence. (ii) *±0 map keys:* the stored sign of a zero float key is
+a projection concern (axiom E4 below — the zero-sign determinant,
+tier-2 instantiable) and is excluded from the tier-1 claim.
+
+The byte sequence of a stream is a deterministic function of the
+value sequence, including the memory-encounter
+history across values: the backing join rule of WF-24 is normative — fully
 determined by the closed geometry and the live bytes — so a second
 implementation joins (or declines to join) identically. No timestamps,
 addresses, or randomness enter the encoded bytes; intern tables are
-deterministic in DFS order (WF-13); map order is fixed by the three-phase KO
-scheme (KO-1, KO-2b, KO-2a below). The one place implementation-defined
-identity participates is the E5 tie-break, which fixes
-the ORDER of otherwise indistinguishable map pairs, never byte content.
+deterministic in DFS order (WF-24); map order is fixed by the three-phase KO
+scheme (KO-1, KO-2b, KO-2a below). The one place identity
+determinants participate is the E5 tie-break, which fixes the ORDER of
+otherwise indistinguishable map pairs, never byte content.
 
 **Key equality axioms (core).** The core owns the equality and order of
 map keys through five axioms; the KO clauses below are their operational
 contract.
 
-- **E1 Key domain.** A map key is any encodable value whose kind admits
-  equality in the value model. NaN and dynamically uncomparable kinds
-  (slice/map/func at any depth) are outside the key domain: the encoder
-  rejects them with a typed error naming the path to the offender. The
-  exclusion is a property of the value model itself, not of any host
-  language: a NaN slot is unreachable and undeletable through every
-  observable operation (lookup, range, and deletion cannot name it), and
-  two slots carrying identical raw bits could not be told apart, breaking
-  injectivity (KO-2).
+- **E1 Key domain.** A map key is any encodable value. Sequence values
+  and VARIANT values are inside the key domain: they compare by value
+  equality, and byte-equal skeletons of such keys are true duplicates —
+  a decoder reject (KO-8). Map values in key position and float keys
+  are carried by the core and admitted per binding: where the binding's
+  language lacks the equality, the binding rejects (KO-4). NaN is the
+  only core-level ban: the encoder rejects a NaN key with a typed error
+  naming the path to the offender — a NaN slot is unreachable and
+  undeletable through every observable operation (lookup, range, and
+  deletion cannot name it), and two slots carrying identical raw bits
+  could not be told apart, breaking injectivity (KO-2). A cycle
+  reachable from a key position is a core-level encoder reject with a
+  classified termination error: value equality over a cyclic key does
+  not terminate (KO-5).
 - **E2 Skeleton.** The skeleton of a key is its literal, non-interning
-  encoding: repeated pointers are collapsed to the nil marker — equality
-  of reference-kind components is decided by the identity layer (KO-2),
-  never by dereferencing the target. Because skeletons never
-  dereference, key encoding terminates on cyclic structures.
+  encoding: repeated pointers are collapsed to the nil token (WF-15)
+  — equality of reference-kind components is decided by the identity
+  layer (KO-2), never by dereferencing the target. Sequences and
+  VARIANTs in key position recurse by value into their components, and
+  the E1 cycle guard is what keeps their key encoding and comparison
+  finite.
 - **E3 Total order.** Map keys are totally ordered by bytewise
   lexicographic comparison of their skeletons.
 - **E4 ±0 collapse.** At most one zero float key of a given float key
   type may occupy a map: +0 and −0 are one key of the order (E3 sees
   distinct raw bits, the domain sees one slot). Which sign is stored in
-  the slot is not fixed by the core — it is the projection's
-  key-overwrite semantics (GO-2) — and the encoder never normalizes ±0 in
-  any position: the stored representation is observable and round-trips
-  bit-for-bit (KO-3).
+  the slot is not fixed by the core — it is the zero-sign determinant,
+  the projection's key-overwrite semantics instantiated by binding
+  declaration — and the encoder never normalizes ±0 in any position: the
+  stored representation is observable and round-trips bit-for-bit (KO-3).
 - **E5 Tie-break.** Pairs equal in (skeleton, value bytes) — legal when
   their keys occupy distinct identity slots (E2) — are ordered by a
-  stable implementation-defined discriminator that never enters the
-  encoded bytes. Within one encoding the discriminator is deterministic;
-  between processes it is unspecified.
+  stable discriminator over the tie-break identity determinant — a form
+  instantiated by binding declaration — that never enters the encoded
+  bytes. Within one encoding the discriminator is deterministic;
+  between processes it is fixed only where the binding declares the
+  determinant's tier-2 instantiation.
 
 **KO-1 Base order.** The total order of map keys is bytewise lexicographic
 over the key **skeleton** (axiom E2): the literal, non-interning canonical
 encoding of the key value — strings as STRING literals (never REF tokens),
-repeated pointer components collapsed to the nil marker, interfaces as
-(type tag,
-value), headers and tags included. The skeleton is a sort key, not a wire
+repeated pointer components collapsed to the nil token (WF-15), interfaces as
+(dynamic-type
+tag, value), headers and tags included. The skeleton is a sort key, not a wire
 artifact: on the wire, keys use the regular canonical encoding (interned
 strings, REFs). Requires definite lengths and minimal-length arguments
 (both normative above).
@@ -910,9 +1114,11 @@ identity-sequence discriminator: for each key, a sequence derived from
 the identities of its reference-kind components, compared
 lexicographically. The discriminator never enters the encoded bytes — it
 fixes only the order of the tied pairs; within one encoding it is
-deterministic, across processes or replays it is unspecified (E5). The
-concrete instantiation — the identity form and the component tie rules —
-is defined by the binding (Go: see GO-2).
+deterministic, and its cross-process guarantee is fixed only by the
+binding's declared determinism scope (E5). The concrete instantiation —
+the identity form and the component tie rules — is the binding's
+tier-2 declaration: determinant form, determinism scope, verification
+hook.
 
 **KO-3 Float keys.** Encoded as raw bits, big-endian, type width. −0.0 is
 not normalized (axiom E4: ±0 cannot coexist in one map; the stored representation is
@@ -923,32 +1129,37 @@ outside the key domain — unreachable and undeletable through observable
 operations; identical raw bits across slots would
 break injectivity, KO-2). NaN values outside key positions are legal.
 
-**KO-4 Interface keys.** A key encoding of an interface is (concrete type
+**KO-4 Interface keys.** A key encoding of an interface is (dynamic-type
 tag, canonical value) — the type tag is part of the key bytes: int64(1) and
-int32(1) are different keys. nil-interface and typed-nil are distinct
-tokens. A dynamically uncomparable kind (slice/map/func at any depth,
-axiom E1) in a key position is an encoder reject.
+int32(1) are different keys. A nil interface key and a typed-nil key are
+byte-distinct: the nil token of WF-15 against a dynamic descriptor plus
+nil body. Map values in key position are admitted per binding (axiom E1);
+a cycle reachable from the key is the encoder reject of KO-5.
 
-**KO-5 Cyclic keys.** Supported by the object-id/backref mechanics:
-skeletons never dereference pointers (axiom E2), so key encoding and
-comparison terminate on cyclic structures; the uncomparable kinds are
-excluded up front by KO-4. Self-references close inside the key
-encoding.
+**KO-5 Cyclic keys.** A cycle reachable from a key position — through any
+reference a key's value graph reaches, at any depth — is a core-level
+encoder reject with a classified termination error (axiom E1): sequences
+and VARIANTs compare by value, and value equality over a cycle does not
+terminate. The guard is loud and names the path; it never hangs and never
+silently truncates the comparison.
 
 **KO-6 Canonical forms.** Integers: minimal length — one line for the
 whole integer domain, the minimal bare or ext argument of the zigzag image
-(WF-4/WF-5/WF-18), so key order agrees with the argument-byte order over
-the integers. Floats: raw bits BE at type width. Complex: the pair of raw-bit components, NaN components
-forbidden in key position (same rationale as KO-3). Strings:
-length-prefixed raw bytes, ordered bytewise. Structs: fields strictly in
-descriptor order; blank fields neither encode nor compare. Arrays: by
-ascending index. Interfaces: (type tag, value). Pointers: KO-2 identity
-layer. Nil tokens per reference kind. Canonicalization never reorders
-structure except maps.
+(WF-7/WF-8/WF-22), the arb rung included, so key order agrees with the
+argument-byte order over the integers. Floats: raw bits BE at type width.
+Strings: length-prefixed raw bytes, ordered bytewise. Structs: fields
+strictly in the descriptor's canonical name-sorted order (WF-19, WF-22);
+blank fields neither encode nor compare. Sequences: arrays by ascending
+index, tuples positionally — elementwise, in position order. Variants:
+tag argument, then the payload skeleton (WF-21). Interfaces: (dynamic-type
+tag, value). Pointers: KO-2 identity layer. Nil: the one nil token
+(WF-15); a typed nil carries its dynamic descriptor plus nil body.
+Canonicalization never reorders structure except maps.
 
 **KO-7 Non-serializable categories.** chan is rejected in every position,
-including keys (live resources are not data). Dynamically uncomparable
-kinds in key positions are rejected per KO-4.
+including keys (live resources are not data). Key-position admission is
+E1's domain: sequence and VARIANT keys inside; NaN and key-reachable
+cycles core rejects; map-in-key per binding (KO-3, KO-4, KO-5).
 
 **KO-8 Duplicate keys.** Duplicate key slots — key encodings equal
 including the identity layer — are a decoder reject. On materialized maps:
@@ -957,16 +1168,16 @@ collapse at value-model insertion (pair count ≠ final slot count →
 reject). Byte-equal
 skeletons in distinct slots are legal and are ordered by KO-2b/KO-2a —
 that is the tie-break's raison d'être; on the skip path, byte-identical
-key token sequences for pointer-free key types are a reject (WF-16). A
+key token sequences for pointer-free key types are a reject (WF-18). A
 duplicate is always an attack or corruption.
 
-**Stable class.** The stable class is a decidable predicate over the
-value domain. A value is stable when no map anywhere in its graph
+**Stable class.** The stable class is the tier-1 class: a decidable
+predicate over the value domain. A value is stable when no map anywhere in its graph
 applies the E5 tie-break — no two of its map pairs are byte-equal in
 skeleton and value bytes across distinct identity slots — and no map in
 its graph holds a zero float key (axiom E4: the stored sign of a zero
-float key is a projection concern, excluded from the
-cross-implementation claim). Pointer-carrying keys whose pair value
+float key is a projection concern, excluded from the tier-1
+claim). Pointer-carrying keys whose pair value
 bytes differ are inside the stable class: KO-2b orders such pairs
 deterministically by value bytes before any identity discriminator
 applies, so the E5 tie-break never fires for them. The class is not
@@ -976,16 +1187,18 @@ stabilize tied pairs. An application MAY restore membership by moving
 identity into value (a declared discriminator inside the key), without
 any format change.
 
-**Guard contract (stable mode).** Encoders offer a stable mode. WHEN
-invoked on a value outside the stable class, the encoder MUST reject
-the value with a deterministic classified error naming the path to the
-offender; the classification is a function of the offending rule alone
-(E5 tie-break applied, or a zero float key present), never of process
-state. The completeness of the guard is conditional on H-1: the
-declaration that exactly the two rules above exhaust the sources of
-process-dependence. The Go binding projects the class (a static
-conservative predicate over types, a dynamic exact predicate at encode
-time); the projection lives in the binding document, not here.
+**Guard contract (stable mode).** Encoders offer a stable mode — one
+mode, the tier-1 guarantee; tier-2 and tier-3 are declarations, not
+encoder modes. WHEN invoked on a value outside the stable class, the
+encoder MUST reject the value with a deterministic classified error
+naming the path to the offender; the classification is a function of
+the offending rule alone (E5 tie-break applied, or a zero float key
+present), never of process state. The completeness of the guard is
+conditional on H-1: the declaration that exactly the declared identity
+determinants exhaust the sources of process-dependence. A binding
+projects the class (a static conservative predicate over types, a
+dynamic exact predicate at encode time); the projection lives in the
+binding document, not here.
 
 ### 8.2 Portable Profile (Frame)
 
@@ -1046,7 +1259,7 @@ business.
 
 **Indirection contract.**
 
-Sharing and cycles are first-class core invariants (WF-13: the intern
+Sharing and cycles are first-class core invariants (WF-24: the intern
 space and references), not an optional capability of a profile. The
 indirection constructions of a native projection — references and
 wrapper types such as Rust's `&`/`Box`/`Rc`/`Arc` — map onto the intern
@@ -1074,30 +1287,34 @@ name for binding documents; the owner of the binding documents is the
 specification side.
 A second implementation binds its own projection against the core plus
 this frame; the extent-agreement and ±0 stored-sign qualifications of
-WF-20 apply as written.
+WF-25 apply as written.
 
 ## 9. Limits and Budgeted Decode
 
-### 9.1 Decoder Hygiene (core) [WF-22]
+### 9.1 Decoder Hygiene (core) [WF-26]
 
 
-- Validate every {off, len, extent} triple against the backing L, every width,
-  and every length before any type-introspection or allocation (WF-15).
+- Validate every {off, len, extent} triple against the backing L, every
+  width, and every length — all ARG-carried values of WF-7 — before any
+  type-introspection or allocation (WF-17).
 - Budget the backing length L — not the view length — against the slice
   budget; exceeding it is a budget error (a crafted L of 2^50 must fail by
   budget, not by allocation).
 - Charge derived backing allocations at their production point:
   a slice/blob backing is booked as L·elemsize — the implicit zero tail
-  [E,L) included, the Binary adapter BLOB body included, the BIGINT value
-  body booked by its advertised ext length — against the same MaxBytes
+  [E,L) included, the Binary adapter BLOB body included, the arb/ext
+  integer value body booked by its advertised ext length — against the
+  same MaxBytes
   counter as input bytes, before the allocation happens; a crafted
   L·es or ext length exceeding the budget fails by budget, never by
   allocation.
-- The MaxBytes counter's scope is one value: it opens at each record's
-  start and resets when the next record begins, so cumulative
-  consumption beyond MaxBytes across the records of a stream is
-  conformant — there is no per-stream cumulative cap. Within one value,
-  input bytes and charged allocations share the counter.
+- The MaxBytes counter's scope is one value — the grammar's own
+  top-level unit (§4.3: a decoder consumes exactly the bytes of one
+  value per step): it opens at the value's start and resets when the
+  next value begins, so cumulative consumption beyond MaxBytes across
+  the values of a stream is conformant — there is no per-stream
+  cumulative cap. Within one value, input bytes and charged
+  allocations share the counter.
 - Truncated input is a format error; no partial values are returned. No
   partial state is exposed either: decode is atomic with respect to the
   target — on any decode error, including a budget error raised from a
@@ -1114,8 +1331,8 @@ WF-20 apply as written.
   materialization frames on decode — so the asymmetry is correct; it is
   pinned here so a second implementation's budgets do not diverge silently.
 - A REF in a typed position must resolve to a record of the matching
-  sort: map positions take map records (WF-16), pointer positions take
-  object records (WF-13); a REF to any other sort is a format error,
+  sort: map positions take map records (WF-18), pointer positions take
+  object records (WF-24); a REF to any other sort is a format error,
   never a type confusion.
 - A degenerate NAMED cycle — a wrapper chain closing onto itself
   through a crafted REF, at the root or in an element-descriptor
@@ -1158,20 +1375,20 @@ the format contract itself rather than in implementation goodwill.
   complexity-attack dimensions (depth, nodes, bytes, map pairs, slice
   length); their default values are normative (clause 9.1).
 - **Non-termination.** The grammar is prefix-free with definite
-  lengths only (WF-3): truncation is a format error, never a hang;
-  cyclic structures close through references (WF-13), so decoding
+  lengths only (WF-4): truncation is a format error, never a hang;
+  cyclic structures close through references (WF-24), so decoding
   terminates on them; a degenerate descriptor cycle is a format error
-  (WF-22).
+  (WF-26).
 - **Silent data fabrication.** Unknown opcodes, unknown subclasses,
-  and reserved selectors are format errors (WF-18, WF-19); no value is
-  ever silently skipped, defaulted, or coerced into existence — the
-  format never turns crafted bytes into a plausible wrong value
-  (WF-23).
+  and reserved selectors are format errors (WF-15, WF-22, WF-23); no
+  value is ever silently skipped, defaulted, or coerced into existence —
+  the format never turns crafted bytes into a plausible wrong value
+  (WF-6).
 - **Error-channel hygiene.** Decoded values, keys, and stream names
   never enter the one-line error text (GO-5): the diagnostic channel
   is not a data-exfiltration or log-injection surface.
 - **Stream identity.** The magic constant makes GBON bytes sniffable
-  and collision-checked against known offset-0 signatures (WF-2).
+  and collision-checked against known offset-0 signatures (WF-3).
   Content security — confidentiality, authenticity — is out of scope:
   the format carries no cryptography and composes with a wrapping
   secure channel.
@@ -1183,20 +1400,20 @@ appendix collects the baseline illustrations. Every byte below follows
 directly from the normative tables of this document.
 
 **Stream header.** Every stream of this specification begins with the
-same six bytes — the magic, major `00`, minor `01` (WF-2):
+same six bytes — the magic, major `00`, minor `02` (WF-3):
 
-    67 62 6F 6E 00 01
+    67 62 6F 6E 00 02
 
-**Inline arguments.** An ARG whose value is 0..11 is the selector
-itself (WF-4): the value `5` in a bare argument position is the single
-byte `05`; `12` needs the u8 form `0C 0C`; `255` is `0C FF`; `256`
-crosses the u16 boundary and is `0D 01 00`.
+**Inline arguments.** An ARG whose value is 0..7 is the selector
+itself (WF-7): the value `5` in a bare argument position is the single
+byte `05`; `8` needs the u8 form `08 08`; `255` is `08 FF`; `256`
+crosses the u16 boundary and is `09 01 00`.
 
-**Zigzag.** INT carries `zz(n)` — 0→0, −1→1, 1→2, −2→3 (WF-5): the
+**Zigzag.** INT carries `zz(n)` — 0→0, −1→1, 1→2, −2→3 (WF-8): the
 argument of `−1` is the value `1`, the argument of `−2` the value `3`.
 
 **Booleans.** The first byte of every token is `class << 4 |
-arg-form` (WF-19): with class `0x1` and selectors 0/1, false is the
+arg-form` (WF-23): with class `0x1` and selectors 0/1, false is the
 byte `10` and true the byte `11`.
 
 **Conformance vectors (non-normative).** A machine-readable conformance
@@ -1208,15 +1425,7 @@ implementations and their test readers; it is not normative prose, and
 the tables and rules of this document remain the sole source of byte
 prescriptions.
 
-## Appendix B. Declared Origins
-
-Declared-origin facts — where a wire artifact adopts a name of the
-reference platform's standard library — are recorded at their
-definition sites (WF-18) as projections, not as history of this
-format. The consolidated external anchor map — sources, roles, and
-verification statuses — is `docs/references.md`.
-
-## Appendix C. References
+## Appendix B. References
 
 The consolidated external anchor map — every cited source with its
 support and verification status — is `docs/references.md`. This

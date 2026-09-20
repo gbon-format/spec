@@ -2,34 +2,62 @@
   "category": "census",
   "section": "8.1",
   "declaration": {
-    "grammar": "canongrain.Graphs",
-    "census_size": 64,
-    "families": [
+    "form": "DD-2 predicate classes",
+    "method": "double derivation (spec S2 DD-2): each predicate asserted twice by independent derivations; example bytes, where concrete fixtures are shown, are doubly derived as DD-1 vectors",
+    "classes": [
       {
-        "name": "census-pair",
-        "map_seeds": 8,
+        "name": "isomorphic-pair",
+        "predicate": "two independently constructed isomorphic values — distinct construction orders, distinct map-iteration seeds, distinct allocation histories — encode to byte-equal streams over the stable class",
         "modes": [
           "marshal",
           "marshal-stable"
+        ],
+        "covers": [
+          "T1 differential (WF-25 :940-943)",
+          "pair sort precedes emission (KO-2 :1031-1035)",
+          "backing join is normative and value-determined (WF-24 :968-977)"
+        ],
+        "examples": [
+          "V-113"
         ],
         "asserts": "byte equality across independently generated isomorphic pairs and map-iteration seeds"
       },
       {
         "name": "aliased-backing",
-        "map_seeds": 16,
+        "predicate": "values sharing multi-window backings — array-pointer views, append chains, blob-carried slices — encode independently of allocation and join order; the join truncates to L = max(off_i+extent_i) identically in every conforming implementation",
         "modes": [
           "marshal",
           "marshal-stable"
+        ],
+        "covers": [
+          "view geometry invariant (WF-17 :487-499)",
+          "record-then-fill registration (WF-24 :762-765)",
+          "re-encode identity (WF-24 :823-827)"
+        ],
+        "examples": [
+          "V-115"
         ],
         "asserts": "byte equality across seeds over map-carried multi-window backings with array-pointer views and append chains"
       },
       {
         "name": "multi-grain-address",
+        "predicate": "interior descent and array-grain addresses encode independently of allocation order: each address opens once at its canonical grain — the coarsest among the tracked grains — and every position of that address resolves through it",
         "modes": [
           "marshal",
           "marshal-stable"
         ],
-        "asserts": "interior descent and array-grain addresses encode independently of allocation order"
+        "covers": [
+          "canonical grain rule (WF-24 :831-839)",
+          "layout-normal grain (WF-24 :840-849)",
+          "grain tags, elision, self-tags (WF-24 :850-851)",
+          "derivable descent and reference-grain resolution (WF-24 :811-830)"
+        ],
+        "examples": [
+          "V-129",
+          "V-130"
+        ],
+        "asserts": "interior descent and array-grain addresses encode independently of allocation order",
+        "notes": "absorbs the four f11-withheld grain rules (derivA2 SENSOR-4 item 3: layout-normal grain, grain tags on canonical-grain vs static-target openings, derivable descent, interface-grain discrimination) as declared predicates; their fixed-byte carriers, if wanted, belong to the topology family form"
       }
     ]
   },

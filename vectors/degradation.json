@@ -1,0 +1,243 @@
+{
+  "category": "degradation",
+  "section": "6.4",
+  "vectors": [
+    {
+      "id": "V-118",
+      "desc": "binary16 receive: rust native, go/java degrade with blame",
+      "tags": [
+        "WF-11",
+        "D1"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80c02403c00",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "float",
+            "form": "binary16",
+            "bits": "3c00"
+          }
+        ]
+      },
+      "deriv": [
+        "FLOAT binary16 1.0: DESC E0 D8 0C 02, raw bits 3C00 big-endian at type width, preserved bit-for-bit (WF-11 :385-392)",
+        "a projection without a native binary16 degrades with blame on receive (WF-11 :394-396): go has no half float — loud classified reject unsupported_kind naming the form and value path (go.md 2.1 :259); java float/double only — unsupported_kind (java.md 2.1 :216); rust f16 is native, no degradation row (rust.md 2.1 :205-209)",
+        "the bytes themselves are legal — one verdict ok, per-binding outcomes in the consumers map; a skipped field of this form consumes grammatically (WF-6 :259-262)"
+      ],
+      "consumers": {
+        "rust": {
+          "verdict": "ok"
+        },
+        "go": {
+          "verdict": "format",
+          "class": "b16_receive"
+        },
+        "java": {
+          "verdict": "format",
+          "class": "b16_receive"
+        }
+      }
+    },
+    {
+      "id": "V-119",
+      "desc": "binary128 receive: width-16 form, rust native, go/java degrade",
+      "tags": [
+        "WF-11",
+        "D2"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80c0810403fff0000000000000000000000000000",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "float",
+            "form": "binary128",
+            "bits": "3fff0000000000000000000000000000"
+          }
+        ]
+      },
+      "deriv": [
+        "FLOAT binary128 1.0: width argument 16 rides the u8 form 08 10 (inline rung caps at 7, WF-22 :627-631), value 40 + 16 raw bytes (WF-11 :385-392)",
+        "go: no quad float — unsupported_kind on receive (go.md 2.1 :259); java: unsupported_kind, no native type exists (java.md 2.1 :216); rust f128 native (rust.md 2.1 :205-209) (WF-11)",
+        "never silent widening: degrades are declared with blame on receive — the reject names the form and the value path (WF-11 :394-396)"
+      ],
+      "consumers": {
+        "rust": {
+          "verdict": "ok"
+        },
+        "go": {
+          "verdict": "format",
+          "class": "b128_receive"
+        },
+        "java": {
+          "verdict": "format",
+          "class": "b128_receive"
+        }
+      }
+    },
+    {
+      "id": "V-120",
+      "desc": "UINT-16 65535 into a java Short target: range-check reject, never wraparound",
+      "tags": [
+        "WF-9",
+        "D3"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80b0239ffff",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "uint",
+            "width": 2,
+            "value": "65535"
+          }
+        ]
+      },
+      "deriv": [
+        "UINT-16 max: DESC E0 D8 0B 02, value body direct (no zigzag) 65535 on the u16 rung — 39 FF FF (WF-9 :363-366; WF-7 :288-289)",
+        "java Short is signed 16-bit: 65535 sits outside — the declared policy is a decode-side range check with blame (overflow_value), values outside reject loudly, never silent wraparound (java.md 2.1 :217); char is the only unsigned integral type and its range rule is 0..FFFF as a UTF-16 code unit (java.md 2.1 :201-207) (WF-9)",
+        "rust u16 and go uint16 are native — the same bytes materialize; the degradation is a property of the consuming projection, encoded per-vector in the consumers map"
+      ],
+      "consumers": {
+        "rust": {
+          "verdict": "ok"
+        },
+        "go": {
+          "verdict": "ok"
+        },
+        "java": {
+          "verdict": "format",
+          "class": "unsigned_range"
+        }
+      }
+    },
+    {
+      "id": "V-121",
+      "desc": "UINT-16 32767 into a java Short target: in-range materialization, the range-check pass",
+      "tags": [
+        "WF-9",
+        "D3"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80b02397fff",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "uint",
+            "width": 2,
+            "value": "32767"
+          }
+        ]
+      },
+      "deriv": [
+        "32767 = Short.MAX_VALUE: the boundary companion of V-120 — one count below, the value sits inside the target's representable range and materializes (u16 rung 39 7F FF, WF-7 :288-289)",
+        "the java row is a range-check gate, not a width gate: values within the target's representable range materialize in the next wider signed type, values outside reject loudly (java.md 2.1 :217) — this leg documents the pass side of that check in the consumers map (WF-9)",
+        "all-ok consumers: the vector carries the family's boundary; the reject side rides V-120 (D3 unsigned_range)"
+      ],
+      "consumers": {
+        "rust": {
+          "verdict": "ok"
+        },
+        "go": {
+          "verdict": "ok"
+        },
+        "java": {
+          "verdict": "ok"
+        }
+      }
+    },
+    {
+      "id": "V-122",
+      "desc": "non-UTF-8 STRING: rust String/java String targets reject, go string carries",
+      "tags": [
+        "WF-13",
+        "D4"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80d6261ff",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "string",
+            "value": "61ff"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0D — STRING kind 13, empty body (WF-22 :624)",
+        "STRING length 2, raw bytes 61 FF: any byte sequence is legal — there is no UTF-8 validity gate in the core; a string is a byte sequence, not mandated text (WF-13 :419-421)",
+        "rust String/str are always valid UTF-8 (std:str): decode-side an invalid sequence into a String or str target rejects — invalid_string_encoding (rust.md 2.1 :202); java String is UTF-16-sourced, invalid UTF-8 has no String image — invalid_string_encoding (java.md 2.1 :218); the gate is loud in both directions, never a lossy default (WF-13)",
+        "go strings are byte sequences — the value carries natively (go.md 5.2 strings row :611); the escape hatch for rust/java is Vec<u8>/byte[] as BLOB (V-123) (WF-14)"
+      ],
+      "consumers": {
+        "rust": {
+          "verdict": "format",
+          "class": "string_utf8_gate"
+        },
+        "go": {
+          "verdict": "ok"
+        },
+        "java": {
+          "verdict": "format",
+          "class": "string_utf8_gate"
+        }
+      }
+    },
+    {
+      "id": "V-123",
+      "desc": "BLOB escape hatch: byte[]/Vec<u8> carry the bytes no String target admits",
+      "tags": [
+        "WF-14",
+        "D4"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002e0d80e720261ff",
+      "ir": {
+        "root": "n1",
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "blob",
+            "L": 2,
+            "dense": "61ff"
+          }
+        ]
+      },
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0E — BLOB kind 14, empty body (WF-22 :625)",
+        "BLOB L 2, E 2, dense bytes 61 FF — the same two bytes V-122 carries as a STRING, here in the canonical byte-sequence kind (WF-14 :428-434)",
+        "Vec<u8> carries all bytes (rust.md 2.1 :202), byte[] carries all bytes (java.md 2.1 :218), []byte is the native BLOB (go.md 1.4 :171-172) — the STRING/BLOB class split is the wire image of the projections' text-versus-binary distinction (WF-13; WF-14)",
+        "all-ok consumers: the documented carry side of the string-gate family; the reject side rides V-122 (D4 string_utf8_gate)",
+        "c4 DD r2: stray E byte removed — ARG L=2 fused on the token (72), ARG E=02 (02), two dense bytes 61 FF (WF-14 :428-429); the round-1 spelling carried a duplicate 02"
+      ],
+      "consumers": {
+        "rust": {
+          "verdict": "ok"
+        },
+        "go": {
+          "verdict": "ok"
+        },
+        "java": {
+          "verdict": "ok"
+        }
+      }
+    }
+  ]
+}

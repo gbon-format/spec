@@ -4,180 +4,117 @@
   "vectors": [
     {
       "id": "V-9",
-      "desc": "string length 5 rides the inline argument form",
+      "desc": "ARG 7: inline rung ceiling (fused UINT carrier)",
       "tags": [
-        "WF-4"
+        "WF-7",
+        "WF-9",
+        "WF-23"
       ],
       "verdict": "ok",
-      "bytes": "67626f6e0001dc0c66737472696e67656161616161",
       "direction": "both",
+      "bytes": "67626f6e0002e0d80b0137",
       "ir": {
         "root": "n1",
         "nodes": [
           {
             "node": "n1",
-            "kind": "string",
-            "value": "aaaaa"
+            "kind": "uint",
+            "value": "7"
           }
         ]
       },
       "deriv": [
-        "header (WF-2)",
-        "root DESC STRING kind 12 = DC 0C, name \"string\" len 6 = 66 737472696e67 (WF-18)",
-        "STRING len 5 <= 11: inline selector 0x60|5 = 65; payload 5 bytes (WF-4, WF-10)"
+        "envelope (c4 DD r5): root DESC E0 D8 0B 01 (UINT-8) — width ARG on the one ladder, minimal width carrying the value (WF-22 :627-631; WF-7 :286-311)",
+        "header (WF-3 :194-198)",
+        "ARG carrier = UINT value body: the value direct, no zigzag (WF-9 :363-364), the rung riding the fused token's low nibble exactly as in a bare argument byte — one ladder, both positions (WF-7 :299-303, WF-23 :701-702)",
+        "7 <= 7: inline rung, token 0x30|7 = 37, no payload (WF-7 :286, boundary :309)"
       ]
     },
     {
       "id": "V-10",
-      "desc": "string length 11: the inline ceiling",
+      "desc": "ARG 8: first u8-rung value",
       "tags": [
-        "WF-4"
+        "WF-7",
+        "WF-9"
       ],
       "verdict": "ok",
-      "bytes": "67626f6e0001dc0c66737472696e676b6161616161616161616161",
       "direction": "both",
+      "bytes": "67626f6e0002e0d80b013808",
       "ir": {
         "root": "n1",
         "nodes": [
           {
             "node": "n1",
-            "kind": "string",
-            "value": "aaaaaaaaaaa"
+            "kind": "uint",
+            "value": "8"
           }
         ]
       },
       "deriv": [
-        "STRING len 11: last inline value, 0x60|11 = 6b (WF-4 boundary 11 -> inline)"
+        "envelope (c4 DD r5): root DESC E0 D8 0B 01 (UINT-8) — width ARG on the one ladder, minimal width carrying the value (WF-22 :627-631; WF-7 :286-311)",
+        "boundary 7 -> inline, 8 -> u8 (WF-7 :309): token 0x38, big-endian payload 08 (WF-7 :287, :304-305)"
       ]
     },
     {
       "id": "V-11",
-      "desc": "string length 12: first u8-form length",
+      "desc": "ARG 255: u8 rung ceiling",
       "tags": [
-        "WF-4"
+        "WF-7",
+        "WF-9"
       ],
       "verdict": "ok",
-      "bytes": "67626f6e0001dc0c66737472696e676c0c616161616161616161616161",
       "direction": "both",
+      "bytes": "67626f6e0002e0d80b0138ff",
       "ir": {
         "root": "n1",
         "nodes": [
           {
             "node": "n1",
-            "kind": "string",
-            "value": "aaaaaaaaaaaa"
+            "kind": "uint",
+            "value": "255"
           }
         ]
       },
       "deriv": [
-        "STRING len 12 > 11: u8 form 0x6C with payload 0C, then 12 bytes (WF-4 boundary 12 -> u8)"
+        "envelope (c4 DD r5): root DESC E0 D8 0B 01 (UINT-8) — width ARG on the one ladder, minimal width carrying the value (WF-22 :627-631; WF-7 :286-311)",
+        "255 -> u8 (WF-7 :310): token 38, payload FF — the last value of the rung"
       ]
     },
     {
       "id": "V-12",
-      "desc": "string length 255: the u8 ceiling",
+      "desc": "ARG 256: first u16-rung value",
       "tags": [
-        "WF-4"
+        "WF-7",
+        "WF-9"
       ],
       "verdict": "ok",
-      "bytes": "67626f6e0001dc0c66737472696e676cff616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161",
       "direction": "both",
+      "bytes": "67626f6e0002e0d80b02390100",
       "ir": {
         "root": "n1",
         "nodes": [
           {
             "node": "n1",
-            "kind": "string",
-            "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            "kind": "uint",
+            "value": "256"
           }
         ]
       },
       "deriv": [
-        "STRING len 255 = u8 max: 6C FF (WF-4 boundary 255 -> u8)"
+        "envelope (c4 DD r5): root DESC E0 D8 0B 02 (UINT-16) — width ARG on the one ladder, minimal width carrying the value (WF-22 :627-631; WF-7 :286-311)",
+        "boundary 255 -> u8, 256 -> u16 (WF-7 :310): token 39, big-endian payload 01 00"
       ]
     },
     {
       "id": "V-13",
-      "desc": "string length 256 crosses into u16",
+      "desc": "ARG 2^64-1: u64 rung ceiling",
       "tags": [
-        "WF-4"
+        "WF-7",
+        "WF-9"
       ],
       "verdict": "ok",
-      "bytes": "67626f6e0001dc0c66737472696e676d010061616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161616161",
       "direction": "both",
-      "ir": {
-        "root": "n1",
-        "nodes": [
-          {
-            "node": "n1",
-            "kind": "string",
-            "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-          }
-        ]
-      },
-      "deriv": [
-        "STRING len 256: u16 form 0x6D, big-endian 01 00 (WF-4 boundary 256 -> u16)"
-      ]
-    },
-    {
-      "id": "V-14",
-      "desc": "UINT 65536 rides the u32 form",
-      "tags": [
-        "WF-4",
-        "WF-6"
-      ],
-      "verdict": "ok",
-      "bytes": "67626f6e0001d96675696e743634083e00010000",
-      "direction": "both",
-      "ir": {
-        "root": "n1",
-        "nodes": [
-          {
-            "node": "n1",
-            "kind": "uint",
-            "value": "65536"
-          }
-        ]
-      },
-      "deriv": [
-        "root DESC UINT kind 9 = D9, name \"uint64\" len 6, width 08 (WF-18)",
-        "UINT 65536 = 0x00010000: u32 form 0x3E, big-endian 00 01 00 00 (WF-4 boundary 65536 -> u32; WF-6)"
-      ]
-    },
-    {
-      "id": "V-15",
-      "desc": "UINT 2^32 rides the u64 form",
-      "tags": [
-        "WF-4",
-        "WF-6"
-      ],
-      "verdict": "ok",
-      "bytes": "67626f6e0001d96675696e743634083f0000000100000000",
-      "direction": "both",
-      "ir": {
-        "root": "n1",
-        "nodes": [
-          {
-            "node": "n1",
-            "kind": "uint",
-            "value": "4294967296"
-          }
-        ]
-      },
-      "deriv": [
-        "UINT 2^32: u64 form 0x3F, 01 00 00 00 00 00 00 00 (WF-4 boundary 2^32 -> u64)",
-        "UINT 2^32 = 0x0000000100000000: u64 form 0x3F, big-endian 00 00 00 01 00 00 00 00 (WF-4 boundary 2^32 -> u64)"
-      ]
-    },
-    {
-      "id": "V-16",
-      "desc": "UINT 2^64-1: the u64 ceiling",
-      "tags": [
-        "WF-6"
-      ],
-      "verdict": "ok",
-      "bytes": "67626f6e0001d96675696e743634083fffffffffffffffff",
-      "direction": "both",
+      "bytes": "67626f6e0002e0d80b08083bffffffffffffffff",
       "ir": {
         "root": "n1",
         "nodes": [
@@ -189,66 +126,49 @@
         ]
       },
       "deriv": [
-        "UINT 2^64-1 = u64 max payload FF x8 (WF-6: UINT tops out at 2^64-1)"
+        "envelope (c4 DD r5): root DESC E0 D8 0B 08 08 (UINT-64) — width ARG on the one ladder, minimal width carrying the value (WF-22 :627-631; WF-7 :286-311)",
+        "2^64-1 -> u64 (WF-7 :311): token 3B, 8-byte big-endian payload FF x8"
       ]
     },
     {
-      "id": "V-17",
-      "desc": "BIGINT 2^64 rides the ext argument",
+      "id": "V-14",
+      "desc": "ARG 2^64: first u128-rung value (rebalanced ladder)",
       "tags": [
-        "WF-4",
-        "WF-18",
-        "WF-5"
+        "WF-7",
+        "WF-9"
       ],
       "verdict": "ok",
-      "bytes": "67626f6e0001dc0f676269672e496e741009020000000000000000",
       "direction": "both",
+      "bytes": "67626f6e0002e0d80b08103c00000000000000010000000000000000",
       "ir": {
         "root": "n1",
         "nodes": [
           {
             "node": "n1",
-            "kind": "bigint",
+            "kind": "uint",
             "value": "18446744073709551616"
           }
         ]
       },
       "deriv": [
-        "root DESC BIGINT kind 15 = DC 0F, reserved name \"big.Int\" len 7 (WF-18)",
-        "value body bare argument: zz(2^64)=2^65=0x02_0000000000000000 needs 9 bytes -> ext 10, n=9 inline, payload 02 + 8 zero bytes (WF-4 ext n>=9, WF-5)"
+        "envelope (c4 DD r5): root DESC E0 D8 0B 08 10 (UINT-128) — width ARG on the one ladder, minimal width carrying the value (WF-22 :627-631; WF-7 :286-311)",
+        "boundary 2^64-1 -> u64, 2^64 -> u128 (WF-7 :311): token 3C, one fixed 16-byte payload (WF-7 :312-313)",
+        "leading zeros within the fixed-width rung payload are legal — minimality governs rung choice, not intra-rung spelling (WF-7 :306-308: leading zeros of a WIDER RUNG)"
       ]
     },
     {
-      "id": "V-18",
-      "desc": "BIGINT zero: inline zero of the value body",
+      "id": "V-15",
+      "desc": "non-minimal rung rejected: 255 in the u16 form",
       "tags": [
-        "WF-18"
-      ],
-      "verdict": "ok",
-      "bytes": "67626f6e0001dc0f676269672e496e7400",
-      "direction": "both",
-      "ir": {
-        "root": "n1",
-        "nodes": [
-          {
-            "node": "n1",
-            "kind": "bigint",
-            "value": "0"
-          }
-        ]
-      },
-      "deriv": [
-        "BIGINT value body zz(0)=0, inline selector 00 (WF-18 kind 15: one bare argument)"
-      ]
-    },
-    {
-      "id": "V-19",
-      "desc": "ext argument selector in a bare non-BIGINT position",
-      "tags": [
-        "WF-4"
+        "WF-7"
       ],
       "verdict": "format",
-      "bytes": "67626f6e0001dc0d665b5d62797465701009010000000000000000"
+      "bytes": "67626f6e0002e0d80b013900ff",
+      "class": "arg_nonminimal_width",
+      "deriv": [
+        "envelope (c4 DD r5): root DESC E0 D8 0B 01 — would-be canonical prefix (UINT-1, the width-1 domain carrying 255) before the non-minimal token (WF-22 :627-631)",
+        "u16 rung 39 carries payload 00 FF: 255 fits the u8 rung — the minimal rung is the only legal form, a decoder rejects any rung whose value fits a narrower rung (WF-7 :306-309; class arg_nonminimal_width)"
+      ]
     }
   ]
 }
