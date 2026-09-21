@@ -16,7 +16,7 @@ reference keys of the repository (WF-24); the displayed section numbers
 are reader cosmetics.
 
 ```
-Format version: 0.1 (major 0, minor 1)
+Format version: 0.2 (major 0, minor 2)
 Document scope: token-level grammar, topology, canonical rules
 ```
 
@@ -62,6 +62,7 @@ heading: `(core)` or `(core+annotation)`.
   - [6.14 Opcode Table and Partitioning (core) [WF-19]](#614-opcode-table-and-partitioning-core-wf-19)
 - [7. Graph Encodings: Identity, Sharing, and Cycles](#7-graph-encodings-identity-sharing-and-cycles)
   - [7.1 Topology: Intern Space and References (core) [WF-13]](#71-topology-intern-space-and-references-core-wf-13)
+  - [7.2 Positional Path References (0.2, WF-13 Amendment)](#72-positional-path-references-02-wf-13-amendment)
 - [8. Canonical and Portable Profiles](#8-canonical-and-portable-profiles)
   - [8.1 Canonical Encoding (core) [WF-20]](#81-canonical-encoding-core-wf-20)
   - [8.2 Portable Profile (Frame)](#82-portable-profile-frame)
@@ -71,6 +72,7 @@ heading: `(core)` or `(core+annotation)`.
 - [Appendix A. Examples](#appendix-a-examples)
 - [Appendix B. Declared Origins](#appendix-b-declared-origins)
 - [Appendix C. References](#appendix-c-references)
+- [Appendix D. Projection Fidelity (0.2 Annex, non-core)](#appendix-d-projection-fidelity-02-annex-non-core)
 
 ## 1. Scope and Layering
 
@@ -194,7 +196,7 @@ magic(4B) ‖ major(u8) ‖ minor(u8)
 - `major` is the major version; this document specifies major `00`,
   the draft era of the format (WF-21). Finalization — the first
   stability commitment of the format — is major 1 (WF-21).
-- `minor` is the minor version; this document specifies minor `01`.
+- `minor` is the minor version; this document specifies minor `02`.
   Minors are additive within a major: an encoder emits the minor it
   implements.
 A decoder MUST reject with a format error any stream whose magic does not
@@ -231,6 +233,14 @@ the draft era a decoder rejects only unknown majors. The ladder carries
 no content history for token grammar: every descriptor kind, token
 class, and argument form specified in this document is a start
 condition of 0.0, not an addition attributed to a minor.
+
+A conforming encoder of minor `02` emits header minor `02` on every
+stream it produces — path-free streams included: the minor names the
+grammar the encoder implements, never the content of one stream (the
+WF-2 letter above). A decoder of a lower minor parses the minor-`02`
+header normally (additive-only) and fails loudly at the first
+path-carrying token it cannot resolve (7.2) — the loud failure is
+token-level, never header-level.
 
 - Major version changes may break decoding; a decoder rejects unknown
   majors outright (WF-2).
@@ -339,6 +349,18 @@ Rules:
   token. The ext form inherits minimality twice over: n ≥ 9 (nine bytes
   are the least that carries a value ≥ 2^64) and a nonzero leading byte
   (leading zeros of the payload are non-canonical).
+
+**The path form's arguments (0.2).** Every integer the REF path argument
+of 7.2 carries — a field-name id, an element index — is an ARG value of
+this section: one selector plus payload, narrowest form, minimality
+enforced on encode and reject on decode. The path's framing bytes — the
+marker `05`, the terminator `06`, the step-kind bytes `00`/`01` — are
+selector-space bytes of reserved and bare ranges, not integer arguments:
+positions inside a path are fixed by the grammar, the bare-argument
+discipline of WF-3. A stream of a lower minor that carries the path form
+is illegal at the token: the marker is an unknown selector in every
+known position of a lower-minor decoder (WF-19) — the same loud
+discipline the ext selector carries here.
 
 ## 6. Value Encodings by Kind
 
@@ -621,7 +643,7 @@ The first byte of every token is `class << 4 | arg-form`:
 | 0x9 | VIEW | form 0: {id}; form 1: {id,off,len}; form 2: {id,off,len,extent} (WF-15) |
 | 0xA | MAP | ARG = pair count (WF-16) |
 | 0xB | STRUCT | field values in descriptor order (WF-17) |
-| 0xC | REF | ARG = intern id (WF-13) |
+| 0xC | REF | ARG = intern id; optional path argument after the id (WF-13, 7.2) |
 | 0xD | DESC | type descriptor record (WF-18) |
 | 0xE | ESC-EXP | second byte = experimental subclass |
 | 0xF | ESC-PRIV | second byte = private subclass |
@@ -780,7 +802,12 @@ Rules:
   Rings entered through a root, an interface slot, a field, an element,
   or a map value; double-pointer chains; shared cells; and containers
   reached through their leading storage all resolve by it, at any depth
-  and from any entry point.
+  and from any entry point. A REF carrying the path argument of 7.2
+  resolves through this one rule by one added clause: locate the named
+  record and descend the path through its inline storage — the terminal
+  position's storage is the cell, and the consuming position fixes the
+  materialized handle's grain. Bare REFs, views, and path-free streams
+  resolve exactly as the clauses above state.
 - **Backing join rule (guard).** A slice/blob position over memory already
   closed by a backing record joins that record — and emits a view over it —
   exactly when: (a) its whole extent-window [ptr, ptr+extent·es) lies
@@ -808,6 +835,106 @@ Rules:
   tracked grain keeps the record — opened at its own grain, never at a
   struct grain of the unrelated container — and the zero-size alias
   carries the marker.
+
+### 7.2 Positional Path References (0.2, WF-13 Amendment)
+
+A positional path reference carries interior-slot identity: an optional
+path argument on a REF token names a position inside a record's inline
+storage — a field of the record, a field of an element, an element of a
+backing — and the reference resolves to that slot's storage, not to the
+record's head. Wire form:
+
+```
+path-ref    := 0xC ‖ ARG id ‖ 05 ‖ step+ ‖ 06
+field-step  := 00 ‖ ARG name-id
+element-step:= 01 ‖ ARG index
+```
+
+- **Framing bytes.** The marker `05` opens and the terminator `06`
+  closes the path; both are NIL-class reserved selectors (WF-12) —
+  undefined in every position of every prior minor, so a decoder of a
+  lower minor fails loudly at the marker: an unknown opcode in a known
+  position (WF-19). Step-kind bytes `00` (field) and `01` (element)
+  ride the bare-argument space at grammar-fixed positions (WF-3). The
+  integers of a path are minimal ARG values (WF-4).
+- **One or more steps.** A path is `step+`. A zero-step path — the
+  marker directly before the terminator — is a format error of class
+  `bad_path`.
+- **Name-addressed field steps.** A field step names its field by
+  reference to the field name's intern record — the same intern record
+  the descriptor's STRUCT field-name position uses (WF-18); a field
+  step therefore never carries a string literal. Ordinal field steps
+  do not exist. An element step is a minimal ARG index (WF-4). Mixed
+  paths are legal.
+- **Mandatory elision.** Where a position's grain is derivable from the
+  named record's canonical grain by the derivable descent of 7.1 —
+  leading fields with zero-size fields skipped, elements at index zero
+  — a conforming encoder emits the derivable form, the bare REF with
+  zero path bytes; a stream carrying a path whose steps exactly spell
+  such a descent is non-canonical, and a decoder rejects it
+  `bad_path`. Non-canonical forms are errors, not synonyms.
+- **Rooting.** A path roots only at the record owning the inline
+  storage: element steps root at the BACKING record of the slice or
+  array; field steps root at the record whose descriptor declares the
+  field. A step shall not traverse a view position, an interface
+  position, or a map cell. Element indices are always in the backing's
+  declared index space — never a view's local index. A violating path
+  rejects `bad_path`.
+- **Zero-size terminals.** Zero-size fields are members of the
+  descriptor field table — the descent skip of 7.1 is a descent rule,
+  not a table rule — and stay nameable as interior steps. A path whose
+  terminal slot has zero-size declared type rejects `bad_path`:
+  identity of zero-size targets is neither preserved nor observable
+  (the zero-size rule of 7.1), and the terminal marker semantics stay
+  with that rule.
+- **Grain compatibility.** The path-ref position's static target grain
+  shall be exactly pointer-to-the-terminal-slot's-declared-type. A
+  position of any other grain rejects `bad_path` — out-of-family grains
+  never resolve position-dependently; uniform resolution is preserved.
+- **Tagless.** A path-ref carries no grain tag: tags attach to openings
+  (grain tags, 7.1), and a path-ref opens nothing. The materialized
+  handle's grain is derivable from the named record's descriptor plus
+  the path — stream-derivable, asker-independent.
+- **Double reference.** A standalone cell record whose body is a
+  path-ref — the shape of a pointer to an interior pointer — is legal
+  grammar: registration before children applies, one cell per reserved
+  id, and the body resolves by the one resolution rule. The
+  mandatory-elision rule of this section governs pointer positions; a
+  cell body is a record body, not a pointer position, and the
+  derivable-spelling rejection does not apply to it: a bare REF names
+  the record, never the interior slot, so a cell whose denotation is
+  an interior position carries the explicit path form regardless of
+  derivability.
+- **Record forcing.** An untracked container whose interior address is
+  tracked by the stream shall have its record opened, at its canonical
+  grain as fixed by the pre-scan: the forcing rule is part of the
+  canonical grain rule of 7.1, and encoded bytes remain a pure function
+  of the value-graph. The forced record opens immediately before its
+  first dependent carrier in the canonical field order; that position
+  is canonical across implementations.
+- **Layout-normal positions.** A path at a layout-normal
+  (named-conversion) position maps through the layout-normal descriptor
+  (layout-normal grain, 7.1): identical structure carries the same
+  field names, so the name steps are stable. A path terminal at a named
+  grain materializes a handle into the RECORD's storage — never into a
+  fresh converted copy.
+- **Coder-backed exclusion.** A step naming a field whose type is
+  coder-backed — kind 14, no descriptor field table (WF-18) — or
+  otherwise layout-delegating rejects `bad_path`.
+- **Interface grain.** A path-ref at interface grain is legal iff the
+  terminal slot's declared type is interface-compatible. No value body
+  follows a path-ref, so its byte shape stays disjoint from
+  interface-grain discrimination (7.1): an opening always carries the
+  discriminating descriptor, a path-ref never does — the degenerate
+  payload shape keeps its carve-out, disjoint by construction.
+- **Slot-storage decode invariant.** Handles bind SLOT STORAGE at
+  record open; values fill later; each slot's value is read exactly
+  once, at its own token — the first-encounter snapshot discipline of
+  7.1 extended from records to inline slots.
+- **Error class.** `bad_path` is a class beside the existing
+  error-class taxonomy; no existing class is reclassified. The budget
+  discipline of paths is section 9.1 (WF-22); the version discipline is
+  section 4.4 (WF-21).
 
 ## 8. Canonical and Portable Profiles
 
@@ -1098,6 +1225,16 @@ WF-20 apply as written.
   consumption beyond MaxBytes across the records of a stream is
   conformant — there is no per-stream cumulative cap. Within one value,
   input bytes and charged allocations share the counter.
+- Every path step byte charges MaxBytes within the per-value scope: the
+  validation walk of a path (7.2) is linear in the path bytes and
+  touches no memory outside descriptor tables. The length of a path is
+  bounded by the remaining byte budget — a path of 10^4 steps pays 10^4
+  bytes — and no MaxDepth claim is made for paths.
+- The element-index `< L` check of a path step runs BEFORE any pointer
+  arithmetic (an argument can carry values near 2^63). Indices into the
+  implicit zero tail [E, L) are pre-charged by the backing's
+  production-point booking above: storage a path hands the consumer was
+  booked when the backing was produced.
 - Truncated input is a format error; no partial values are returned. No
   partial state is exposed either: decode is atomic with respect to the
   target — on any decode error, including a budget error raised from a
@@ -1222,3 +1359,29 @@ The consolidated external anchor map — every cited source with its
 support and verification status — is `docs/references.md`. This
 document's normative citations: RFC 2119, RFC 8174 (clause 2.1), and
 IEEE 754-2019 (clause 6.4).
+
+## Appendix D. Projection Fidelity (0.2 Annex, non-core)
+
+The path amendment of 7.2 admits interior-slot identity. What a
+projection preserves of it is a projection-conditional fact, declared
+here: a projection claiming conformance to minor `02` with paths
+satisfies its row; silence is non-conformance, never a default.
+
+| Projection | Interior-slot fidelity | Value-side mechanism |
+|---|---|---|
+| Go (reference) | L5 full — struct fields, nested value-struct fields, slice- and array-element interiors, blob-element interiors; identity by address through slot storage | handles materialize as pointers into record storage; derivable-surface and fidelity rows live in docs/bindings/go.md |
+| Rust | L5 reified through opt-in machinery of the binding — a denotation-table row mapping the reified slot to the same neutral core type, an encoder story, a budget row; the machinery is opt-in and rides with 0.2. Round-trip tier: decode-only — a decoded graph re-encodes path bytes exactly; the encode-side story is the machinery's own | denotation table over reified slots |
+| Java | decoded-value model = object graph plus retained lens metadata; re-encode is bytes-exact; staleness fails loudly — recompute from a mutated object is impossible by construction, the lens being retained state of the decoded value, never a recomputation from the graph | object graph + retained lens, value-side state |
+| Rust and Java, L6 tier | projection-conditional: each L6 tier declares its interior-slot fidelity by this annex's rule inside its own change process | per-tier declaration |
+
+The Java row redefines the round-trip clause of 7.1 for that projection
+explicitly, not by implication: the clause holds with the lens declared
+as value-side state of the decoded value — the lens rides beside the
+graph, participates in re-encode, and its staleness is a loud error,
+never a silent divergence (schema-snapshot compatible, GO-6/SA-4).
+
+**Coordination note.** This minor (0.2) admits positional path
+references in the 0.1 lineage. The tri-language descriptor rework
+planned for the 0.2-line successor will renumber to minor 0.3 in its
+own change process; until that process lands, this note is the
+coordination point between the two lineages.

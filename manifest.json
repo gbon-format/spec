@@ -90,6 +90,15 @@
       "covers": [
         "WF-20"
       ]
+    },
+    {
+      "file": "vectors/ppr.json",
+      "section": "7.2",
+      "covers": [
+        "WF-13",
+        "WF-4",
+        "WF-22"
+      ]
     }
   ],
   "vectors": [
@@ -677,6 +686,86 @@
       "id": "V-117",
       "category": "aliased",
       "verdict": "format"
+    },
+    {
+      "id": "V-118",
+      "verdict": "ok",
+      "category": "ppr"
+    },
+    {
+      "id": "V-119",
+      "verdict": "ok",
+      "category": "ppr"
+    },
+    {
+      "id": "V-120",
+      "verdict": "ok",
+      "category": "ppr"
+    },
+    {
+      "id": "V-121",
+      "verdict": "ok",
+      "category": "ppr"
+    },
+    {
+      "id": "V-122",
+      "verdict": "ok",
+      "category": "ppr"
+    },
+    {
+      "id": "V-123",
+      "verdict": "format",
+      "category": "ppr"
+    },
+    {
+      "id": "V-124",
+      "verdict": "format",
+      "category": "ppr"
+    },
+    {
+      "id": "V-125",
+      "verdict": "format",
+      "category": "ppr"
+    },
+    {
+      "id": "V-126",
+      "verdict": "format",
+      "category": "ppr"
+    },
+    {
+      "id": "V-127",
+      "verdict": "format",
+      "category": "ppr"
+    },
+    {
+      "id": "V-128",
+      "verdict": "format",
+      "category": "ppr"
+    },
+    {
+      "id": "V-129",
+      "verdict": "format",
+      "category": "ppr"
+    },
+    {
+      "id": "V-130",
+      "verdict": "format",
+      "category": "ppr"
+    },
+    {
+      "id": "V-131",
+      "verdict": "format",
+      "category": "ppr"
+    },
+    {
+      "id": "V-132",
+      "verdict": "ok",
+      "category": "ppr"
+    },
+    {
+      "id": "V-133",
+      "verdict": "budget",
+      "category": "ppr"
     }
   ],
   "coverage": {
@@ -787,6 +876,7 @@
         "V-63"
       ],
       "WF-12": [
+        "V-127",
         "V-87",
         "V-88",
         "V-89",
@@ -797,14 +887,6 @@
         "V-99"
       ],
       "WF-13": [
-        "V-42",
-        "V-54",
-        "V-55",
-        "V-56",
-        "V-57",
-        "V-58",
-        "V-59",
-        "V-97",
         "V-100",
         "V-101",
         "V-102",
@@ -816,7 +898,29 @@
         "V-114",
         "V-115",
         "V-116",
-        "V-117"
+        "V-117",
+        "V-118",
+        "V-119",
+        "V-120",
+        "V-121",
+        "V-124",
+        "V-125",
+        "V-126",
+        "V-127",
+        "V-128",
+        "V-129",
+        "V-130",
+        "V-131",
+        "V-132",
+        "V-133",
+        "V-42",
+        "V-54",
+        "V-55",
+        "V-56",
+        "V-57",
+        "V-58",
+        "V-59",
+        "V-97"
       ],
       "WF-14": [
         "V-40",
@@ -876,6 +980,8 @@
       ],
       "WF-2": [
         "V-1",
+        "V-122",
+        "V-123",
         "V-2",
         "V-3",
         "V-4",
@@ -890,14 +996,17 @@
         "V-114"
       ],
       "WF-21": [
+        "V-122",
+        "V-29",
         "V-3",
         "V-4",
+        "V-48",
         "V-5",
-        "V-7",
-        "V-29",
-        "V-48"
+        "V-7"
       ],
       "WF-22": [
+        "V-130",
+        "V-133",
         "V-44",
         "V-79",
         "V-80",
@@ -918,10 +1027,10 @@
         "V-6"
       ],
       "WF-4": [
-        "V-9",
         "V-10",
         "V-11",
         "V-12",
+        "V-123",
         "V-13",
         "V-14",
         "V-15",
@@ -929,7 +1038,8 @@
         "V-19",
         "V-49",
         "V-66",
-        "V-80"
+        "V-80",
+        "V-9"
       ],
       "WF-5": [
         "V-1",

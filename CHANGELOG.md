@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0]
+
+### Added
+
+- wire-format.md: minor 0.2 amendment — positional path references
+  (new section 7.2, a WF-13 amendment): interior-slot identity through
+  an optional path argument on REF (marker/terminator framing from
+  reserved NIL-class selectors; name-addressed field steps into the
+  intern space; element steps over backing records; mandatory
+  derivable-descent elision; zero-size-terminal, rooting, and
+  grain-compatibility rejects; layout-normal mapping; the `bad_path`
+  class beside the unchanged error taxonomy). Also: the version
+  discipline of section 4.4 (a 0.2 encoder emits header minor 02 on
+  every stream), the WF-4 path-form argument note, the WF-19 0xC row
+  form note, the one-clause resolution-rule amendment, the WF-22 path
+  budget clauses, and the projection-fidelity annex (Appendix D) with
+  the tri-language coordination note.
+- vectors/ppr.json + manifest.json: the conformance corpus grows by
+  sixteen vectors (V-118..V-133, corpus 117→133): interior-slot
+  aliasing carriers (struct field, slice element field,
+  interface-grain terminal), the elision boundary, the version
+  behavior pair, the `bad_path` negative set (zero-step path,
+  derivable-descent spelling, wrong rooting, zero-size terminal,
+  out-of-family grain, coder-backed step, index beyond L, incompatible
+  interface terminal), and the byte-charge boundary; manifest
+  categories/covers rows and coverage entries for the new category.
+- docs/bindings/go.md: the interior-pointer row of the value-model
+  table and the Go fidelity declaration for interior slots (5.3
+  register unchanged).
+- wire-format.md 7.2, in-cycle pins: the record-forcing position —
+  a forced record opens immediately before its first dependent
+  carrier in the canonical field order (canonical across
+  implementations); the double-reference carve-out — a cell body is
+  a record body, not a pointer position, and a bare REF names the
+  record, so a cell denoting an interior position carries the
+  explicit path form regardless of derivability. Section 9.1
+  (WF-22): MaxBytes guards one value against the absolute stream
+  position.
+- vectors/ppr.json: seven staged vectors repaired against the
+  reference decoder — V-119/V-126/V-130/V-133 duplicate-E argument
+  bytes (a C1 authoring defect), V-120 non-minimal argument bytes
+  (WF-4), V-127/V-129 descriptor field counts.
+- docs/bindings/go.md: error-class inventory rows for the two
+  additive classes (`bad_path`, `evolution_ref_unmaterialized`)
+  with the 4.1 consumption-mapping rows in lockstep; the version
+  statements track the core at format 0.2 (major 0, minor 2); the
+  forced-open position and the cell-body carve-out projected into
+  the interior-slot fidelity note.
+
 ## [0.1.1] - 2026-09-19
 
 ### Added
@@ -170,7 +219,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Consolidated external anchor map (docs/references.md) with gate-verified
   two-way citations.
 
-[Unreleased]: https://github.com/gbon-format/spec/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/gbon-format/spec/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/gbon-format/spec/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/gbon-format/spec/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/gbon-format/spec/compare/v0.0.5...v0.1.0
+[0.0.5]: https://github.com/gbon-format/spec/compare/v0.0.4...v0.0.5
+[0.0.4]: https://github.com/gbon-format/spec/compare/v0.0.3...v0.0.4
+[0.0.3]: https://github.com/gbon-format/spec/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/gbon-format/spec/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/gbon-format/spec/releases/tag/v0.0.1

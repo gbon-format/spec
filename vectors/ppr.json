@@ -1,0 +1,603 @@
+{
+  "category": "ppr",
+  "section": "7.2",
+  "vectors": [
+    {
+      "id": "V-118",
+      "desc": "interior-slot alias, middle struct field: the *int64 field carries a path-ref into the S record's B slot; bytes of the aliased and an independent twin graph differ, each canonical",
+      "tags": [
+        "WF-13"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002d5672a6d61696e2e57d0666d61696e2e57026156d5672a6d61696e2e53d0666d61696e2e53036141d865696e743634086142ca6143ca6150d5662a696e743634cab0b0222426cc1205000c0c06",
+      "ir": {
+        "root": {
+          "ref": "w1"
+        },
+        "nodes": [
+          {
+            "node": "w1",
+            "kind": "struct",
+            "type": "main.W",
+            "fields": [
+              {
+                "name": "V",
+                "value": {
+                  "ref": "s1"
+                }
+              },
+              {
+                "name": "P",
+                "value": {
+                  "ref": "p1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "s1",
+            "kind": "struct",
+            "type": "main.S",
+            "fields": [
+              {
+                "name": "A",
+                "value": {
+                  "ref": "a1"
+                }
+              },
+              {
+                "name": "B",
+                "value": {
+                  "ref": "b1"
+                }
+              },
+              {
+                "name": "C",
+                "value": {
+                  "ref": "c1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "a1",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "b1",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "c1",
+            "kind": "int",
+            "value": "3"
+          },
+          {
+            "node": "p1",
+            "kind": "cell",
+            "of": "s1",
+            "name": "B"
+          }
+        ]
+      },
+      "deriv": [
+        "DECL tree: *main.W(id0)/main.W(id2) ARG2; V *main.S(id5)/main.S(id7) ARG3 A(9) int64(10,11) B(12) C(13); P *int64(15,16); B0 opens the W record(id17)",
+        "V: B0 opens the S record(id18) at grain equality, tag elided; A=INT 22, B=INT 24, C=INT 26 (zigzag 1/2/3)",
+        "P: REF18 (cc12) + marker 05 + field step 00/ARG 12 (the B name intern record, WF-18 name-addressed) + terminator 06 - the 0.2 path form (7.2); the edge is one token chain, the independent twin graph encodes a standalone cell record instead - distinct bytes, each canonical"
+      ]
+    },
+    {
+      "id": "V-119",
+      "desc": "interior-slot alias over a slice element field: an element step into the backing record then a field step - mixed path, two step kinds, one path",
+      "tags": [
+        "WF-13"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002d5672a6d61696e2e55d0666d61696e2e55026156d1685b5d6d61696e2e45d0666d61696e2e45016146d865696e743634086150d5662a696e743634cab08303b022b024b026900c10cc10050102000906",
+      "ir": {
+        "root": {
+          "ref": "u1"
+        },
+        "nodes": [
+          {
+            "node": "u1",
+            "kind": "struct",
+            "type": "main.U",
+            "fields": [
+              {
+                "name": "V",
+                "value": {
+                  "ref": "v1"
+                }
+              },
+              {
+                "name": "P",
+                "value": {
+                  "ref": "p1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "v1",
+            "kind": "view",
+            "backing": {
+              "ref": "a1"
+            },
+            "off": 0,
+            "len": 3,
+            "extent": 3
+          },
+          {
+            "node": "a1",
+            "kind": "array",
+            "len": 3,
+            "elements": [
+              {
+                "ref": "e0"
+              },
+              {
+                "ref": "e1"
+              },
+              {
+                "ref": "e2"
+              }
+            ]
+          },
+          {
+            "node": "e0",
+            "kind": "struct",
+            "type": "main.E",
+            "fields": [
+              {
+                "name": "F",
+                "value": {
+                  "ref": "f0"
+                }
+              }
+            ]
+          },
+          {
+            "node": "e1",
+            "kind": "struct",
+            "type": "main.E",
+            "fields": [
+              {
+                "name": "F",
+                "value": {
+                  "ref": "f1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "e2",
+            "kind": "struct",
+            "type": "main.E",
+            "fields": [
+              {
+                "name": "F",
+                "value": {
+                  "ref": "f2"
+                }
+              }
+            ]
+          },
+          {
+            "node": "f0",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "f1",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "f2",
+            "kind": "int",
+            "value": "3"
+          },
+          {
+            "node": "p1",
+            "kind": "cell",
+            "of": "e2",
+            "name": "F"
+          }
+        ]
+      },
+      "deriv": [
+        "DECL tree: *main.U(0)/main.U(2) ARG2; V []main.E(5,6) elem main.E(7,8) ARG1 F(9) int64(10,11); P *int64(13,14); B0 opens the U record(id15)",
+        "V: the slice opens its backing ARRAY record(id16) L=3 E=3, three value structs B0/INT (elements are not pointer targets), then VIEW form 0 {id} - the full window (WF-14, WF-15)",
+        "P: REF16 (cc10) + marker 05 + element step 01/ARG 2 (backing index space) + field step 00/ARG 9 (F) + terminator 06 - element steps root at the BACKING record, then the field step descends the element's inline storage (7.2 rooting)"
+      ]
+    },
+    {
+      "id": "V-120",
+      "desc": "double reference: a standalone cell record whose body is a path-ref (p holds the interior alias, q points at p) - the cell opens by the path token, q closes by a bare REF to the cell",
+      "tags": [
+        "WF-13"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002d5672a6d61696e2e52d0666d61696e2e52036141d865696e743634086150d5662a696e743634c56151d5672a2a696e743634c8b02c0ecc0d05000406cc0e",
+      "ir": {
+        "root": {
+          "ref": "r1"
+        },
+        "nodes": [
+          {
+            "node": "r1",
+            "kind": "struct",
+            "type": "main.R",
+            "fields": [
+              {
+                "name": "A",
+                "value": {
+                  "ref": "a1"
+                }
+              },
+              {
+                "name": "P",
+                "value": {
+                  "ref": "p1"
+                }
+              },
+              {
+                "name": "Q",
+                "value": {
+                  "ref": "q1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "a1",
+            "kind": "int",
+            "value": "7"
+          },
+          {
+            "node": "p1",
+            "kind": "cell",
+            "of": "r1",
+            "name": "A"
+          },
+          {
+            "node": "q1",
+            "kind": "cell",
+            "of": "p1"
+          }
+        ]
+      },
+      "deriv": [
+        "DECL tree: *main.R(0)/main.R(2) ARG3; A int64(5,6); P *int64(8,9) target REF5; Q **int64(11,12) target REF8; B0 opens the R record(id13)",
+        "P: the cell record(id14) opens with a path-ref body - REF13 (cc0d) + 05 + field step 00/04 (A) + 06: registration before children holds, one cell per reserved id (7.2 double reference)",
+        "Q: bare REF14 (cc0e) - an identity edge to the cell; handles bind slot storage at record open, values fill later, each slot read once at its own token (7.2 decode invariant)"
+      ]
+    },
+    {
+      "id": "V-121",
+      "desc": "elision boundary: a position derivable by the 7.1 descent (leading field A) encodes as the bare REF with zero path bytes - the 0.1 form, byte-identical stream shape",
+      "tags": [
+        "WF-13"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002d5672a6d61696e2e57d0666d61696e2e57026156d5672a6d61696e2e53d0666d61696e2e53036141d865696e743634086142ca6143ca6150d5662a696e743634cab0b0222426cc12",
+      "ir": {
+        "root": {
+          "ref": "w1"
+        },
+        "nodes": [
+          {
+            "node": "w1",
+            "kind": "struct",
+            "type": "main.W",
+            "fields": [
+              {
+                "name": "V",
+                "value": {
+                  "ref": "s1"
+                }
+              },
+              {
+                "name": "P",
+                "value": {
+                  "ref": "p1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "s1",
+            "kind": "struct",
+            "type": "main.S",
+            "fields": [
+              {
+                "name": "A",
+                "value": {
+                  "ref": "a1"
+                }
+              },
+              {
+                "name": "B",
+                "value": {
+                  "ref": "b1"
+                }
+              },
+              {
+                "name": "C",
+                "value": {
+                  "ref": "c1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "a1",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "b1",
+            "kind": "int",
+            "value": "2"
+          },
+          {
+            "node": "c1",
+            "kind": "int",
+            "value": "3"
+          },
+          {
+            "node": "p1",
+            "kind": "cell",
+            "of": "s1",
+            "name": "A"
+          }
+        ]
+      },
+      "deriv": [
+        "same DECL tree as the alias vector; P targets the leading field A - derivable by the 7.1 descent (leading fields, zero-size skipped)",
+        "P: bare REF18 (cc12), no marker, no steps - mandatory elision (7.2): the common case stays byte-identical to a 0.1 stream; a stream spelling this descent as a path is the non-canonical reject of the negative set"
+      ]
+    },
+    {
+      "id": "V-122",
+      "desc": "a path-free stream of a 0.2 encoder: header minor 02 over a self-ring body; the body is byte-identical to the 0.1 encoding of the same value - only the header minor byte differs",
+      "tags": [
+        "WF-2",
+        "WF-21"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002d5672a6d61696e2e4ed0666d61696e2e4e026156d865696e74363408644e657874c0b022c8",
+      "ir": {
+        "root": {
+          "ref": "n1"
+        },
+        "nodes": [
+          {
+            "node": "n1",
+            "kind": "struct",
+            "type": "main.N",
+            "fields": [
+              {
+                "name": "V",
+                "value": {
+                  "ref": "v1"
+                }
+              },
+              {
+                "name": "Next",
+                "value": {
+                  "ref": "n1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "v1",
+            "kind": "int",
+            "value": "1"
+          }
+        ]
+      },
+      "deriv": [
+        "the 0.2 encoder emits header minor 02 on every stream, path-free streams included (4.4); the body carries no path form and no 0.2-only byte",
+        "the 0.1 twin of this value is the same stream with header minor 01 - the only differing byte is the header minor; a 0.1 decoder parses this header normally and decodes the body without meeting any unknown token"
+      ]
+    },
+    {
+      "id": "V-123",
+      "desc": "a minor-01 stream carries the path form: the marker 05 is an unknown NIL-class selector in a known position - a loud format error at the token, the ext-selector discipline; a 0.2 encoder never produces this stream",
+      "tags": [
+        "WF-2",
+        "WF-4"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0001d5672a6d61696e2e57d0666d61696e2e57026156d5672a6d61696e2e53d0666d61696e2e53036141d865696e743634086142ca6143ca6150d5662a696e743634cab0b0222426cc1205000c0c06",
+      "class": "malformed_op"
+    },
+    {
+      "id": "V-124",
+      "desc": "zero-step path: the marker directly before the terminator - path is step+, one or more; the empty path is an error, not a synonym of the bare REF",
+      "tags": [
+        "WF-13"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002d5672a6d61696e2e57d0666d61696e2e57026156d5672a6d61696e2e53d0666d61696e2e53036141d865696e743634086142ca6143ca6150d5662a696e743634cab0b0222426cc120506",
+      "class": "bad_path"
+    },
+    {
+      "id": "V-125",
+      "desc": "a path whose steps exactly spell the derivable descent (leading field A): non-canonical - the derivable form is the bare REF with zero path bytes, and this spelling is an error, not a synonym",
+      "tags": [
+        "WF-13"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002d5672a6d61696e2e57d0666d61696e2e57026156d5672a6d61696e2e53d0666d61696e2e53036141d865696e743634086142ca6143ca6150d5662a696e743634cab0b0222426cc1205000906",
+      "class": "bad_path"
+    },
+    {
+      "id": "V-126",
+      "desc": "wrong rooting: an element step names the U struct record, not its slice's backing record - a struct descriptor declares fields, not elements; element steps root at the backing record, indices live in the backing's declared index space",
+      "tags": [
+        "WF-13"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002d5672a6d61696e2e55d0666d61696e2e55026156d1685b5d6d61696e2e45d0666d61696e2e45016146d865696e743634086150d5662a696e743634cab08303b022b024b026900c10cc0f05010206",
+      "class": "bad_path"
+    },
+    {
+      "id": "V-127",
+      "desc": "zero-size terminal: the path names the Z field of the U record - Z is a member of the descriptor table and stays nameable as an interior step, but the terminal slot has zero-size declared type: identity of zero-size targets is neither preserved nor observable, the terminal rejects; the tracked non-zero grain of the same address keeps the record, the zero-size alias carries the marker (the adjacency holds)",
+      "tags": [
+        "WF-13",
+        "WF-12"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002d5672a6d61696e2e55d0666d61696e2e5503615ad069737472756374207b7d00614dd865696e743634086150d56a2a737472756374207b7dc5b0b024cc0d05000406",
+      "class": "bad_path"
+    },
+    {
+      "id": "V-128",
+      "desc": "out-of-family grain: the position's static target is *string, the terminal slot's declared type is int64 - the position grain is not pointer-to-the-declared-slot-type; out-of-family grains never resolve position-dependently",
+      "tags": [
+        "WF-13"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002d5672a6d61696e2e57d0666d61696e2e57026156d5672a6d61696e2e53d0666d61696e2e53036141d865696e743634086142ca6143ca6150d5672a737472696e67dc0c66737472696e67b0b0222426cc1405000c0c06",
+      "class": "bad_path"
+    },
+    {
+      "id": "V-129",
+      "desc": "coder-backed step: the path names field C, whose type is a kind-14 CODER descriptor - no descriptor field table, layout delegated to the coder; the step rejects",
+      "tags": [
+        "WF-13"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002d5672a6d61696e2e55d0666d61696e2e55036143dc0e667665632e434300614dd865696e743634086150d5672a7665632e4343c5b00024cc0d05000406",
+      "class": "bad_path",
+      "coder_probe": {
+        "name": "vec.CC",
+        "tag": 0,
+        "body": "00"
+      }
+    },
+    {
+      "id": "V-130",
+      "desc": "index beyond the backing's declared length: element index 3 against L=3 - the index < L check runs before any pointer arithmetic (an argument can carry values near 2^63); the boundary witness L-1 = 2 is the positive carrier's own step; zero-tail indices [E, L) are legal and pre-charged - none exist here, E = L = 3",
+      "tags": [
+        "WF-13",
+        "WF-22"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002d5672a6d61696e2e55d0666d61696e2e55026156d1685b5d6d61696e2e45d0666d61696e2e45016146d865696e743634086150d5662a696e743634cab08303b022b024b026900c10cc10050103000906",
+      "class": "bad_path"
+    },
+    {
+      "id": "V-131",
+      "desc": "interface grain over an incompatible terminal: the interface-position path names the B field, whose declared type int64 is not interface-compatible - a path-ref at interface grain is legal only for an interface-compatible terminal slot; the collision mate: an opening at this position always carries the discriminating DESC, the path-ref carries none - the shapes stay byte-disjoint",
+      "tags": [
+        "WF-13"
+      ],
+      "verdict": "format",
+      "bytes": "67626f6e0002d5672a6d61696e2e55d0666d61696e2e55026156d5672a6d61696e2e53d0666d61696e2e53036141d865696e743634086142ca6143ca6149d66c0c696e74657266616365207b7db0b0222426cc1205000c0c06",
+      "class": "bad_path"
+    },
+    {
+      "id": "V-132",
+      "desc": "interface-grain path over an interface-compatible terminal: the interface position holds a path-ref into the T record's Q slot, declared *int64 - a pointer slot serves an interface position; no value body follows the path-ref, so the byte shape stays disjoint from every opening at the same position (the collision matrix, positive side)",
+      "tags": [
+        "WF-13"
+      ],
+      "verdict": "ok",
+      "direction": "both",
+      "bytes": "67626f6e0002d5672a6d61696e2e55d0666d61696e2e55026156d5672a6d61696e2e54d0666d61696e2e54026146d865696e743634086151d5662a696e743634ca6149d66c0c696e74657266616365207b7db0b02200cc1305000c0c06",
+      "ir": {
+        "root": {
+          "ref": "u1"
+        },
+        "nodes": [
+          {
+            "node": "u1",
+            "kind": "struct",
+            "type": "main.U",
+            "fields": [
+              {
+                "name": "V",
+                "value": {
+                  "ref": "t1"
+                }
+              },
+              {
+                "name": "I",
+                "value": {
+                  "ref": "i1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "t1",
+            "kind": "struct",
+            "type": "main.T",
+            "fields": [
+              {
+                "name": "F",
+                "value": {
+                  "ref": "f1"
+                }
+              },
+              {
+                "name": "Q",
+                "value": {
+                  "ref": "q1"
+                }
+              }
+            ]
+          },
+          {
+            "node": "f1",
+            "kind": "int",
+            "value": "1"
+          },
+          {
+            "node": "q1",
+            "kind": "nil",
+            "value": "ptr"
+          },
+          {
+            "node": "i1",
+            "kind": "cell",
+            "of": "t1",
+            "name": "Q"
+          }
+        ]
+      },
+      "deriv": [
+        "DECL tree: *main.U(0)/main.U(2) ARG2; V *main.T(5)/main.T(7) ARG2 F(9) int64(10,11) Q(12) *int64(13,14); I interface{}(15,16); B0 opens the U record(id17)",
+        "V: B0 opens the T record(id18) at grain equality; F=INT 22; Q=nil pointer selector 0 (WF-12)",
+        "I: REF18 (cc13) + 05 + field step 00/ARG 12 (Q) + 06 - the terminal slot is declared *int64, a pointer slot: interface-compatible; the handle materializes into the record's Q slot storage, tagless - no grain tag and no body byte ride the path-ref"
+      ]
+    },
+    {
+      "id": "V-133",
+      "desc": "byte-charge boundary: under a lowered MaxBytes the chained element steps of a deep path push the value past the cap at a step byte - the path pays for itself; the validation walk is linear in path bytes, charges every step byte, and never allocates before the index check",
+      "tags": [
+        "WF-22",
+        "WF-13"
+      ],
+      "verdict": "budget",
+      "bytes": "67626f6e0002d5672a6d61696e2e55d0666d61696e2e55026156d26c1d5b315d5b315d5b315d5b315d5b315d5b315d5b315d5b315d696e74363401d26c1a5b315d5b315d5b315d5b315d5b315d5b315d5b315d696e74363401d26c175b315d5b315d5b315d5b315d5b315d5b315d696e74363401d26c145b315d5b315d5b315d5b315d5b315d696e74363401d26c115b315d5b315d5b315d5b315d696e74363401d26c0e5b315d5b315d5b315d696e74363401d26b5b315d5b315d696e74363401d2685b315d696e74363401d865696e743634086150d5662a696e743634cc15b08101810181018101810181018101810122cc1b050100010001000100010001000100010006",
+      "limits": {
+        "max_bytes": 28
+      },
+      "class": "budget_bytes"
+    }
+  ]
+}

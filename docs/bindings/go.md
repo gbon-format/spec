@@ -1,7 +1,7 @@
 # GBON Go Binding
 
 Binding of the GBON wire-format core to the Go value model. The core
-specification (docs/wire-format.md, format 0.1, minor 1) is
+specification (docs/wire-format.md, format 0.2, minor 2) is
 normative and language-independent; this document is the Go projection —
 an appendix non-normative with respect to the core — carrying the parts
 of the contract specific to the Go value model. Sections of this
@@ -189,8 +189,8 @@ The platform names carried in the short form in this projection:
 
 ### 2.1 Cross-Version Stability Notes [GO-2]
 
-**Version state.** The binding tracks the core at format 0.1 (major 0,
-minor 1); the stability notes of this section are stated against that
+**Version state.** The binding tracks the core at format 0.2 (major 0,
+minor 2); the stability notes of this section are stated against that
 state. The per-construct grounding of the mapping sits in the
 denotation table (5.2); the host-language degeneracy causes in the
 register (5.3).
@@ -373,6 +373,24 @@ set. The binding-side mechanics:
 - Determinism: permuting the declaration order and rebuilding the same
   scope produce identical artifact bytes.
 
+**Fidelity for interior slots (0.2).** The Go projection preserves
+interior-slot identity in full: handles materialize as pointers into
+record storage, and the path amendment of wire-format.md 7.2 resolves
+against the named record's inline storage — struct fields, nested
+value-struct fields, slice- and array-element interiors, blob-element
+interiors. Derivable
+positions keep the bare-REF form. A forced record opens immediately
+before its first dependent carrier in the canonical field order (the
+record-forcing rule of 7.2 — canonical across implementations); a
+cell body is a record body, not a pointer position, and a bare REF
+names the record, so a cell denoting an interior position carries
+the explicit path form regardless of derivability (the
+double-reference carve-out of 7.2 — derivability does not elide
+cell bodies). The projection's fidelity row is
+declared in the projection-fidelity annex (Appendix D of
+wire-format.md); the Go row is full interior-slot fidelity, and the
+cross-projection table lives there, not here.
+
 ### 2.4 Evolution Intents [GO-7]
 
 Evolution facts are declared, not inferred: a removal is a reserved name,
@@ -452,8 +470,10 @@ faults are codec capability):
 | `overflow_value` | data/format | format | value out of the target range |
 | `duplicate_key` | data/format | format | duplicate map key |
 | `bad_ref` | data/format | format | unresolvable or misused reference |
+| `bad_path` | data/format | format | unresolvable or non-canonical REF path argument (7.2) |
 | `bad_view` | data/format | format | malformed view record |
 | `type_mismatch` | data/format | format | stream kind does not fit the target |
+| `evolution_ref_unmaterialized` | data/format | format | narrowing carve-out: a kept ref resolves a record the skip left unmaterialized |
 | `unknown_name` | data/format | format | unregistered wire name |
 | `budget_depth` | budget | budget | depth budget exhausted |
 | `budget_nodes` | budget | budget | node budget exhausted |
@@ -507,8 +527,10 @@ itself — machine-checkable shapes, no prose in the columns.
 | `overflow_value` | 400 | InvalidArgument | `overflow_value` |
 | `duplicate_key` | 400 | InvalidArgument | `duplicate_key` |
 | `bad_ref` | 400 | InvalidArgument | `bad_ref` |
+| `bad_path` | 400 | InvalidArgument | `bad_path` |
 | `bad_view` | 400 | InvalidArgument | `bad_view` |
 | `type_mismatch` | 400 | InvalidArgument | `type_mismatch` |
+| `evolution_ref_unmaterialized` | 400 | InvalidArgument | `evolution_ref_unmaterialized` |
 | `unknown_name` | 422 | FailedPrecondition | `unknown_name` |
 | `budget_depth` | 413 | ResourceExhausted | `budget_depth` |
 | `budget_nodes` | 413 | ResourceExhausted | `budget_nodes` |
@@ -560,7 +582,7 @@ A claim that needs a lower tier where a higher tier speaks is a defect
 (the falsification class of CLM-5 in docs/meta/claims.md).
 
 **Version pin (tier 1).** The Go Language Specification is pinned by
-its fetch record: page https://go.dev/ref/spec/, fetched
+its fetch record: page go.dev/ref/spec, fetched
 17 September 2026, 341470 bytes, sha256
 7a0e32461098566bd7f9ec16dfbef3e0e92ee2768c2106357d8b205395a36507.
 Toolchain pin: gbon-go `go 1.27` and `toolchain go1.27.1`, gate image
@@ -610,6 +632,7 @@ degeneracy recorded in the register (5.3).
 | channels | no wire image — no opcodes in any class (GO-1) | comparable channels compare by identity — no denotation (gspec:Channel types) | — | format limit, not a degeneracy cause | UNSUPPORTED | n/a — classified reject `unsupported_kind` with the path |
 | unsafe.Pointer | no wire image — no opcodes in any class (GO-1) | outside the value model (gspec:Package unsafe) | — | format limit, not a degeneracy cause | UNSUPPORTED | n/a — classified reject `unsupported_kind` with the path |
 | exotic/composite map keys | map keys per the KO scheme; skeletons never dereference (E2) | identity keys for pointer components (KO-2a) — "Slice, map, and function types are not comparable." (gspec:Comparison operators) (gspec:Map types) | key identity distinction; tied-pair order deterministic within one encoding (E5) | pointer-to-map keys rejected unsupported-type (GO-3); dynamically uncomparable members outside the key domain (E1) | EXACT | per-key skeleton walk; the pointee-map reject names the path |
+| interior pointers | a REF with the path argument over the named record's inline storage (WF-13, the 0.2 amendment of wire-format.md 7.2); derivable positions keep the bare-REF form, zero path bytes | "The operand must be addressable, that is, either a variable, pointer indirection, or slice indexing operation." (gspec:Address operators) — `&x.f` and `&s[i].f` compare by pointer identity, not pointee value | identity of the interior slot (sharing); nil-ness; each slot's value read once at its own token | none — identity binds slot storage at record open | EXACT | path resolution against the named record's inline storage; handles materialize as pointers into record storage |
 
 UNSUPPORTED rows carry a format limit (no opcodes), never a
 degeneracy cause; DEGRADED rows, when one is declared, cite a register
